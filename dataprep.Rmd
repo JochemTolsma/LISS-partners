@@ -13,10 +13,52 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE, results="hold")
+
+
+colorize <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
+
+```
+
+
+
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy(position = c('top', 'right'))
+#klippy::klippy(color = 'darkred')
+#klippy::klippy(tooltip_message = 'Click to copy', tooltip_success = 'Done')
+```
+
+```{css, echo=FALSE}
+pre.test {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+}
+
+pre.test2 {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+  background-color: white
+}
+
+
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 24px;
+}
 
 
 ```
+
 
 ## Dataprep Partner Paper
 In this document I will show how I progammed the partner data. I will first show the procedure using the original SPSS file with the background data variables that we need. First, this is *nohouse_encr* which contains the unique HH id. Second, we use the variable *positie* which shows the position of a respondent in the HH, when this value is lower than 5, the respondent is a partner.(See the variable for the labelling in the original SPSS). The files are in a seperate zipfile. 
@@ -43,10 +85,12 @@ ls(MyData)
 
 #select people that are either partner or household head. 
 table(MyData$positie)
+attr(MyData$positie, "labels")
+attr(MyData$geslacht, "labels")
 
 #select only people who are partner.
 MyData <- MyData %>%
-  filter(positie < 5)
+  filter(positie < 4) #JT changed this to 4!
 
 #check whether correct. 
 table(MyData$positie)
@@ -58,6 +102,7 @@ list_hh <- MyData %>%
 
 #merge the two df's
 MyData <- merge(MyData, list_hh, by  = 'nohouse_encr')
+#thijmen try to use tidy functions. the join functions
 
 #select on n = 2.
 MyData <- MyData %>%
@@ -77,6 +122,31 @@ test_2 <- reshape(test,
                   idvar = 'nohouse_encr',
                   timevar = 'partner')
 
+# is het niet handiger om mannen voorop te zetten en dan de vrouwen. dus wellicht nog selecteren op heteroparen. 
+
+test3 <- test %>% 
+  arrange(nohouse_encr, geslacht) %>% #ordenen op geslacht
+  group_by(nohouse_encr) %>%  #groeperen op huishouden
+  summarise(hetero=(sum(geslacht)==3)) %>% #bepaal of homo/heterostel
+  right_join(test) %>% #koppel weer aan originele data
+  arrange(nohouse_encr, geslacht) %>% #opnieuw ordenen
+  filter(hetero==TRUE) # en de homostellen verwijderen. 
+
+test3 <- test3 %>% mutate(geslacht2=ifelse(geslacht==1,"m", "f" ))
+test4 <- reshape(as.data.frame(test3), #reshape cant handle tibles
+                  direction = 'wide',
+                  v.names = c("positie", "nomem_encr", "partner", "geslacht"),
+                  idvar = 'nohouse_encr',
+                  timevar = 'geslacht2')
+
+
+# use the reshape command. 
+test_2 <- reshape(test,
+                  direction = 'wide',
+                  v.names = c("geslacht", "positie", "nomem_encr"),
+                  idvar = 'nohouse_encr',
+                  timevar = 'partner')
+
 #use this method for the complete df 
 MyData$partner <- rep(1:2, 2581)
 
@@ -86,6 +156,8 @@ MyData <- reshape(MyData,
                   idvar = 'nohouse_encr',
                   timevar = 'partner')
 ```
+
+`r colorize("MOETEN WE NIET POSITIE<4 SELECTEREN", "red")`
 
 ### Application to the whole partner data
 ```{r prep of the partner data 1}
