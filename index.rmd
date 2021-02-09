@@ -1,0 +1,108 @@
+---
+title: "LISS-Partners"
+author: '[Jochem Tolsma](https://www.jochemtolsma.nl) - Radboud University, the Netherlands'
+bibliography: references.bib
+date: "Last compiled on `r format(Sys.time(), '%B, %Y')`"
+output: 
+  html_document:
+    toc:  true
+    toc_float: true
+    number_sections: false
+    code_folding: show
+    code_download: yes
+---
+
+```{r, globalsettings, echo=FALSE, warning=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=100),tidy=TRUE, warning = FALSE, message = FALSE,comment = "#>", cache=TRUE, class.source=c("test"), class.output=c("test2"))
+options(width = 100)
+rgl::setupKnitr()
+
+
+colorize <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
+
+```
+
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy(position = c('top', 'right'))
+#klippy::klippy(color = 'darkred')
+#klippy::klippy(tooltip_message = 'Click to copy', tooltip_success = 'Done')
+```
+
+```{css, echo=FALSE}
+pre.test {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+}
+
+pre.test2 {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+  background-color: white
+}
+
+
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 24px;
+}
+
+
+```
+
+----
+
+This website is a replication package for the paper "LISS-partners" by @Jeroense2021. It contains R code to replicate all Tables in the manuscript. 
+
+Use the top menu to navigate to the section of interest. The section replicates the **Main Tables** of the manuscript. 
+
+To copy the code click the button in the upper right corner of the code-chunks. 
+
+
+----
+
+## Data
+All data and scripts can be found on [Github](https://github.com/JochemTolsma/LISS-partners)
+
+----
+
+## Contact
+Questions can be addressed to the first author of the corresponding article, [Thijmen Jeroense](mailto:thijmen.jeroense@ru.nl). 
+
+----  
+
+## Data  
+
+We start with a datafile in ....
+
+
+---  
+
+
+
+## Table 1 {.tabset .tabset-fade}
+
+### part1 
+
+```{r, results="hold"}
+```
+
+---  
+
+
+### part2
+
+
+
+---  
+

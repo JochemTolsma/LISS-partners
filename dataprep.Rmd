@@ -1,0 +1,234 @@
+---
+title: "Dataprep Partner Paper"
+author: "Thijmen Jeroense"
+bibliography: references.bib
+date: "Last compiled on `r format(Sys.time(), '%B, %Y')`"
+output: 
+  html_document:
+    toc:  true
+    toc_float: true
+    number_sections: false
+    code_folding: show
+    code_download: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+## Dataprep Partner Paper
+In this document I will show how I progammed the partner data. I will first show the procedure using the original SPSS file with the background data variables that we need. First, this is *nohouse_encr* which contains the unique HH id. Second, we use the variable *positie* which shows the position of a respondent in the HH, when this value is lower than 5, the respondent is a partner.(See the variable for the labelling in the original SPSS). The files are in a seperate zipfile. 
+
+For the dataprep I use the following packages as well as the base R functions.
+
+```{r packages}
+library(dplyr)
+library(purrr)
+library(haven)
+
+```
+
+
+### Procedure of creating partner data
+
+In this section the procedure of creating the parner dyads is explained on the original spss file.  
+```{r procedure explanation}
+#import data
+MyData <- read_sav('data-raw/avars_201912_EN_1.0p.sav')
+
+#take a look at the contents of the data.
+ls(MyData)
+
+#select people that are either partner or household head. 
+table(MyData$positie)
+
+#select only people who are partner.
+MyData <- MyData %>%
+  filter(positie < 5)
+
+#check whether correct. 
+table(MyData$positie)
+
+#select households where both partners are present.
+#create hh count variable n
+list_hh <- MyData %>% 
+  count(nohouse_encr)
+
+#merge the two df's
+MyData <- merge(MyData, list_hh, by  = 'nohouse_encr')
+
+#select on n = 2.
+MyData <- MyData %>%
+  filter(n == 2)
+
+#test: first add a respondent/partner var.
+#then use the reshape command to create a wide dataset with respondent and partner data in one dyad (partnership)
+#create a test df.
+test <- MyData[1:20,1:5]
+#p = partner / r = respondent.
+test$partner <- rep(c("r", "p"),10)
+
+# use the reshape command. 
+test_2 <- reshape(test,
+                  direction = 'wide',
+                  v.names = c("geslacht", "positie", "nomem_encr"),
+                  idvar = 'nohouse_encr',
+                  timevar = 'partner')
+
+#use this method for the complete df 
+MyData$partner <- rep(1:2, 2581)
+
+MyData <- reshape(MyData,
+                  direction = 'wide',
+                  v.names = names(MyData[,2:34]),
+                  idvar = 'nohouse_encr',
+                  timevar = 'partner')
+```
+
+### Application to the whole partner data
+```{r prep of the partner data 1}
+#use this procedure for the whole liss_core data. 
+#load the merged liss core file
+load('data-processed/liss_merged_core_file_v1_201124.Rdata')
+
+#first create a subset of the liss_core data for Jochem to play with.
+liss_subset <- lisscdn_wide %>%
+  select(nomem_encr, nohouse_encr.1, nohouse_encr.2, nohouse_encr.3, nohouse_encr.4, nohouse_encr.5, nohouse_encr.6, nohouse_encr.7, nohouse_encr.8,
+         nohouse_encr.9,nohouse_encr.10, nohouse_encr.11, eu_integration.1, eu_integration.2, eu_integration.3, eu_integration.4, eu_integration.5,
+         eu_integration.6, eu_integration.7, eu_integration.8, eu_integration.9, eu_integration.10, eu_integration.11, geslacht.1, geslacht.2, geslacht.3, geslacht.4,
+         geslacht.5, geslacht.6, geslacht.7, geslacht.8, geslacht.9, geslacht.10, geslacht.11, oplmet.1, oplmet.2, oplmet.3, oplmet.4,
+         oplmet.5, oplmet.6, oplmet.7, oplmet.8, oplmet.9, oplmet.10, oplmet.11, immigrants.1, immigrants.2, immigrants.3, immigrants.4, immigrants.5, immigrants.6,
+         immigrants.7, immigrants.8, immigrants.9, immigrants.10, immigrants.11, positie.1, positie.2, positie.3, positie.4, positie.5, positie.6, positie.7, positie.8, positie.9,
+         positie.10, positie.11)
+```
+
+First we need to recode some of the variables. 
+
+```{r var recode}
+
+##----------------------------------- Variable recode --------------------------------##
+#gender
+# 0 = male, 1 = female.
+liss_subset[,grep(names(liss_subset), pattern = "geslacht", value = T)] <- apply(liss_subset[,grep(names(liss_subset), pattern = "geslacht", value = T)] , 2, function(x)x - 1)
+
+#education in years
+#create custom function
+func1 <- function(x) {
+  x2 <- ifelse(x == 1, 6, x)
+  x3 <- ifelse(x == 2, 10, x2)
+  x4 <- ifelse(x == 3, 11.5, x3)
+  x5 <- ifelse(x == 4, 10.5, x4)
+  x6 <- ifelse(x == 5, 15, x5)
+  x7 <- ifelse(x == 6, 16, x6)
+  x8 <- ifelse(x == 7, NA, x7)
+  x9 <- ifelse(x == 8, 4, x8)
+  x10 <- ifelse(x == 9, 0, x9)
+  return(x10)
+}
+
+
+# education in year recode with apply. 
+liss_subset[,grep(names(liss_subset), pattern = "oplmet", value = T)] <- 
+  apply(liss_subset[,grep(names(liss_subset), pattern = "oplmet", value = T)], 2, func1)
+
+#immigrants
+#reverse code the variable. 
+liss_subset[,grep(names(liss_subset), pattern = "immigrants", value = T)] <- 
+  apply(liss_subset[,grep(names(liss_subset), pattern = "immigrants", value = T)], 2, function(x) 5 - x)
+
+```
+
+Now we can start with the datapreperation.
+
+```{r prep of the partner data 2}
+#reshape into a wide file.
+liss_subset_long <- reshape(liss_subset,
+                            direction = 'long',
+                            varying = names(liss_subset[,2:67]),
+                            idvar = 'nomem_encr',
+                            times = 1:11)
+
+
+#create custom function to use with lapply
+#this custom function follows the logic of the test procedure. 
+#I will create a list of all the waves, then use lapply to apply the function to all the dfs
+#Then I will 
+partner_function <- function (x) {
+  
+  #filter out non partners
+  a <- x %>%
+    filter(!is.na(positie) & positie < 5)
+  #count the members of the hh
+  b <- a %>% 
+    count(nohouse_encr)
+  #merge the two datasources
+  c <- merge(a, b, by = "nohouse_encr")
+  #select on 2.
+  d <- c %>%
+    filter(n == 2)
+  #length of df, which we need for rep function.
+  e <- d %>% 
+    summarize(n())
+  
+  #create partner variable
+  d$partner <- rep(c("r", "p"), e[1]/2)
+  
+  #reshape into wide file.
+  f <- reshape(d,
+          direction = 'wide',
+          v.names = names(d[,c(2,4:8)]),
+          idvar = 'nohouse_encr',
+          timevar = 'partner')
+  
+  return(f)
+}
+
+#create a partner list data with dplyr.
+partner_list <- liss_subset_long %>%
+  group_split(time)
+
+#apply the function to the data. 
+partner_list <- lapply(partner_list, partner_function)
+#use do.call to reduce the lists to one df.
+partner_df_long <- do.call(rbind, partner_list)
+
+```
+
+Now we only have a long file, so before we finish we need to reshape into a wide file. 
+
+```{r, wide file}
+partner_df_wide <- reshape(partner_df_long,
+                           direction = 'wide',
+                           v.names = names(partner_df_long[,4:15]),
+                           idvar = 'nohouse_encr',
+                           timevar = 'time')
+
+```
+
+Clean the global environment and save the Rdata
+```{r, export and cleaning}
+#clean the environment. 
+rm(list=ls()[! ls() %in% c("partner_df_wide", "partner_df_long")])
+
+#save the Rdata
+save.image('data-processed/partner_dataprepped.Rdata')
+
+```
+
+### Description of the data
+
+The *partner_dataprepped_v1_210209.Rdata* consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables. The suffices .r and .p denote respondent and partner, .1 etc denotes the wave in the wide format. 
+
+Variables of interest and value labels:
+
+- nohouse_encr = hh id
+- nomem_encr = respondent/partner id
+- oplmet = higheste completed education in years
+- geslacht = dummy with 0 = male / 1 = female
+- eu_integratrion = 0 = eu integration has gone too far / 4 = eu integration should go further
+- immigrants = 0 = immigrants should adjust / 4 immigrants can retain their own culture.
+
+
+

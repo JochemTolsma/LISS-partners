@@ -3,7 +3,7 @@
 .Rapp.history
 
 # Session Data files
-.RData
+#.RData
 
 # User-specific files
 .Ruserdata
@@ -34,3 +34,6 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+# Specific directories
+/data-raw/

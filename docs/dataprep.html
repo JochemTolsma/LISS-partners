@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Thijmen Jeroense" />
+
+
+<title>Dataprep Partner Paper</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Replication package</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Tables Manuscript</a>
+</li>
+<li>
+  <a href="dataprep.html">Data preperation</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/JochemTolsma/LISS-partners">
+    <span class="fab fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+<li role="separator" class="divider"></li>
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Dataprep Partner Paper</h1>
+<h4 class="author">Thijmen Jeroense</h4>
+<h4 class="date">Last compiled on februari, 2021</h4>
+
+</div>
+
+
+<div id="dataprep-partner-paper" class="section level2">
+<h2>Dataprep Partner Paper</h2>
+<p>In this document I will show how I progammed the partner data. I will first show the procedure using the original SPSS file with the background data variables that we need. First, this is <em>nohouse_encr</em> which contains the unique HH id. Second, we use the variable <em>positie</em> which shows the position of a respondent in the HH, when this value is lower than 5, the respondent is a partner.(See the variable for the labelling in the original SPSS). The files are in a seperate zipfile.</p>
+<p>For the dataprep I use the following packages as well as the base R functions.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(purrr)
+library(haven)</code></pre>
+<div id="procedure-of-creating-partner-data" class="section level3">
+<h3>Procedure of creating partner data</h3>
+<p>In this section the procedure of creating the parner dyads is explained on the original spss file.</p>
+<pre class="r"><code>#import data
+MyData &lt;- read_sav(&#39;data-raw/avars_201912_EN_1.0p.sav&#39;)
+
+#take a look at the contents of the data.
+ls(MyData)</code></pre>
+<pre><code>##  [1] &quot;aantalhh&quot;      &quot;aantalki&quot;      &quot;belbezig&quot;      &quot;brutocat&quot;     
+##  [5] &quot;brutohh_f&quot;     &quot;brutoink&quot;      &quot;brutoink_f&quot;    &quot;burgstat&quot;     
+##  [9] &quot;doetmee&quot;       &quot;gebjaar&quot;       &quot;geslacht&quot;      &quot;herkomstgroep&quot;
+## [13] &quot;leeftijd&quot;      &quot;lftdcat&quot;       &quot;lftdhhh&quot;       &quot;netinc&quot;       
+## [17] &quot;nettocat&quot;      &quot;nettohh_f&quot;     &quot;nettoink&quot;      &quot;nettoink_f&quot;   
+## [21] &quot;nohouse_encr&quot;  &quot;nomem_encr&quot;    &quot;oplcat&quot;        &quot;oplmet&quot;       
+## [25] &quot;oplzon&quot;        &quot;partner&quot;       &quot;positie&quot;       &quot;simpc&quot;        
+## [29] &quot;sted&quot;          &quot;wave&quot;          &quot;werving&quot;       &quot;woning&quot;       
+## [33] &quot;woonvorm&quot;</code></pre>
+<pre class="r"><code>#select people that are either partner or household head. 
+table(MyData$positie)</code></pre>
+<pre><code>## 
+##    1    2    3    4    5    6    7 
+## 4502 2042  535   29 2550  102   66</code></pre>
+<pre class="r"><code>#select only people who are partner.
+MyData &lt;- MyData %&gt;%
+  filter(positie &lt; 5)
+
+#check whether correct. 
+table(MyData$positie)</code></pre>
+<pre><code>## 
+##    1    2    3    4 
+## 4502 2042  535   29</code></pre>
+<pre class="r"><code>#select households where both partners are present.
+#create hh count variable n
+list_hh &lt;- MyData %&gt;% 
+  count(nohouse_encr)
+
+#merge the two df&#39;s
+MyData &lt;- merge(MyData, list_hh, by  = &#39;nohouse_encr&#39;)
+
+#select on n = 2.
+MyData &lt;- MyData %&gt;%
+  filter(n == 2)
+
+#test: first add a respondent/partner var.
+#then use the reshape command to create a wide dataset with respondent and partner data in one dyad (partnership)
+#create a test df.
+test &lt;- MyData[1:20,1:5]
+#p = partner / r = respondent.
+test$partner &lt;- rep(c(&quot;r&quot;, &quot;p&quot;),10)
+
+# use the reshape command. 
+test_2 &lt;- reshape(test,
+                  direction = &#39;wide&#39;,
+                  v.names = c(&quot;geslacht&quot;, &quot;positie&quot;, &quot;nomem_encr&quot;),
+                  idvar = &#39;nohouse_encr&#39;,
+                  timevar = &#39;partner&#39;)
+
+#use this method for the complete df 
+MyData$partner &lt;- rep(1:2, 2581)
+
+MyData &lt;- reshape(MyData,
+                  direction = &#39;wide&#39;,
+                  v.names = names(MyData[,2:34]),
+                  idvar = &#39;nohouse_encr&#39;,
+                  timevar = &#39;partner&#39;)</code></pre>
+</div>
+<div id="application-to-the-whole-partner-data" class="section level3">
+<h3>Application to the whole partner data</h3>
+<pre class="r"><code>#use this procedure for the whole liss_core data. 
+#load the merged liss core file
+load(&#39;data-processed/liss_merged_core_file_v1_201124.Rdata&#39;)
+
+#first create a subset of the liss_core data for Jochem to play with.
+liss_subset &lt;- lisscdn_wide %&gt;%
+  select(nomem_encr, nohouse_encr.1, nohouse_encr.2, nohouse_encr.3, nohouse_encr.4, nohouse_encr.5, nohouse_encr.6, nohouse_encr.7, nohouse_encr.8,
+         nohouse_encr.9,nohouse_encr.10, nohouse_encr.11, eu_integration.1, eu_integration.2, eu_integration.3, eu_integration.4, eu_integration.5,
+         eu_integration.6, eu_integration.7, eu_integration.8, eu_integration.9, eu_integration.10, eu_integration.11, geslacht.1, geslacht.2, geslacht.3, geslacht.4,
+         geslacht.5, geslacht.6, geslacht.7, geslacht.8, geslacht.9, geslacht.10, geslacht.11, oplmet.1, oplmet.2, oplmet.3, oplmet.4,
+         oplmet.5, oplmet.6, oplmet.7, oplmet.8, oplmet.9, oplmet.10, oplmet.11, immigrants.1, immigrants.2, immigrants.3, immigrants.4, immigrants.5, immigrants.6,
+         immigrants.7, immigrants.8, immigrants.9, immigrants.10, immigrants.11, positie.1, positie.2, positie.3, positie.4, positie.5, positie.6, positie.7, positie.8, positie.9,
+         positie.10, positie.11)</code></pre>
+<p>First we need to recode some of the variables.</p>
+<pre class="r"><code>##----------------------------------- Variable recode --------------------------------##
+#gender
+# 0 = male, 1 = female.
+liss_subset[,grep(names(liss_subset), pattern = &quot;geslacht&quot;, value = T)] &lt;- apply(liss_subset[,grep(names(liss_subset), pattern = &quot;geslacht&quot;, value = T)] , 2, function(x)x - 1)
+
+#education in years
+#create custom function
+func1 &lt;- function(x) {
+  x2 &lt;- ifelse(x == 1, 6, x)
+  x3 &lt;- ifelse(x == 2, 10, x2)
+  x4 &lt;- ifelse(x == 3, 11.5, x3)
+  x5 &lt;- ifelse(x == 4, 10.5, x4)
+  x6 &lt;- ifelse(x == 5, 15, x5)
+  x7 &lt;- ifelse(x == 6, 16, x6)
+  x8 &lt;- ifelse(x == 7, NA, x7)
+  x9 &lt;- ifelse(x == 8, 4, x8)
+  x10 &lt;- ifelse(x == 9, 0, x9)
+  return(x10)
+}
+
+
+# education in year recode with apply. 
+liss_subset[,grep(names(liss_subset), pattern = &quot;oplmet&quot;, value = T)] &lt;- 
+  apply(liss_subset[,grep(names(liss_subset), pattern = &quot;oplmet&quot;, value = T)], 2, func1)
+
+#immigrants
+#reverse code the variable. 
+liss_subset[,grep(names(liss_subset), pattern = &quot;immigrants&quot;, value = T)] &lt;- 
+  apply(liss_subset[,grep(names(liss_subset), pattern = &quot;immigrants&quot;, value = T)], 2, function(x) 5 - x)</code></pre>
+<p>Now we can start with the datapreperation.</p>
+<pre class="r"><code>#reshape into a wide file.
+liss_subset_long &lt;- reshape(liss_subset,
+                            direction = &#39;long&#39;,
+                            varying = names(liss_subset[,2:67]),
+                            idvar = &#39;nomem_encr&#39;,
+                            times = 1:11)
+
+
+#create custom function to use with lapply
+#this custom function follows the logic of the test procedure. 
+#I will create a list of all the waves, then use lapply to apply the function to all the dfs
+#Then I will 
+partner_function &lt;- function (x) {
+  
+  #filter out non partners
+  a &lt;- x %&gt;%
+    filter(!is.na(positie) &amp; positie &lt; 5)
+  #count the members of the hh
+  b &lt;- a %&gt;% 
+    count(nohouse_encr)
+  #merge the two datasources
+  c &lt;- merge(a, b, by = &quot;nohouse_encr&quot;)
+  #select on 2.
+  d &lt;- c %&gt;%
+    filter(n == 2)
+  #length of df, which we need for rep function.
+  e &lt;- d %&gt;% 
+    summarize(n())
+  
+  #create partner variable
+  d$partner &lt;- rep(c(&quot;r&quot;, &quot;p&quot;), e[1]/2)
+  
+  #reshape into wide file.
+  f &lt;- reshape(d,
+          direction = &#39;wide&#39;,
+          v.names = names(d[,c(2,4:8)]),
+          idvar = &#39;nohouse_encr&#39;,
+          timevar = &#39;partner&#39;)
+  
+  return(f)
+}
+
+#create a partner list data with dplyr.
+partner_list &lt;- liss_subset_long %&gt;%
+  group_split(time)
+
+#apply the function to the data. 
+partner_list &lt;- lapply(partner_list, partner_function)
+#use do.call to reduce the lists to one df.
+partner_df_long &lt;- do.call(rbind, partner_list)</code></pre>
+<p>Now we only have a long file, so before we finish we need to reshape into a wide file.</p>
+<pre class="r"><code>partner_df_wide &lt;- reshape(partner_df_long,
+                           direction = &#39;wide&#39;,
+                           v.names = names(partner_df_long[,4:15]),
+                           idvar = &#39;nohouse_encr&#39;,
+                           timevar = &#39;time&#39;)</code></pre>
+<p>Clean the global environment and save the Rdata</p>
+<pre class="r"><code>#clean the environment. 
+rm(list=ls()[! ls() %in% c(&quot;partner_df_wide&quot;, &quot;partner_df_long&quot;)])
+
+#save the Rdata
+save.image(&#39;data-processed/partner_dataprepped.Rdata&#39;)</code></pre>
+</div>
+<div id="description-of-the-data" class="section level3">
+<h3>Description of the data</h3>
+<p>The <em>partner_dataprepped_v1_210209.Rdata</em> consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables. The suffices .r and .p denote respondent and partner, .1 etc denotes the wave in the wide format.</p>
+<p>Variables of interest and value labels:</p>
+<ul>
+<li>nohouse_encr = hh id</li>
+<li>nomem_encr = respondent/partner id</li>
+<li>oplmet = higheste completed education in years</li>
+<li>geslacht = dummy with 0 = male / 1 = female</li>
+<li>eu_integratrion = 0 = eu integration has gone too far / 4 = eu integration should go further</li>
+<li>immigrants = 0 = immigrants should adjust / 4 immigrants can retain their own culture.</li>
+</ul>
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRhdGFwcmVwIFBhcnRuZXIgUGFwZXIiDQphdXRob3I6ICJUaGlqbWVuIEplcm9lbnNlIg0KYmlibGlvZ3JhcGh5OiByZWZlcmVuY2VzLmJpYg0KZGF0ZTogIkxhc3QgY29tcGlsZWQgb24gYHIgZm9ybWF0KFN5cy50aW1lKCksICclQiwgJVknKWAiDQpvdXRwdXQ6IA0KICBodG1sX2RvY3VtZW50Og0KICAgIHRvYzogIHRydWUNCiAgICB0b2NfZmxvYXQ6IHRydWUNCiAgICBudW1iZXJfc2VjdGlvbnM6IGZhbHNlDQogICAgY29kZV9mb2xkaW5nOiBzaG93DQogICAgY29kZV9kb3dubG9hZDogeWVzDQotLS0NCg0KYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9DQprbml0cjo6b3B0c19jaHVuayRzZXQoZWNobyA9IFRSVUUpDQoNCg0KYGBgDQoNCiMjIERhdGFwcmVwIFBhcnRuZXIgUGFwZXINCkluIHRoaXMgZG9jdW1lbnQgSSB3aWxsIHNob3cgaG93IEkgcHJvZ2FtbWVkIHRoZSBwYXJ0bmVyIGRhdGEuIEkgd2lsbCBmaXJzdCBzaG93IHRoZSBwcm9jZWR1cmUgdXNpbmcgdGhlIG9yaWdpbmFsIFNQU1MgZmlsZSB3aXRoIHRoZSBiYWNrZ3JvdW5kIGRhdGEgdmFyaWFibGVzIHRoYXQgd2UgbmVlZC4gRmlyc3QsIHRoaXMgaXMgKm5vaG91c2VfZW5jciogd2hpY2ggY29udGFpbnMgdGhlIHVuaXF1ZSBISCBpZC4gU2Vjb25kLCB3ZSB1c2UgdGhlIHZhcmlhYmxlICpwb3NpdGllKiB3aGljaCBzaG93cyB0aGUgcG9zaXRpb24gb2YgYSByZXNwb25kZW50IGluIHRoZSBISCwgd2hlbiB0aGlzIHZhbHVlIGlzIGxvd2VyIHRoYW4gNSwgdGhlIHJlc3BvbmRlbnQgaXMgYSBwYXJ0bmVyLihTZWUgdGhlIHZhcmlhYmxlIGZvciB0aGUgbGFiZWxsaW5nIGluIHRoZSBvcmlnaW5hbCBTUFNTKS4gVGhlIGZpbGVzIGFyZSBpbiBhIHNlcGVyYXRlIHppcGZpbGUuIA0KDQpGb3IgdGhlIGRhdGFwcmVwIEkgdXNlIHRoZSBmb2xsb3dpbmcgcGFja2FnZXMgYXMgd2VsbCBhcyB0aGUgYmFzZSBSIGZ1bmN0aW9ucy4NCg0KYGBge3IgcGFja2FnZXN9DQpsaWJyYXJ5KGRwbHlyKQ0KbGlicmFyeShwdXJycikNCmxpYnJhcnkoaGF2ZW4pDQoNCmBgYA0KDQoNCiMjIyBQcm9jZWR1cmUgb2YgY3JlYXRpbmcgcGFydG5lciBkYXRhDQoNCkluIHRoaXMgc2VjdGlvbiB0aGUgcHJvY2VkdXJlIG9mIGNyZWF0aW5nIHRoZSBwYXJuZXIgZHlhZHMgaXMgZXhwbGFpbmVkIG9uIHRoZSBvcmlnaW5hbCBzcHNzIGZpbGUuICANCmBgYHtyIHByb2NlZHVyZSBleHBsYW5hdGlvbn0NCiNpbXBvcnQgZGF0YQ0KTXlEYXRhIDwtIHJlYWRfc2F2KCdkYXRhLXJhdy9hdmFyc18yMDE5MTJfRU5fMS4wcC5zYXYnKQ0KDQojdGFrZSBhIGxvb2sgYXQgdGhlIGNvbnRlbnRzIG9mIHRoZSBkYXRhLg0KbHMoTXlEYXRhKQ0KDQojc2VsZWN0IHBlb3BsZSB0aGF0IGFyZSBlaXRoZXIgcGFydG5lciBvciBob3VzZWhvbGQgaGVhZC4gDQp0YWJsZShNeURhdGEkcG9zaXRpZSkNCg0KI3NlbGVjdCBvbmx5IHBlb3BsZSB3aG8gYXJlIHBhcnRuZXIuDQpNeURhdGEgPC0gTXlEYXRhICU+JQ0KICBmaWx0ZXIocG9zaXRpZSA8IDUpDQoNCiNjaGVjayB3aGV0aGVyIGNvcnJlY3QuIA0KdGFibGUoTXlEYXRhJHBvc2l0aWUpDQoNCiNzZWxlY3QgaG91c2Vob2xkcyB3aGVyZSBib3RoIHBhcnRuZXJzIGFyZSBwcmVzZW50Lg0KI2NyZWF0ZSBoaCBjb3VudCB2YXJpYWJsZSBuDQpsaXN0X2hoIDwtIE15RGF0YSAlPiUgDQogIGNvdW50KG5vaG91c2VfZW5jcikNCg0KI21lcmdlIHRoZSB0d28gZGYncw0KTXlEYXRhIDwtIG1lcmdlKE15RGF0YSwgbGlzdF9oaCwgYnkgID0gJ25vaG91c2VfZW5jcicpDQoNCiNzZWxlY3Qgb24gbiA9IDIuDQpNeURhdGEgPC0gTXlEYXRhICU+JQ0KICBmaWx0ZXIobiA9PSAyKQ0KDQojdGVzdDogZmlyc3QgYWRkIGEgcmVzcG9uZGVudC9wYXJ0bmVyIHZhci4NCiN0aGVuIHVzZSB0aGUgcmVzaGFwZSBjb21tYW5kIHRvIGNyZWF0ZSBhIHdpZGUgZGF0YXNldCB3aXRoIHJlc3BvbmRlbnQgYW5kIHBhcnRuZXIgZGF0YSBpbiBvbmUgZHlhZCAocGFydG5lcnNoaXApDQojY3JlYXRlIGEgdGVzdCBkZi4NCnRlc3QgPC0gTXlEYXRhWzE6MjAsMTo1XQ0KI3AgPSBwYXJ0bmVyIC8gciA9IHJlc3BvbmRlbnQuDQp0ZXN0JHBhcnRuZXIgPC0gcmVwKGMoInIiLCAicCIpLDEwKQ0KDQojIHVzZSB0aGUgcmVzaGFwZSBjb21tYW5kLiANCnRlc3RfMiA8LSByZXNoYXBlKHRlc3QsDQogICAgICAgICAgICAgICAgICBkaXJlY3Rpb24gPSAnd2lkZScsDQogICAgICAgICAgICAgICAgICB2Lm5hbWVzID0gYygiZ2VzbGFjaHQiLCAicG9zaXRpZSIsICJub21lbV9lbmNyIiksDQogICAgICAgICAgICAgICAgICBpZHZhciA9ICdub2hvdXNlX2VuY3InLA0KICAgICAgICAgICAgICAgICAgdGltZXZhciA9ICdwYXJ0bmVyJykNCg0KI3VzZSB0aGlzIG1ldGhvZCBmb3IgdGhlIGNvbXBsZXRlIGRmIA0KTXlEYXRhJHBhcnRuZXIgPC0gcmVwKDE6MiwgMjU4MSkNCg0KTXlEYXRhIDwtIHJlc2hhcGUoTXlEYXRhLA0KICAgICAgICAgICAgICAgICAgZGlyZWN0aW9uID0gJ3dpZGUnLA0KICAgICAgICAgICAgICAgICAgdi5uYW1lcyA9IG5hbWVzKE15RGF0YVssMjozNF0pLA0KICAgICAgICAgICAgICAgICAgaWR2YXIgPSAnbm9ob3VzZV9lbmNyJywNCiAgICAgICAgICAgICAgICAgIHRpbWV2YXIgPSAncGFydG5lcicpDQpgYGANCg0KIyMjIEFwcGxpY2F0aW9uIHRvIHRoZSB3aG9sZSBwYXJ0bmVyIGRhdGENCmBgYHtyIHByZXAgb2YgdGhlIHBhcnRuZXIgZGF0YSAxfQ0KI3VzZSB0aGlzIHByb2NlZHVyZSBmb3IgdGhlIHdob2xlIGxpc3NfY29yZSBkYXRhLiANCiNsb2FkIHRoZSBtZXJnZWQgbGlzcyBjb3JlIGZpbGUNCmxvYWQoJ2RhdGEtcHJvY2Vzc2VkL2xpc3NfbWVyZ2VkX2NvcmVfZmlsZV92MV8yMDExMjQuUmRhdGEnKQ0KDQojZmlyc3QgY3JlYXRlIGEgc3Vic2V0IG9mIHRoZSBsaXNzX2NvcmUgZGF0YSBmb3IgSm9jaGVtIHRvIHBsYXkgd2l0aC4NCmxpc3Nfc3Vic2V0IDwtIGxpc3NjZG5fd2lkZSAlPiUNCiAgc2VsZWN0KG5vbWVtX2VuY3IsIG5vaG91c2VfZW5jci4xLCBub2hvdXNlX2VuY3IuMiwgbm9ob3VzZV9lbmNyLjMsIG5vaG91c2VfZW5jci40LCBub2hvdXNlX2VuY3IuNSwgbm9ob3VzZV9lbmNyLjYsIG5vaG91c2VfZW5jci43LCBub2hvdXNlX2VuY3IuOCwNCiAgICAgICAgIG5vaG91c2VfZW5jci45LG5vaG91c2VfZW5jci4xMCwgbm9ob3VzZV9lbmNyLjExLCBldV9pbnRlZ3JhdGlvbi4xLCBldV9pbnRlZ3JhdGlvbi4yLCBldV9pbnRlZ3JhdGlvbi4zLCBldV9pbnRlZ3JhdGlvbi40LCBldV9pbnRlZ3JhdGlvbi41LA0KICAgICAgICAgZXVfaW50ZWdyYXRpb24uNiwgZXVfaW50ZWdyYXRpb24uNywgZXVfaW50ZWdyYXRpb24uOCwgZXVfaW50ZWdyYXRpb24uOSwgZXVfaW50ZWdyYXRpb24uMTAsIGV1X2ludGVncmF0aW9uLjExLCBnZXNsYWNodC4xLCBnZXNsYWNodC4yLCBnZXNsYWNodC4zLCBnZXNsYWNodC40LA0KICAgICAgICAgZ2VzbGFjaHQuNSwgZ2VzbGFjaHQuNiwgZ2VzbGFjaHQuNywgZ2VzbGFjaHQuOCwgZ2VzbGFjaHQuOSwgZ2VzbGFjaHQuMTAsIGdlc2xhY2h0LjExLCBvcGxtZXQuMSwgb3BsbWV0LjIsIG9wbG1ldC4zLCBvcGxtZXQuNCwNCiAgICAgICAgIG9wbG1ldC41LCBvcGxtZXQuNiwgb3BsbWV0LjcsIG9wbG1ldC44LCBvcGxtZXQuOSwgb3BsbWV0LjEwLCBvcGxtZXQuMTEsIGltbWlncmFudHMuMSwgaW1taWdyYW50cy4yLCBpbW1pZ3JhbnRzLjMsIGltbWlncmFudHMuNCwgaW1taWdyYW50cy41LCBpbW1pZ3JhbnRzLjYsDQogICAgICAgICBpbW1pZ3JhbnRzLjcsIGltbWlncmFudHMuOCwgaW1taWdyYW50cy45LCBpbW1pZ3JhbnRzLjEwLCBpbW1pZ3JhbnRzLjExLCBwb3NpdGllLjEsIHBvc2l0aWUuMiwgcG9zaXRpZS4zLCBwb3NpdGllLjQsIHBvc2l0aWUuNSwgcG9zaXRpZS42LCBwb3NpdGllLjcsIHBvc2l0aWUuOCwgcG9zaXRpZS45LA0KICAgICAgICAgcG9zaXRpZS4xMCwgcG9zaXRpZS4xMSkNCmBgYA0KDQpGaXJzdCB3ZSBuZWVkIHRvIHJlY29kZSBzb21lIG9mIHRoZSB2YXJpYWJsZXMuIA0KDQpgYGB7ciB2YXIgcmVjb2RlfQ0KDQojIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIFZhcmlhYmxlIHJlY29kZSAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMjDQojZ2VuZGVyDQojIDAgPSBtYWxlLCAxID0gZmVtYWxlLg0KbGlzc19zdWJzZXRbLGdyZXAobmFtZXMobGlzc19zdWJzZXQpLCBwYXR0ZXJuID0gImdlc2xhY2h0IiwgdmFsdWUgPSBUKV0gPC0gYXBwbHkobGlzc19zdWJzZXRbLGdyZXAobmFtZXMobGlzc19zdWJzZXQpLCBwYXR0ZXJuID0gImdlc2xhY2h0IiwgdmFsdWUgPSBUKV0gLCAyLCBmdW5jdGlvbih4KXggLSAxKQ0KDQojZWR1Y2F0aW9uIGluIHllYXJzDQojY3JlYXRlIGN1c3RvbSBmdW5jdGlvbg0KZnVuYzEgPC0gZnVuY3Rpb24oeCkgew0KICB4MiA8LSBpZmVsc2UoeCA9PSAxLCA2LCB4KQ0KICB4MyA8LSBpZmVsc2UoeCA9PSAyLCAxMCwgeDIpDQogIHg0IDwtIGlmZWxzZSh4ID09IDMsIDExLjUsIHgzKQ0KICB4NSA8LSBpZmVsc2UoeCA9PSA0LCAxMC41LCB4NCkNCiAgeDYgPC0gaWZlbHNlKHggPT0gNSwgMTUsIHg1KQ0KICB4NyA8LSBpZmVsc2UoeCA9PSA2LCAxNiwgeDYpDQogIHg4IDwtIGlmZWxzZSh4ID09IDcsIE5BLCB4NykNCiAgeDkgPC0gaWZlbHNlKHggPT0gOCwgNCwgeDgpDQogIHgxMCA8LSBpZmVsc2UoeCA9PSA5LCAwLCB4OSkNCiAgcmV0dXJuKHgxMCkNCn0NCg0KDQojIGVkdWNhdGlvbiBpbiB5ZWFyIHJlY29kZSB3aXRoIGFwcGx5LiANCmxpc3Nfc3Vic2V0WyxncmVwKG5hbWVzKGxpc3Nfc3Vic2V0KSwgcGF0dGVybiA9ICJvcGxtZXQiLCB2YWx1ZSA9IFQpXSA8LSANCiAgYXBwbHkobGlzc19zdWJzZXRbLGdyZXAobmFtZXMobGlzc19zdWJzZXQpLCBwYXR0ZXJuID0gIm9wbG1ldCIsIHZhbHVlID0gVCldLCAyLCBmdW5jMSkNCg0KI2ltbWlncmFudHMNCiNyZXZlcnNlIGNvZGUgdGhlIHZhcmlhYmxlLiANCmxpc3Nfc3Vic2V0WyxncmVwKG5hbWVzKGxpc3Nfc3Vic2V0KSwgcGF0dGVybiA9ICJpbW1pZ3JhbnRzIiwgdmFsdWUgPSBUKV0gPC0gDQogIGFwcGx5KGxpc3Nfc3Vic2V0WyxncmVwKG5hbWVzKGxpc3Nfc3Vic2V0KSwgcGF0dGVybiA9ICJpbW1pZ3JhbnRzIiwgdmFsdWUgPSBUKV0sIDIsIGZ1bmN0aW9uKHgpIDUgLSB4KQ0KDQpgYGANCg0KTm93IHdlIGNhbiBzdGFydCB3aXRoIHRoZSBkYXRhcHJlcGVyYXRpb24uDQoNCmBgYHtyIHByZXAgb2YgdGhlIHBhcnRuZXIgZGF0YSAyfQ0KI3Jlc2hhcGUgaW50byBhIHdpZGUgZmlsZS4NCmxpc3Nfc3Vic2V0X2xvbmcgPC0gcmVzaGFwZShsaXNzX3N1YnNldCwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBkaXJlY3Rpb24gPSAnbG9uZycsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFyeWluZyA9IG5hbWVzKGxpc3Nfc3Vic2V0WywyOjY3XSksDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgaWR2YXIgPSAnbm9tZW1fZW5jcicsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgdGltZXMgPSAxOjExKQ0KDQoNCiNjcmVhdGUgY3VzdG9tIGZ1bmN0aW9uIHRvIHVzZSB3aXRoIGxhcHBseQ0KI3RoaXMgY3VzdG9tIGZ1bmN0aW9uIGZvbGxvd3MgdGhlIGxvZ2ljIG9mIHRoZSB0ZXN0IHByb2NlZHVyZS4gDQojSSB3aWxsIGNyZWF0ZSBhIGxpc3Qgb2YgYWxsIHRoZSB3YXZlcywgdGhlbiB1c2UgbGFwcGx5IHRvIGFwcGx5IHRoZSBmdW5jdGlvbiB0byBhbGwgdGhlIGRmcw0KI1RoZW4gSSB3aWxsIA0KcGFydG5lcl9mdW5jdGlvbiA8LSBmdW5jdGlvbiAoeCkgew0KICANCiAgI2ZpbHRlciBvdXQgbm9uIHBhcnRuZXJzDQogIGEgPC0geCAlPiUNCiAgICBmaWx0ZXIoIWlzLm5hKHBvc2l0aWUpICYgcG9zaXRpZSA8IDUpDQogICNjb3VudCB0aGUgbWVtYmVycyBvZiB0aGUgaGgNCiAgYiA8LSBhICU+JSANCiAgICBjb3VudChub2hvdXNlX2VuY3IpDQogICNtZXJnZSB0aGUgdHdvIGRhdGFzb3VyY2VzDQogIGMgPC0gbWVyZ2UoYSwgYiwgYnkgPSAibm9ob3VzZV9lbmNyIikNCiAgI3NlbGVjdCBvbiAyLg0KICBkIDwtIGMgJT4lDQogICAgZmlsdGVyKG4gPT0gMikNCiAgI2xlbmd0aCBvZiBkZiwgd2hpY2ggd2UgbmVlZCBmb3IgcmVwIGZ1bmN0aW9uLg0KICBlIDwtIGQgJT4lIA0KICAgIHN1bW1hcml6ZShuKCkpDQogIA0KICAjY3JlYXRlIHBhcnRuZXIgdmFyaWFibGUNCiAgZCRwYXJ0bmVyIDwtIHJlcChjKCJyIiwgInAiKSwgZVsxXS8yKQ0KICANCiAgI3Jlc2hhcGUgaW50byB3aWRlIGZpbGUuDQogIGYgPC0gcmVzaGFwZShkLA0KICAgICAgICAgIGRpcmVjdGlvbiA9ICd3aWRlJywNCiAgICAgICAgICB2Lm5hbWVzID0gbmFtZXMoZFssYygyLDQ6OCldKSwNCiAgICAgICAgICBpZHZhciA9ICdub2hvdXNlX2VuY3InLA0KICAgICAgICAgIHRpbWV2YXIgPSAncGFydG5lcicpDQogIA0KICByZXR1cm4oZikNCn0NCg0KI2NyZWF0ZSBhIHBhcnRuZXIgbGlzdCBkYXRhIHdpdGggZHBseXIuDQpwYXJ0bmVyX2xpc3QgPC0gbGlzc19zdWJzZXRfbG9uZyAlPiUNCiAgZ3JvdXBfc3BsaXQodGltZSkNCg0KI2FwcGx5IHRoZSBmdW5jdGlvbiB0byB0aGUgZGF0YS4gDQpwYXJ0bmVyX2xpc3QgPC0gbGFwcGx5KHBhcnRuZXJfbGlzdCwgcGFydG5lcl9mdW5jdGlvbikNCiN1c2UgZG8uY2FsbCB0byByZWR1Y2UgdGhlIGxpc3RzIHRvIG9uZSBkZi4NCnBhcnRuZXJfZGZfbG9uZyA8LSBkby5jYWxsKHJiaW5kLCBwYXJ0bmVyX2xpc3QpDQoNCmBgYA0KDQpOb3cgd2Ugb25seSBoYXZlIGEgbG9uZyBmaWxlLCBzbyBiZWZvcmUgd2UgZmluaXNoIHdlIG5lZWQgdG8gcmVzaGFwZSBpbnRvIGEgd2lkZSBmaWxlLiANCg0KYGBge3IsIHdpZGUgZmlsZX0NCnBhcnRuZXJfZGZfd2lkZSA8LSByZXNoYXBlKHBhcnRuZXJfZGZfbG9uZywNCiAgICAgICAgICAgICAgICAgICAgICAgICAgIGRpcmVjdGlvbiA9ICd3aWRlJywNCiAgICAgICAgICAgICAgICAgICAgICAgICAgIHYubmFtZXMgPSBuYW1lcyhwYXJ0bmVyX2RmX2xvbmdbLDQ6MTVdKSwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgIGlkdmFyID0gJ25vaG91c2VfZW5jcicsDQogICAgICAgICAgICAgICAgICAgICAgICAgICB0aW1ldmFyID0gJ3RpbWUnKQ0KDQpgYGANCg0KQ2xlYW4gdGhlIGdsb2JhbCBlbnZpcm9ubWVudCBhbmQgc2F2ZSB0aGUgUmRhdGENCmBgYHtyLCBleHBvcnQgYW5kIGNsZWFuaW5nfQ0KI2NsZWFuIHRoZSBlbnZpcm9ubWVudC4gDQpybShsaXN0PWxzKClbISBscygpICVpbiUgYygicGFydG5lcl9kZl93aWRlIiwgInBhcnRuZXJfZGZfbG9uZyIpXSkNCg0KI3NhdmUgdGhlIFJkYXRhDQpzYXZlLmltYWdlKCdkYXRhLXByb2Nlc3NlZC9wYXJ0bmVyX2RhdGFwcmVwcGVkLlJkYXRhJykNCg0KYGBgDQoNCiMjIyBEZXNjcmlwdGlvbiBvZiB0aGUgZGF0YQ0KDQpUaGUgKnBhcnRuZXJfZGF0YXByZXBwZWRfdjFfMjEwMjA5LlJkYXRhKiBjb25zaXN0cyBvZiB0aGUgcHJlcHBlZCBkYXRhIGZvciB0aGUgcGFydG5lciBwYXBlciwgaW4gbG9uZyBhbmQgd2lkZSBmb3JtYXQuIEZvciBub3csIEkgaGF2ZSBvbmx5IGluY2x1ZGVkIGEgc2VsZWN0aW9uIG9mIHZhcmlhYmxlcy4gVGhlIHN1ZmZpY2VzIC5yIGFuZCAucCBkZW5vdGUgcmVzcG9uZGVudCBhbmQgcGFydG5lciwgLjEgZXRjIGRlbm90ZXMgdGhlIHdhdmUgaW4gdGhlIHdpZGUgZm9ybWF0LiANCg0KVmFyaWFibGVzIG9mIGludGVyZXN0IGFuZCB2YWx1ZSBsYWJlbHM6DQoNCi0gbm9ob3VzZV9lbmNyID0gaGggaWQNCi0gbm9tZW1fZW5jciA9IHJlc3BvbmRlbnQvcGFydG5lciBpZA0KLSBvcGxtZXQgPSBoaWdoZXN0ZSBjb21wbGV0ZWQgZWR1Y2F0aW9uIGluIHllYXJzDQotIGdlc2xhY2h0ID0gZHVtbXkgd2l0aCAwID0gbWFsZSAvIDEgPSBmZW1hbGUNCi0gZXVfaW50ZWdyYXRyaW9uID0gMCA9IGV1IGludGVncmF0aW9uIGhhcyBnb25lIHRvbyBmYXIgLyA0ID0gZXUgaW50ZWdyYXRpb24gc2hvdWxkIGdvIGZ1cnRoZXINCi0gaW1taWdyYW50cyA9IDAgPSBpbW1pZ3JhbnRzIHNob3VsZCBhZGp1c3QgLyA0IGltbWlncmFudHMgY2FuIHJldGFpbiB0aGVpciBvd24gY3VsdHVyZS4NCg0KDQoNCg==</div>
+<p>Copyright &copy; 2021 Jochem Tolsma</p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("dataprep.Rmd");
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

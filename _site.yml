@@ -1,0 +1,21 @@
+name: "Replication package LISS-partners"
+output_dir: "docs"
+navbar:
+  title: "Replication package"
+  left:
+    - text: "Tables Manuscript"
+      href: index.html
+  # - text: "Supplementary Material"
+  #    href: SM.html
+    - text: "Data preperation"
+      href: dataprep.html
+  right:
+    - icon: fab fa-github
+      href: https://github.com/JochemTolsma/LISS-partners
+output:
+  html_document:
+    theme: flatly
+    highlight: default
+    include:
+      after_body: footer.html
+    
