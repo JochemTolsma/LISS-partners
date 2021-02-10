@@ -12,9 +12,11 @@ output:
     code_download: yes
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache=TRUE, results="hold", eval=FALSE)
-
+```{r setup,globalsettings, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE, cache=TRUE, results="hold", eval=FALSE, class.source=c("test"))
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=100),tidy=TRUE, warning = FALSE, message = FALSE,comment = "#>", cache=TRUE, class.source=c("test"), class.output=c("test2"), results="hold", eval=FALSE)
+options(width = 100)
 
 colorize <- function(x, color) {
   if (knitr::is_latex_output()) {
@@ -28,25 +30,23 @@ colorize <- function(x, color) {
 ```
 
 
-
-```{r klippy, echo=FALSE, include=TRUE}
+```{r klippy, echo=FALSE, include=TRUE, eval=TRUE}
 klippy::klippy(position = c('top', 'right'))
 #klippy::klippy(color = 'darkred')
 #klippy::klippy(tooltip_message = 'Click to copy', tooltip_success = 'Done')
 ```
 
 
-```{r packages}
-#load packages.
-library(dplyr)
-library(haven)
-library(purrr)
-```
+
+```{css, echo=FALSE, eval=TRUE}
+
+.watch-out {
+  background-color: lightpink;
+  border: 3px solid red;
+  font-weight: bold;
+}
 
 
-
-
-```{css, echo=FALSE}
 pre.test {
   max-height: 300px;
   overflow-y: auto;
@@ -69,6 +69,16 @@ h1, .h1, h2, .h2, h3, .h3 {
 
 
 ```
+
+```{r packages, class.source="watch-out"}
+#load packages.
+library(dplyr)
+library(haven)
+library(purrr)
+```
+
+
+
 
 ## Constructing the merged LISS data
 
