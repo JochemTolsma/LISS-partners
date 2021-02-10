@@ -13,7 +13,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache=TRUE, results="hold")
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE, results="hold", eval=FALSE)
 
 
 colorize <- function(x, color) {
@@ -34,6 +34,17 @@ klippy::klippy(position = c('top', 'right'))
 #klippy::klippy(color = 'darkred')
 #klippy::klippy(tooltip_message = 'Click to copy', tooltip_success = 'Done')
 ```
+
+
+```{r packages}
+#load packages.
+library(dplyr)
+library(haven)
+library(purrr)
+```
+
+
+
 
 ```{css, echo=FALSE}
 pre.test {
@@ -59,23 +70,500 @@ h1, .h1, h2, .h2, h3, .h3 {
 
 ```
 
+## Constructing the merged LISS data
+
+Hoi Thijmen. Kun je hier nog even een lijstje maken van alle gebruikte originele liss data files. Een alternatief is om die op te noemen in README.md. Daar ook netjes verwijzen naar LISS en gebruikersovereenkomst. 
+
+Het script is goed te volgen en in principe ook helemaal prima voor een replication package.  
+Maar,...
+
+Zelf zou ik het nog iets netter vinden als je:  
+
+- eerst **alle** data inleest.  
+- dan **alle** data aan elkaar knoopt.  
+- dan pas cases weggooid (en ook de N in je script vermeld)  
+- je dan pas gaat hercoderen.  
+- dan pas wegschrijft. 
+- je iets consistenter of tidy approach gebruikt of base R. Het is nu een beetje een ratjetoe. 
+
+Ik heb het script iets aangepast, zodat het werkt binnen de repository. Mijn dir structuur is als volgt: 
+
+- LISS-partners  
+---data-processed  
+---data-raw  
+------alter_data  
+------avars  
+------leisure_integ_data  
+------pol_data  
+------rel_data  
+---docs  
+---manuscript  
+
+Zoek even in het script naar "JT". 
+
+```{r, eval=FALSE}
+#---------------------------- LISS Merging ----------------------------#
+#Dyad data preperation.
+#Author: Thijmen Jeroense
+
+#disable the scientific notation in R (else all the id's will be in scientific notation)
+options(scipen = 999) #JT op het eind van dit script weer aan zetten? 
+
+
+
+#---------------------------- Data import and Merging the different LISS files ----------------------------#
+
+#import the different liss files from their directory. 
+file_names=as.list(dir(path="data-raw/leisure_integ_data/", pattern = '*.sav'))
+#create an empty list so that we can load all the files in this list. 
+desired_length <- 11 #
+liss_files <- vector(mode = "list", length = desired_length)
+
+#import all the files in the list.
+# for some reason lapply does not work with read_sav, so I just use a loop. 
+for (i in 1:length(file_names)) {
+  liss_files[[i]] <- read_sav(paste("data-raw/leisure_integ_data/",file_names[[i]], sep=""))
+}
+
+#just to be sure, order the files on nomem_encr
+liss_files <- lapply(liss_files, function(x) {
+y <- x[base::order(x$nomem_encr),]
+return(y)
+})
+
+#For a full outer join.
+liss_merged <- liss_files %>%
+  reduce(full_join, by = 'nomem_encr') ##JT weird programming
+
+#order on nomem_encr
+liss_merged <- liss_merged[base::order(liss_merged$nomem_encr),] #mix of base R and tidy
+
+#get the politics and values data.
+#I do this seperately as I wanted to create wave id's, and this was easier to do on one file.
+#import the data files.
+file_names=as.list(dir(path="data-raw/pol_data/", pattern = '*.sav'))
+liss_files <- vector(mode = "list", length = 11)
+
+#loop to load all the data in one list.
+#name them. 
+for (i in 1:length(file_names)) {
+  liss_files[[i]] <- read_sav(paste("data-raw/pol_data/",file_names[[i]], sep=""))
+} 
+
+#just to be sure, order the files on nomem_encr
+liss_files <- lapply(liss_files, function(x) {
+  y <- x[base::order(x$nomem_encr),]
+  return(y)
+})
+
+#merge the data into one file.
+liss_pol <- liss_files %>%
+  reduce(full_join, by = 'nomem_encr')
+
+#order on nomem_encr
+liss_pol <- liss_pol[base::order(liss_pol$nomem_encr),]
+
+#remove the household id variables from the liss_pol and liss_merged file.
+# they are incomplete as in some waves they are not present. I will add them later with the background data. 
+liss_pol[,c("nohouse_encr", "nohouse_encr.x", "nohouse_encr.y", "nohouse_encr.x.x", "nohouse_encr.y.y")] <- NULL
+liss_merged[,c("nohouse_encr", "nohouse_encr.x", "nohouse_encr.y", "nohouse_encr.x.x", "nohouse_encr.y.y")] <- NULL
+
+#get the alter id handles.
+# JT perhaps add some explanation how we retrieved this data. preferably in README.md
+setwd('C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/alter_data')
+getwd()
+
+#import the data files.
+file_names=as.list(dir(path="data-raw/alter_data/", pattern = '*.sav'))
+liss_names_alters <- vector(mode = "list", length = 11)
+
+#loop to load all the data in one list.
+#name them. 
+for (i in 1:length(file_names)) {
+  liss_names_alters[[i]] <- read_sav(paste("data-raw/alter_data/",file_names[[i]], sep=""))
+} 
+
+#just to be sure, order the files on nomem_encr and add suffixes to the data.
+#Then we can correctly identify the different waves. 
+liss_files <- lapply(1:11, function(i) {
+  data <- liss_names_alters[[i]][base::order(liss_names_alters[[i]]$nomem_encr),]
+  names(data)[-1] <- paste0(names(data)[-1], sep = ".", c(1:11)[i])
+  return(data)
+})
+
+#merge the data
+liss_merged_alter <- liss_files %>%
+  reduce(full_join, by = 'nomem_encr')
+
+#order on nomem_encr
+liss_merged_alter <- liss_merged_alter[base::order(liss_merged_alter$nomem_encr),]
+
+#okay, let's merge the liss_merged, liss_merged_alters and the politics and values waves.
+liss <- left_join(liss_merged, liss_merged_alter, by = "nomem_encr")
+liss <- left_join(liss, liss_pol, by = "nomem_encr")
+# JT: please try to use the %>% operator to do this stuff in one go. 
+
+#import the background variable data. 
+#import data files.
+file_names=as.list(dir(path="data-raw/avars/", pattern = '*.sav'))
+liss_files <- vector(mode = "list", length = 11)
+
+#import the files in a for loop.
+for (i in 1:length(file_names)) {
+  liss_files[[i]] <- read_sav(paste("data-raw/avars/",file_names[[i]], sep=""))
+} 
+
+#just to be sure, order the files on nomem_encr and add suffixes to the data 
+# JT Please explain the suffixes here and in text
+liss_files <- lapply(1:11, function(i) {
+  data <- liss_files[[i]][base::order(liss_files[[i]]$nomem_encr),]
+  names(data)[-1] <- paste0(names(data)[-1], sep = ".", c(1:11)[i])
+  return(data)
+})
+
+#
+liss_background <- liss_files %>%
+  reduce(full_join, by = 'nomem_encr')
+
+#order on nomem_encr
+liss_background <- liss_background[base::order(liss_background$nomem_encr),]
+
+#merge the avars file with the liss files. Use a left-join as we only want info from people who participate in the integration waves.
+liss <- left_join(liss, liss_background, by = 'nomem_encr')
+#JT I think my strategy would be to use full joins and then afterwards use filters to select respondents. That way we know how many respondents we loose. We would like to report this in our manuscript right? 
+
+#clean the global environment.
+rm(file_names, liss_files, liss_merged, liss_merged_alter, liss_names_alters, desired_length, i, liss_pol, liss_background)
+
+
+#--------------------------------------------- Variable selection from the complete liss file --------------------------------------------#
+#first, let's order the data on the id variable (nomem_encr)
+liss <- liss[base::order(liss$nomem_encr),]
+
+
+# JT: could you please make a folder with all codebooks so I/reviewers can look up the variable names. 
+
+#create subset of all the data that I want for every wave. Then we can make a new file where we only have the selected data that we want.
+#liss politics variables that I need
+liss_pol <- liss %>%
+  select(nomem_encr, cv08a012,cv08a047, cv08a048, cv08a049, cv08a050, cv08a051, cv08a052, cv08a058, cv08a101, cv08a102, cv08a103, cv08a104, cv08a105, cv08a001, cv08a044, cv08a014, cv08a106, cv08a107, cv08a108, cv08a109,cv08a110,cv08a111,cv08a112,cv08a113,cv08a114,cv08a115, cv08a116,cv08a117,cv08a118,cv08a119,cv08a120,cv08a121,cv08a122,cv08a123,
+         cv09b012,cv09b047, cv09b048, cv09b049, cv09b050, cv09b051, cv09b052, cv09b058, cv09b101, cv09b102, cv09b103, cv09b104, cv09b105, cv09b001, cv09b044, cv09b014,cv09b106, cv09b107, cv09b108, cv09b109,cv09b110,cv09b111,cv09b112,cv09b113,cv09b114,cv09b115,cv09b116,cv09b117,cv09b118,cv09b119,cv09b120,cv09b121,cv09b122,cv09b123,
+         cv10c012,cv10c047, cv10c048, cv10c049, cv10c050, cv10c051, cv10c052, cv10c058, cv10c101, cv10c102, cv10c103, cv10c104, cv10c105, cv10c001, cv10c044, cv10c014,cv10c106, cv10c107, cv10c108, cv10c109,cv10c110,cv10c111,cv10c112,cv10c113,cv10c114,cv10c115,cv10c116,cv10c117,cv10c118,cv10c119,cv10c120,cv10c121,cv10c122,cv10c123,
+         cv11d012,cv11d047, cv11d048, cv11d049, cv11d050, cv11d051, cv11d052, cv11d171, cv11d101, cv11d102, cv11d103, cv11d104, cv11d105, cv11d001, cv11d044, cv11d014,cv11d106, cv11d107, cv11d108, cv11d109,cv11d110,cv11d111,cv11d112,cv11d113,cv11d114,cv11d115, cv11d116,cv11d117,cv11d118,cv11d119,cv11d120,cv11d121,cv11d122,cv11d123,
+         cv12e012,cv12e047, cv12e048, cv12e049, cv12e050, cv12e051, cv12e052, cv12e171, cv12e101, cv12e102, cv12e103, cv12e104, cv12e105, cv12e001, cv12e044, cv12e014,cv12e106, cv12e107, cv12e108, cv12e109,cv12e110,cv12e111,cv12e112,cv12e113,cv12e114,cv12e115, cv12e116,cv12e117,cv12e118,cv12e119,cv12e120,cv12e121,cv12e122,cv12e123,
+         cv13f012,cv13f047, cv13f048, cv13f049, cv13f050, cv13f051, cv13f052, cv13f209, cv13f101, cv13f102, cv13f103, cv13f104, cv13f105, cv13f001, cv13f044, cv13f014,cv13f106, cv13f107, cv13f108, cv13f109,cv13f110,cv13f111,cv13f112,cv13f113,cv13f114,cv13f115, cv13f116,cv13f117,cv13f118,cv13f119,cv13f120,cv13f121,cv13f122,cv13f123,
+         cv14g012,cv14g047, cv14g048, cv14g049, cv14g050, cv14g051, cv14g052, cv14g209, cv14g101, cv14g102, cv14g103, cv14g104, cv14g105, cv14g001, cv14g044, cv14g014,cv14g106, cv14g107, cv14g108, cv14g109,cv14g110,cv14g111,cv14g112,cv14g113,cv14g114,cv14g115, cv14g116,cv14g117,cv14g118,cv14g119,cv14g120,cv14g121,cv14g122,cv14g123,
+         cv16h012,cv16h047, cv16h048, cv16h049, cv16h050, cv16h051, cv16h052, cv16h209, cv16h101, cv16h102, cv16h103, cv16h104, cv16h105, cv16h001, cv16h044, cv16h014,cv16h106, cv16h107, cv16h108, cv16h109,cv16h110,cv16h111,cv16h112,cv16h113,cv16h114,cv16h115, cv16h116,cv16h117,cv16h118,cv16h119,cv16h120,cv16h121,cv16h122,cv16h123,
+         cv17i012,cv17i047, cv17i048, cv17i049, cv17i050, cv17i051, cv17i052, cv17i244, cv17i101, cv17i102, cv17i103, cv17i104, cv17i105, cv17i001, cv17i044, cv17i014,cv17i106, cv17i107, cv17i108, cv17i109,cv17i110,cv17i111,cv17i112,cv17i113,cv17i114,cv17i115, cv17i116,cv17i117,cv17i118,cv17i119,cv17i120,cv17i121,cv17i122,cv17i123,
+         cv18j012,cv18j047, cv18j048, cv18j049, cv18j050, cv18j051, cv18j052, cv18j243, cv18j101, cv18j102, cv18j103, cv18j104, cv18j105, cv18j001, cv18j044, cv18j014,cv18j106, cv18j107, cv18j108, cv18j109,cv18j110,cv18j111,cv18j112,cv18j113,cv18j114,cv18j115, cv18j116,cv18j117,cv18j118,cv18j119,cv18j120,cv18j121,cv18j122,cv18j123,
+         cv19k012,cv19k047, cv19k048, cv19k049, cv19k050, cv19k051, cv19k052, cv19k243, cv19k101, cv19k102, cv19k103, cv19k104, cv19k105, cv19k001, cv19k044, cv19k014,cv19k106, cv19k107, cv19k108, cv19k109,cv19k110,cv19k111,cv19k112,cv19k113,cv19k114,cv19k115, cv19k116,cv19k117,cv19k118,cv19k119,cv19k120,cv19k121,cv19k122,cv19k123)
+
+
+#change names.
+names(liss_pol)<- c("nomem_encr", "pol_int.1"	,	"parl_donot_care.1"	,	"pol_part_int.1"	,	"no_influece.1"	,	"cap_act_pol.1"	,	"clear_picture.1"	,	"pol_compl.1"	,	"vote_int.1"	,	"lr_scale.1"	,	"euthanasia.1"	,	"income_diff.1"	,	"immigrants.1",	"eu_integration.1"	,"gov_sat.1", "satdem.1", "poltrust.1", "postmatfirst.1", "postmatsecond.1", "postmatthird.1", "workingmother.1", "childjobmother.1", "fulltimemother.1", "equalcontribution.1", "fatherworks.1", "fatherhousehold.1", "fatherschildcare.1", "differentculture.1", "foreignerculture.1", "asylum.1", "foreignsocsec.1", "toomanyforeigners.1", "foreignnotaccepted.1", "foreigneconomy.1", "neighborhood.1", 
+                    "pol_int.2"	,	"parl_donot_care.2"	,	"pol_part_int.2"	,	"no_influece.2"	,	"cap_act_pol.2"	,	"clear_picture.2"	,	"pol_compl.2"	,	"vote_int.2"	,	"lr_scale.2"	,	"euthanasia.2"	,	"income_diff.2"	,	"immigrants.2"	,	"eu_integration.2"	,"gov_sat.2", "satdem.2", "poltrust.2","postmatfirst.2", "postmatsecond.2", "postmatthird.2", "workingmother.2", "childjobmother.2", "fulltimemother.2", "equalcontribution.2", "fatherworks.2", "fatherhousehold.2", "fatherschildcare.2", "differentculture.2", "foreignerculture.2", "asylum.2", "foreignsocsec.2", "toomanyforeigners.2", "foreignnotaccepted.2", "foreigneconomy.2", "neighborhood.2",
+                    "pol_int.3"	,	"parl_donot_care.3"	,	"pol_part_int.3"	,	"no_influece.3"	,	"cap_act_pol.3"	,	"clear_picture.3"	,	"pol_compl.3"	,	"vote_int.3"	,	"lr_scale.3"	,	"euthanasia.3"	,	"income_diff.3"	,	"immigrants.3"	,	"eu_integration.3"	,"gov_sat.3", "satdem.3", "poltrust.3","postmatfirst.3", "postmatsecond.3", "postmatthird.3", "workingmother.3", "childjobmother.3", "fulltimemother.3", "equalcontribution.3", "fatherworks.3", "fatherhousehold.3", "fatherschildcare.3", "differentculture.3", "foreignerculture.3", "asylum.3", "foreignsocsec.3", "toomanyforeigners.3", "foreignnotaccepted.3", "foreigneconomy.3", "neighborhood.3",
+                    "pol_int.4"	,	"parl_donot_care.4"	,	"pol_part_int.4"	,	"no_influece.4"	,	"cap_act_pol.4"	,	"clear_picture.4"	,	"pol_compl.4"	,	"vote_int.4"	,	"lr_scale.4"	,	"euthanasia.4"	,	"income_diff.4"	,	"immigrants.4"	,	"eu_integration.4"	,"gov_sat.4", "satdem.4", "poltrust.4","postmatfirst.4", "postmatsecond.4", "postmatthird.4", "workingmother.4", "childjobmother.4", "fulltimemother.4", "equalcontribution.4", "fatherworks.4", "fatherhousehold.4", "fatherschildcare.4","differentculture.4", "foreignerculture.4", "asylum.4", "foreignsocsec.4", "toomanyforeigners.4", "foreignnotaccepted.4", "foreigneconomy.4", "neighborhood.4",
+                    "pol_int.5"	,	"parl_donot_care.5"	,	"pol_part_int.5"	,	"no_influece.5"	,	"cap_act_pol.5"	,	"clear_picture.5"	,	"pol_compl.5"	,	"vote_int.5"	,	"lr_scale.5"	,	"euthanasia.5"	,	"income_diff.5"	,	"immigrants.5"	,	"eu_integration.5"	,"gov_sat.5", "satdem.5", "poltrust.5","postmatfirst.5", "postmatsecond.5", "postmatthird.5", "workingmother.5", "childjobmother.5", "fulltimemother.5", "equalcontribution.5", "fatherworks.5", "fatherhousehold.5", "fatherschildcare.5","differentculture.5", "foreignerculture.5", "asylum.5", "foreignsocsec.5", "toomanyforeigners.5", "foreignnotaccepted.5", "foreigneconomy.5", "neighborhood.5",
+                    "pol_int.6"	,	"parl_donot_care.6"	,	"pol_part_int.6"	,	"no_influece.6"	,	"cap_act_pol.6"	,	"clear_picture.6"	,	"pol_compl.6"	,	"vote_int.6"	,	"lr_scale.6"	,	"euthanasia.6"	,	"income_diff.6"	,	"immigrants.6"	,	"eu_integration.6"	,"gov_sat.6", "satdem.6", "poltrust.6","postmatfirst.6", "postmatsecond.6", "postmatthird.6", "workingmother.6", "childjobmother.6", "fulltimemother.6", "equalcontribution.6", "fatherworks.6", "fatherhousehold.6", "fatherschildcare.6","differentculture.6", "foreignerculture.6", "asylum.6", "foreignsocsec.6", "toomanyforeigners.6", "foreignnotaccepted.6", "foreigneconomy.6", "neighborhood.6",
+                    "pol_int.7"	,	"parl_donot_care.7"	,	"pol_part_int.7"	,	"no_influece.7"	,	"cap_act_pol.7"	,	"clear_picture.7"	,	"pol_compl.7"	,	"vote_int.7"	,	"lr_scale.7"	,	"euthanasia.7"	,	"income_diff.7"	,	"immigrants.7"	,	"eu_integration.7"	,"gov_sat.7", "satdem.7", "poltrust.7","postmatfirst.7", "postmatsecond.7", "postmatthird.7", "workingmother.7", "childjobmother.7", "fulltimemother.7", "equalcontribution.7", "fatherworks.7", "fatherhousehold.7", "fatherschildcare.7","differentculture.7", "foreignerculture.7", "asylum.7", "foreignsocsec.7", "toomanyforeigners.7", "foreignnotaccepted.7", "foreigneconomy.7", "neighborhood.7",
+                    "pol_int.8"	,	"parl_donot_care.8"	,	"pol_part_int.8"	,	"no_influece.8"	,	"cap_act_pol.8"	,	"clear_picture.8"	,	"pol_compl.8"	,	"vote_int.8"	,	"lr_scale.8"	,	"euthanasia.8"	,	"income_diff.8"	,	"immigrants.8"	,	"eu_integration.8"	,"gov_sat.8", "satdem.8", "poltrust.8","postmatfirst.8", "postmatsecond.8", "postmatthird.8", "workingmother.8", "childjobmother.8", "fulltimemother.8", "equalcontribution.8", "fatherworks.8", "fatherhousehold.8", "fatherschildcare.8","differentculture.8", "foreignerculture.8", "asylum.8", "foreignsocsec.8", "toomanyforeigners.8", "foreignnotaccepted.8", "foreigneconomy.8", "neighborhood.8",
+                    "pol_int.9"	,	"parl_donot_care.9"	,	"pol_part_int.9"	,	"no_influece.9"	,	"cap_act_pol.9"	,	"clear_picture.9"	,	"pol_compl.9"	,	"vote_int.9"	,	"lr_scale.9"	,	"euthanasia.9"	,	"income_diff.9"	,	"immigrants.9"	,	"eu_integration.9","gov_sat.9", "satdem.9", "poltrust.9","postmatfirst.9", "postmatsecond.9", "postmatthird.9", "workingmother.9", "childjobmother.9", "fulltimemother.9", "equalcontribution.9", "fatherworks.9", "fatherhousehold.9", "fatherschildcare.9","differentculture.9", "foreignerculture.9", "asylum.9", "foreignsocsec.9", "toomanyforeigners.9", "foreignnotaccepted.9", "foreigneconomy.9", "neighborhood.9",
+                    "pol_int.10"	,	"parl_donot_care.10"	,	"pol_part_int.10"	,	"no_influece.10"	,	"cap_act_pol.10"	,	"clear_picture.10"	,	"pol_compl.10"	,	"vote_int.10"	,	"lr_scale.10"	,	"euthanasia.10"	,	"income_diff.10"	,	"immigrants.10"	,	"eu_integration.10","gov_sat.10", "satdem.10", "poltrust.10", "postmatfirst.10", "postmatsecond.10", "postmatthird.10", "workingmother.10", "childjobmother.10", "fulltimemother.10", "equalcontribution.10", "fatherworks.10", "fatherhousehold.10", "fatherschildcare.10","differentculture.10", "foreignerculture.10", "asylum.10", "foreignsocsec.10", "toomanyforeigners.10", "foreignnotaccepted.10", "foreigneconomy.10", "neighborhood.10",
+                    "pol_int.11"	,	"parl_donot_care.11"	,	"pol_part_int.11"	,	"no_influece.11"	,	"cap_act_pol.11"	,	"clear_picture.11"	,	"pol_compl.11"	,	"vote_int.11"	,	"lr_scale.11"	,	"euthanasia.11"	,	"income_diff.11"	,	"immigrants.11"	,	"eu_integration.11","gov_sat.11", "satdem.11", "poltrust.11", "postmatfirst.11", "postmatsecond.11", "postmatthird.11", "workingmother.11", "childjobmother.11", "fulltimemother.11", "equalcontribution.11", "fatherworks.11", "fatherhousehold.11", "fatherschildcare.11","differentculture.11", "foreignerculture.11", "asylum.11", "foreignsocsec.11", "toomanyforeigners.11", "foreignnotaccepted.11", "foreigneconomy.11", "neighborhood.11")	
+
+
+#get the background data and rename the columns. 
+liss_avars <- liss %>%
+  select(geslacht.1,positie.1,gebjaar.1,leeftijd.1,lftdcat.1,aantalhh.1,aantalki.1,partner.1,burgstat.1,woonvorm.1,woning.1,sted.1,belbezig.1,brutoink.1,nettoink.1,brutocat.1,nettocat.1,oplzon.1,oplmet.1,oplcat.1, nohouse_encr.1,
+         geslacht.2,positie.2,gebjaar.2,leeftijd.2,lftdcat.2,aantalhh.2,aantalki.2,partner.2,burgstat.2,woonvorm.2,woning.2,sted.2,belbezig.2,brutoink.2,nettoink.2,brutocat.2,nettocat.2,oplzon.2,oplmet.2,oplcat.2, nohouse_encr.2,
+         geslacht.3,positie.3,gebjaar.3,leeftijd.3,lftdcat.3,aantalhh.3,aantalki.3,partner.3,burgstat.3,woonvorm.3,woning.3,sted.3,belbezig.3,brutoink.3,nettoink.3,brutocat.3,nettocat.3,oplzon.3,oplmet.3,oplcat.3, nohouse_encr.3,
+         geslacht.4,positie.4,gebjaar.4,leeftijd.4,lftdcat.4,aantalhh.4,aantalki.4,partner.4,burgstat.4,woonvorm.4,woning.4,sted.4,belbezig.4,brutoink.4,nettoink.4,brutocat.4,nettocat.4,oplzon.4,oplmet.4,oplcat.4, nohouse_encr.4,
+         geslacht.5,positie.5,gebjaar.5,leeftijd.5,lftdcat.5,aantalhh.5,aantalki.5,partner.5,burgstat.5,woonvorm.5,woning.5,sted.5,belbezig.5,brutoink.5,nettoink.5,brutocat.5,nettocat.5,oplzon.5,oplmet.5,oplcat.5, nohouse_encr.5,
+         geslacht.6,positie.6,gebjaar.6,leeftijd.6,lftdcat.6,aantalhh.6,aantalki.6,partner.6,burgstat.6,woonvorm.6,woning.6,sted.6,belbezig.6,brutoink.6,nettoink.6,brutocat.6,nettocat.6,oplzon.6,oplmet.6,oplcat.6, nohouse_encr.6,
+         geslacht.7,positie.7,gebjaar.7,leeftijd.7,lftdcat.7,aantalhh.7,aantalki.7,partner.7,burgstat.7,woonvorm.7,woning.7,sted.7,belbezig.7,brutoink.7,nettoink.7,brutocat.7,nettocat.7,oplzon.7,oplmet.7,oplcat.7, nohouse_encr.7,
+         geslacht.8,positie.8,gebjaar.8,leeftijd.8,lftdcat.8,aantalhh.8,aantalki.8,partner.8,burgstat.8,woonvorm.8,woning.8,sted.8,belbezig.8,brutoink.8,nettoink.8,brutocat.8,nettocat.8,oplzon.8,oplmet.8,oplcat.8, nohouse_encr.8,
+         geslacht.9,positie.9,gebjaar.9,leeftijd.9,lftdcat.9,aantalhh.9,aantalki.9,partner.9,burgstat.9,woonvorm.9,woning.9,sted.9,belbezig.9,brutoink.9,nettoink.9,brutocat.9,nettocat.9,oplzon.9,oplmet.9,oplcat.9, nohouse_encr.9,
+         geslacht.10,positie.10,gebjaar.10,leeftijd.10,lftdcat.10,aantalhh.10,aantalki.10,partner.10,burgstat.10,woonvorm.10,woning.10,sted.10,belbezig.10,brutoink.10,nettoink.10,brutocat.10,nettocat.10,oplzon.10,oplmet.10,oplcat.10, nohouse_encr.10,
+         geslacht.11,positie.11,gebjaar.11,leeftijd.11,lftdcat.11,aantalhh.11,aantalki.11,partner.11,burgstat.11,woonvorm.11,woning.11,sted.11,belbezig.11,brutoink.11,nettoink.11,brutocat.11,nettocat.11,oplzon.11,oplmet.11,oplcat.11, nohouse_encr.11)
+
+#get the background data and rename the columns.
+#For the first three waves there are is no data on this variable
+liss_origin <- liss %>%
+  select(herkomstgroep.4, herkomstgroep.5, herkomstgroep.6, herkomstgroep.7, herkomstgroep.8, herkomstgroep.9, herkomstgroep.10, herkomstgroep.11)
+names(liss_origin) <- c("origin.4", "origin.5", "origin.6", "origin.7", "origin.8", "origin.9", "origin.10","origin.11")
+
+#create ego origin 1-3 with NA's so we can later merge them into a long file. 
+liss_origin$origin.1 <- NA
+liss_origin$origin.2 <- NA
+liss_origin$origin.3 <- NA
+
+#For some reason the reshape command bugs when the ordering is not correct. 
+liss_origin <- liss_origin[,c(9:11,1:8)]
+
+#alter ids 
+liss_alter_id <- liss %>%
+  select(name1_rec.1, name2_rec.1, name3_rec.1, name4_rec.1, name5_rec.1,
+         name1_rec.2, name2_rec.2, name3_rec.2, name4_rec.2, name5_rec.2,
+         name1_rec.3, name2_rec.3, name3_rec.3, name4_rec.3, name5_rec.3,
+         name1_rec.4, name2_rec.4, name3_rec.4, name4_rec.4, name5_rec.4,
+         name1_rec.5, name2_rec.5, name3_rec.5, name4_rec.5, name5_rec.5,
+         name1_rec.6, name2_rec.6, name3_rec.6, name4_rec.6, name5_rec.6,
+         name1_rec.7, name2_rec.7, name3_rec.7, name4_rec.7, name5_rec.7,
+         name1_rec.8, name2_rec.8, name3_rec.8, name4_rec.8, name5_rec.8,
+         name1_rec.9, name2_rec.9, name3_rec.9, name4_rec.9, name5_rec.9,
+         name1_rec.10, name2_rec.10, name3_rec.10, name4_rec.10, name5_rec.10,
+         name1_rec.11, name2_rec.11, name3_rec.11, name4_rec.11, name5_rec.11)
+
+#rename the alter id's
+names(liss_alter_id) <- c("alter_id_1.1", "alter_id_2.1", "alter_id_3.1", "alter_id_4.1", "alter_id_5.1",
+                          "alter_id_1.2", "alter_id_2.2", "alter_id_3.2", "alter_id_4.2", "alter_id_5.2",
+                          "alter_id_1.3", "alter_id_2.3", "alter_id_3.3", "alter_id_4.3", "alter_id_5.3",
+                          "alter_id_1.4", "alter_id_2.4", "alter_id_3.4", "alter_id_4.4", "alter_id_5.4",
+                          "alter_id_1.5", "alter_id_2.5", "alter_id_3.5", "alter_id_4.5", "alter_id_5.5",
+                          "alter_id_1.6", "alter_id_2.6", "alter_id_3.6", "alter_id_4.6", "alter_id_5.6",
+                          "alter_id_1.7", "alter_id_2.7", "alter_id_3.7", "alter_id_4.7", "alter_id_5.7",
+                          "alter_id_1.8", "alter_id_2.8", "alter_id_3.8", "alter_id_4.8", "alter_id_5.8",
+                          "alter_id_1.9", "alter_id_2.9", "alter_id_3.9", "alter_id_4.9", "alter_id_5.9",
+                          "alter_id_1.10", "alter_id_2.10", "alter_id_3.10", "alter_id_4.10", "alter_id_5.10",
+                          "alter_id_1.11", "alter_id_2.11", "alter_id_3.11", "alter_id_4.11", "alter_id_5.11"
+                          )
+
+#extract the alter variables and rename them. 
+#renaming the alter variables. 
+#selecting the alter data. 
+liss_alters <-  liss %>%
+  select(cs08a326, cs08a315, cs08a320, cs08a328, cs08a329, cs08a324, cs08a323, cs08a321, cs08a300, cs08a327, 
+          cs08a337, cs08a316, cs08a331, cs08a339, cs08a340, cs08a335, cs08a334, cs08a332, cs08a301, cs08a338,
+          cs08a348, cs08a317, cs08a342, cs08a350, cs08a351, cs08a346, cs08a345, cs08a343, cs08a302, cs08a349,
+          cs08a359, cs08a318, cs08a353, cs08a361, cs08a362, cs08a357, cs08a356, cs08a354, cs08a303, cs08a360,
+          cs08a370, cs08a319, cs08a364, cs08a372, cs08a373, cs08a368, cs08a367, cs08a365, cs08a304, cs08a371,
+          cs09b326, cs09b315, cs09b320, cs09b328, cs09b329, cs09b324, cs09b323, cs09b321, cs09b300, cs09b327,
+          cs09b337, cs09b316, cs09b331, cs09b339, cs09b340, cs09b335, cs09b334, cs09b332, cs09b301, cs09b338,
+          cs09b348, cs09b317, cs09b342, cs09b350, cs09b351, cs09b346, cs09b345, cs09b343, cs09b302, cs09b349,
+          cs09b359, cs09b318, cs09b353, cs09b361, cs09b362, cs09b357, cs09b356, cs09b354, cs09b303, cs09b360,
+          cs09b370, cs09b319, cs09b364, cs09b372, cs09b373, cs09b368, cs09b367, cs09b365, cs09b304, cs09b371,
+          cs10c326, cs10c315, cs10c320, cs10c328, cs10c329, cs10c324, cs10c323, cs10c321, cs10c300, cs10c327,
+          cs10c337, cs10c316, cs10c331, cs10c339, cs10c340, cs10c335, cs10c334, cs10c332, cs10c301, cs10c338,
+          cs10c348, cs10c317, cs10c342, cs10c350, cs10c351, cs10c346, cs10c345, cs10c343, cs10c302, cs10c349,
+          cs10c359, cs10c318, cs10c353, cs10c361, cs10c362, cs10c357, cs10c356, cs10c354, cs10c303, cs10c360,
+          cs10c370, cs10c319, cs10c364, cs10c372, cs10c373, cs10c368, cs10c367, cs10c365, cs10c304, cs10c371,
+          cs11d326, cs11d315, cs11d320, cs11d328, cs11d329, cs11d324, cs11d323, cs11d321, cs11d300, cs11d327,
+          cs11d337, cs11d316, cs11d331, cs11d339, cs11d340, cs11d335, cs11d334, cs11d332, cs11d301, cs11d338,
+          cs11d348, cs11d317, cs11d342, cs11d350, cs11d351, cs11d346, cs11d345, cs11d343, cs11d302, cs11d349,
+          cs11d359, cs11d318, cs11d353, cs11d361, cs11d362, cs11d357, cs11d356, cs11d354, cs11d303, cs11d360,
+          cs11d370, cs11d319, cs11d364, cs11d372, cs11d373, cs11d368, cs11d367, cs11d365, cs11d304, cs11d371,
+          cs12e326, cs12e315, cs12e320, cs12e328, cs12e329, cs12e324, cs12e323, cs12e321, cs12e300, cs12e327,
+          cs12e337, cs12e316, cs12e331, cs12e339, cs12e340, cs12e335, cs12e334, cs12e332, cs12e301, cs12e338,
+          cs12e348, cs12e317, cs12e342, cs12e350, cs12e351, cs12e346, cs12e345, cs12e343, cs12e302, cs12e349,
+          cs12e359, cs12e318, cs12e353, cs12e361, cs12e362, cs12e357, cs12e356, cs12e354, cs12e303, cs12e360,
+          cs12e370, cs12e319, cs12e364, cs12e372, cs12e373, cs12e368, cs12e367, cs12e365, cs12e304, cs12e371,
+          cs13f326, cs13f315, cs13f320, cs13f328, cs13f329, cs13f324, cs13f323, cs13f321, cs13f300, cs13f327,
+          cs13f337, cs13f316, cs13f331, cs13f339, cs13f340, cs13f335, cs13f334, cs13f332, cs13f301, cs13f338,
+          cs13f348, cs13f317, cs13f342, cs13f350, cs13f351, cs13f346, cs13f345, cs13f343, cs13f302, cs13f349,
+          cs13f359, cs13f318, cs13f353, cs13f361, cs13f362, cs13f357, cs13f356, cs13f354, cs13f303, cs13f360,
+          cs13f370, cs13f319, cs13f364, cs13f372, cs13f373, cs13f368, cs13f367, cs13f365, cs13f304, cs13f371,
+          cs14g326, cs14g315, cs14g320, cs14g328, cs14g329, cs14g324, cs14g323, cs14g321, cs14g300, cs14g327,
+          cs14g337, cs14g316, cs14g331, cs14g339, cs14g340, cs14g335, cs14g334, cs14g332, cs14g301, cs14g338,
+          cs14g348, cs14g317, cs14g342, cs14g350, cs14g351, cs14g346, cs14g345, cs14g343, cs14g302, cs14g349,
+          cs14g359, cs14g318, cs14g353, cs14g361, cs14g362, cs14g357, cs14g356, cs14g354, cs14g303, cs14g360,
+          cs14g370, cs14g319, cs14g364, cs14g372, cs14g373, cs14g368, cs14g367, cs14g365, cs14g304, cs14g371,
+          cs15h326, cs15h315, cs15h320, cs15h328, cs15h329, cs15h324, cs15h323, cs15h321, cs15h300, cs15h327,
+          cs15h337, cs15h316, cs15h331, cs15h339, cs15h340, cs15h335, cs15h334, cs15h332, cs15h301, cs15h338,
+          cs15h348, cs15h317, cs15h342, cs15h350, cs15h351, cs15h346, cs15h345, cs15h343, cs15h302, cs15h349,
+          cs15h359, cs15h318, cs15h353, cs15h361, cs15h362, cs15h357, cs15h356, cs15h354, cs15h303, cs15h360,
+          cs15h370, cs15h319, cs15h364, cs15h372, cs15h373, cs15h368, cs15h367, cs15h365, cs15h304, cs15h371,
+          cs16i326, cs16i315, cs16i320, cs16i328, cs16i329, cs16i324, cs16i323, cs16i321, cs16i300, cs16i327,
+          cs16i337, cs16i316, cs16i331, cs16i339, cs16i340, cs16i335, cs16i334, cs16i332, cs16i301, cs16i338,
+          cs16i348, cs16i317, cs16i342, cs16i350, cs16i351, cs16i346, cs16i345, cs16i343, cs16i302, cs16i349,
+          cs16i359, cs16i318, cs16i353, cs16i361, cs16i362, cs16i357, cs16i356, cs16i354, cs16i303, cs16i360,
+          cs16i370, cs16i319, cs16i364, cs16i372, cs16i373, cs16i368, cs16i367, cs16i365, cs16i304, cs16i371,
+          cs17j326, cs17j315, cs17j320, cs17j328, cs17j329, cs17j324, cs17j323, cs17j321, cs17j300, cs17j327,
+          cs17j337, cs17j316, cs17j331, cs17j339, cs17j340, cs17j335, cs17j334, cs17j332, cs17j301, cs17j338,
+          cs17j348, cs17j317, cs17j342, cs17j350, cs17j351, cs17j346, cs17j345, cs17j343, cs17j302, cs17j349,
+          cs17j359, cs17j318, cs17j353, cs17j361, cs17j362, cs17j357, cs17j356, cs17j354, cs17j303, cs17j360,
+          cs17j370, cs17j319, cs17j364, cs17j372, cs17j373, cs17j368, cs17j367, cs17j365, cs17j304, cs17j371,
+          cs18k326, cs18k315, cs18k320, cs18k328, cs18k329, cs18k324, cs18k323, cs18k321, cs18k300, cs18k327,
+          cs18k337, cs18k316, cs18k331, cs18k339, cs18k340, cs18k335, cs18k334, cs18k332, cs18k301, cs18k338,
+          cs18k348, cs18k317, cs18k342, cs18k350, cs18k351, cs18k346, cs18k345, cs18k343, cs18k302, cs18k349,
+          cs18k359, cs18k318, cs18k353, cs18k361, cs18k362, cs18k357, cs18k356, cs18k354, cs18k303, cs18k360,
+          cs18k370, cs18k319, cs18k364, cs18k372, cs18k373, cs18k368, cs18k367, cs18k365, cs18k304, cs18k371,
+          cs08a305, cs08a306, cs08a307, cs08a308, cs08a309, cs08a310, cs08a311, cs08a312,
+         cs08a313, cs08a314,
+         cs09b305, cs09b306, cs09b307, cs09b308, cs09b309, cs09b310, cs09b311, cs09b312,
+         cs09b313, cs09b314,
+         cs10c305, cs10c306, cs10c307, cs10c308, cs10c309, cs10c310, cs10c311, cs10c312,
+         cs10c313, cs10c314,
+         cs11d305, cs11d306, cs11d307, cs11d308, cs11d309, cs11d310, cs11d311, cs11d312,
+         cs11d313, cs11d314,
+         cs12e305, cs12e306, cs12e307, cs12e308, cs12e309, cs12e310, cs12e311, cs12e312,
+         cs12e313, cs12e314,
+         cs13f305, cs13f306, cs13f307, cs13f308, cs13f309, cs13f310, cs13f311, cs13f312,
+         cs13f313, cs13f314,
+         cs14g305, cs14g306, cs14g307, cs14g308, cs14g309, cs14g310, cs14g311, cs14g312,
+         cs14g313, cs14g314,
+         cs15h305, cs15h306, cs15h307, cs15h308, cs15h309, cs15h310, cs15h311, cs15h312,
+         cs15h313, cs15h314,
+         cs16i305, cs16i306, cs16i307, cs16i308, cs16i309, cs16i310, cs16i311, cs16i312,
+         cs16i313, cs16i314,
+         cs17j305, cs17j306, cs17j307, cs17j308, cs17j309, cs17j310, cs17j311, cs17j312,
+         cs17j313, cs17j314,
+         cs18k305, cs18k306, cs18k307, cs18k308, cs18k309, cs18k310, cs18k311, cs18k312,
+         cs18k313, cs18k314
+         )
+
+#Rename the alter variables. 
+names(liss_alters) <- c( "educ_alter1.1","gender_alter1.1", "origin_alter1.1", "prof_alter1.1", "age_alter1.1", "poltalk_alter1.1", "talk_alter1.1", "rel_alter1.1", "dear_alter1.1", "work_a1.1",
+                         "educ_alter2.1","gender_alter2.1", "origin_alter2.1", "prof_alter2.1", "age_alter2.1", "poltalk_alter2.1", "talk_alter2.1", "rel_alter2.1", "dear_alter2.1", "work_a2.1",
+                         "educ_alter3.1","gender_alter3.1", "origin_alter3.1", "prof_alter3.1", "age_alter3.1", "poltalk_alter3.1", "talk_alter3.1", "rel_alter3.1", "dear_alter3.1", "work_a3.1",
+                         "educ_alter4.1","gender_alter4.1", "origin_alter4.1", "prof_alter4.1", "age_alter4.1", "poltalk_alter4.1", "talk_alter4.1", "rel_alter4.1", "dear_alter4.1", "work_a4.1",
+                         "educ_alter5.1","gender_alter5.1", "origin_alter5.1", "prof_alter5.1", "age_alter5.1", "poltalk_alter5.1", "talk_alter5.1", "rel_alter5.1", "dear_alter5.1", "work_a5.1",
+                         "educ_alter1.2","gender_alter1.2", "origin_alter1.2", "prof_alter1.2", "age_alter1.2", "poltalk_alter1.2", "talk_alter1.2", "rel_alter1.2", "dear_alter1.2", "work_a1.2",
+                         "educ_alter2.2","gender_alter2.2", "origin_alter2.2", "prof_alter2.2", "age_alter2.2", "poltalk_alter2.2", "talk_alter2.2", "rel_alter2.2", "dear_alter2.2", "work_a2.2",
+                         "educ_alter3.2","gender_alter3.2", "origin_alter3.2", "prof_alter3.2", "age_alter3.2", "poltalk_alter3.2", "talk_alter3.2", "rel_alter3.2", "dear_alter3.2", "work_a3.2",
+                         "educ_alter4.2","gender_alter4.2", "origin_alter4.2", "prof_alter4.2", "age_alter4.2", "poltalk_alter4.2", "talk_alter4.2", "rel_alter4.2", "dear_alter4.2", "work_a4.2",
+                         "educ_alter5.2","gender_alter5.2", "origin_alter5.2", "prof_alter5.2", "age_alter5.2", "poltalk_alter5.2", "talk_alter5.2", "rel_alter5.2", "dear_alter5.2", "work_a5.2",
+                         "educ_alter1.3","gender_alter1.3", "origin_alter1.3", "prof_alter1.3", "age_alter1.3", "poltalk_alter1.3", "talk_alter1.3", "rel_alter1.3", "dear_alter1.3", "work_a1.3",
+                         "educ_alter2.3","gender_alter2.3", "origin_alter2.3", "prof_alter2.3", "age_alter2.3", "poltalk_alter2.3", "talk_alter2.3", "rel_alter2.3", "dear_alter2.3", "work_a2.3",
+                         "educ_alter3.3","gender_alter3.3", "origin_alter3.3", "prof_alter3.3", "age_alter3.3", "poltalk_alter3.3", "talk_alter3.3", "rel_alter3.3", "dear_alter3.3", "work_a3.3",
+                         "educ_alter4.3","gender_alter4.3", "origin_alter4.3", "prof_alter4.3", "age_alter4.3", "poltalk_alter4.3", "talk_alter4.3", "rel_alter4.3", "dear_alter4.3", "work_a4.3",
+                         "educ_alter5.3","gender_alter5.3", "origin_alter5.3", "prof_alter5.3", "age_alter5.3", "poltalk_alter5.3", "talk_alter5.3", "rel_alter5.3", "dear_alter5.3", "work_a5.3",
+                         "educ_alter1.4","gender_alter1.4", "origin_alter1.4", "prof_alter1.4", "age_alter1.4", "poltalk_alter1.4", "talk_alter1.4", "rel_alter1.4", "dear_alter1.4", "work_a1.4",
+                         "educ_alter2.4","gender_alter2.4", "origin_alter2.4", "prof_alter2.4", "age_alter2.4", "poltalk_alter2.4", "talk_alter2.4", "rel_alter2.4", "dear_alter2.4", "work_a2.4",
+                         "educ_alter3.4","gender_alter3.4", "origin_alter3.4", "prof_alter3.4", "age_alter3.4", "poltalk_alter3.4", "talk_alter3.4", "rel_alter3.4", "dear_alter3.4", "work_a3.4",
+                         "educ_alter4.4","gender_alter4.4", "origin_alter4.4", "prof_alter4.4", "age_alter4.4", "poltalk_alter4.4", "talk_alter4.4", "rel_alter4.4", "dear_alter4.4", "work_a4.4",
+                         "educ_alter5.4","gender_alter5.4", "origin_alter5.4", "prof_alter5.4", "age_alter5.4", "poltalk_alter5.4", "talk_alter5.4", "rel_alter5.4", "dear_alter5.4", "work_a5.4",
+                         "educ_alter1.5","gender_alter1.5", "origin_alter1.5", "prof_alter1.5", "age_alter1.5", "poltalk_alter1.5", "talk_alter1.5", "rel_alter1.5", "dear_alter1.5", "work_a1.5",
+                         "educ_alter2.5","gender_alter2.5", "origin_alter2.5", "prof_alter2.5", "age_alter2.5", "poltalk_alter2.5", "talk_alter2.5", "rel_alter2.5", "dear_alter2.5", "work_a2.5",
+                         "educ_alter3.5","gender_alter3.5", "origin_alter3.5", "prof_alter3.5", "age_alter3.5", "poltalk_alter3.5", "talk_alter3.5", "rel_alter3.5", "dear_alter3.5", "work_a3.5",
+                         "educ_alter4.5","gender_alter4.5", "origin_alter4.5", "prof_alter4.5", "age_alter4.5", "poltalk_alter4.5", "talk_alter4.5", "rel_alter4.5", "dear_alter4.5", "work_a4.5",
+                         "educ_alter5.5","gender_alter5.5", "origin_alter5.5", "prof_alter5.5", "age_alter5.5", "poltalk_alter5.5", "talk_alter5.5", "rel_alter5.5", "dear_alter5.5", "work_a5.5",
+                         "educ_alter1.6","gender_alter1.6", "origin_alter1.6", "prof_alter1.6", "age_alter1.6", "poltalk_alter1.6", "talk_alter1.6", "rel_alter1.6", "dear_alter1.6", "work_a1.6",
+                         "educ_alter2.6","gender_alter2.6", "origin_alter2.6", "prof_alter2.6", "age_alter2.6", "poltalk_alter2.6", "talk_alter2.6", "rel_alter2.6", "dear_alter2.6", "work_a2.6",
+                         "educ_alter3.6","gender_alter3.6", "origin_alter3.6", "prof_alter3.6", "age_alter3.6", "poltalk_alter3.6", "talk_alter3.6", "rel_alter3.6", "dear_alter3.6", "work_a3.6",
+                         "educ_alter4.6","gender_alter4.6", "origin_alter4.6", "prof_alter4.6", "age_alter4.6", "poltalk_alter4.6", "talk_alter4.6", "rel_alter4.6", "dear_alter4.6", "work_a4.6",
+                         "educ_alter5.6","gender_alter5.6", "origin_alter5.6", "prof_alter5.6", "age_alter5.6", "poltalk_alter5.6", "talk_alter5.6", "rel_alter5.6", "dear_alter5.6", "work_a5.6",
+                         "educ_alter1.7","gender_alter1.7", "origin_alter1.7", "prof_alter1.7", "age_alter1.7", "poltalk_alter1.7", "talk_alter1.7", "rel_alter1.7", "dear_alter1.7", "work_a1.7",
+                         "educ_alter2.7","gender_alter2.7", "origin_alter2.7", "prof_alter2.7", "age_alter2.7", "poltalk_alter2.7", "talk_alter2.7", "rel_alter2.7", "dear_alter2.7", "work_a2.7",
+                         "educ_alter3.7","gender_alter3.7", "origin_alter3.7", "prof_alter3.7", "age_alter3.7", "poltalk_alter3.7", "talk_alter3.7", "rel_alter3.7", "dear_alter3.7", "work_a3.7",
+                         "educ_alter4.7","gender_alter4.7", "origin_alter4.7", "prof_alter4.7", "age_alter4.7", "poltalk_alter4.7", "talk_alter4.7", "rel_alter4.7", "dear_alter4.7", "work_a4.7",
+                         "educ_alter5.7","gender_alter5.7", "origin_alter5.7", "prof_alter5.7", "age_alter5.7", "poltalk_alter5.7", "talk_alter5.7", "rel_alter5.7", "dear_alter5.7", "work_a5.7",
+                         "educ_alter1.8","gender_alter1.8", "origin_alter1.8", "prof_alter1.8", "age_alter1.8", "poltalk_alter1.8", "talk_alter1.8", "rel_alter1.8", "dear_alter1.8", "work_a1.8",
+                         "educ_alter2.8","gender_alter2.8", "origin_alter2.8", "prof_alter2.8", "age_alter2.8", "poltalk_alter2.8", "talk_alter2.8", "rel_alter2.8", "dear_alter2.8", "work_a2.8",
+                         "educ_alter3.8","gender_alter3.8", "origin_alter3.8", "prof_alter3.8", "age_alter3.8", "poltalk_alter3.8", "talk_alter3.8", "rel_alter3.8", "dear_alter3.8", "work_a3.8",
+                         "educ_alter4.8","gender_alter4.8", "origin_alter4.8", "prof_alter4.8", "age_alter4.8", "poltalk_alter4.8", "talk_alter4.8", "rel_alter4.8", "dear_alter4.8", "work_a4.8",
+                         "educ_alter5.8","gender_alter5.8", "origin_alter5.8", "prof_alter5.8", "age_alter5.8", "poltalk_alter5.8", "talk_alter5.8", "rel_alter5.8", "dear_alter5.8", "work_a5.8",
+                         "educ_alter1.9","gender_alter1.9", "origin_alter1.9", "prof_alter1.9", "age_alter1.9", "poltalk_alter1.9", "talk_alter1.9", "rel_alter1.9", "dear_alter1.9", "work_a1.9",
+                         "educ_alter2.9","gender_alter2.9", "origin_alter2.9", "prof_alter2.9", "age_alter2.9", "poltalk_alter2.9", "talk_alter2.9", "rel_alter2.9", "dear_alter2.9", "work_a2.9",
+                         "educ_alter3.9","gender_alter3.9", "origin_alter3.9", "prof_alter3.9", "age_alter3.9", "poltalk_alter3.9", "talk_alter3.9", "rel_alter3.9", "dear_alter3.9", "work_a3.9",
+                         "educ_alter4.9","gender_alter4.9", "origin_alter4.9", "prof_alter4.9", "age_alter4.9", "poltalk_alter4.9", "talk_alter4.9", "rel_alter4.9", "dear_alter4.9", "work_a4.9",
+                         "educ_alter5.9","gender_alter5.9", "origin_alter5.9", "prof_alter5.9", "age_alter5.9", "poltalk_alter5.9", "talk_alter5.9", "rel_alter5.9", "dear_alter5.9", "work_a5.9",
+                         "educ_alter1.10","gender_alter1.10", "origin_alter1.10", "prof_alter1.10", "age_alter1.10", "poltalk_alter1.10", "talk_alter1.10", "rel_alter1.10", "dear_alter1.10", "work_a1.10",
+                         "educ_alter2.10","gender_alter2.10", "origin_alter2.10", "prof_alter2.10", "age_alter2.10", "poltalk_alter2.10", "talk_alter2.10", "rel_alter2.10", "dear_alter2.10", "work_a2.10",
+                         "educ_alter3.10","gender_alter3.10", "origin_alter3.10", "prof_alter3.10", "age_alter3.10", "poltalk_alter3.10", "talk_alter3.10", "rel_alter3.10", "dear_alter3.10", "work_a3.10",
+                         "educ_alter4.10","gender_alter4.10", "origin_alter4.10", "prof_alter4.10", "age_alter4.10", "poltalk_alter4.10", "talk_alter4.10", "rel_alter4.10", "dear_alter4.10", "work_a4.10",
+                         "educ_alter5.10","gender_alter5.10", "origin_alter5.10", "prof_alter5.10", "age_alter5.10", "poltalk_alter5.10", "talk_alter5.10", "rel_alter5.10", "dear_alter5.10", "work_a5.10",
+                         "educ_alter1.11","gender_alter1.11", "origin_alter1.11", "prof_alter1.11", "age_alter1.11", "poltalk_alter1.11", "talk_alter1.11", "rel_alter1.11", "dear_alter1.11", "work_a1.11",
+                         "educ_alter2.11","gender_alter2.11", "origin_alter2.11", "prof_alter2.11", "age_alter2.11", "poltalk_alter2.11", "talk_alter2.11", "rel_alter2.11", "dear_alter2.11", "work_a2.11",
+                         "educ_alter3.11","gender_alter3.11", "origin_alter3.11", "prof_alter3.11", "age_alter3.11", "poltalk_alter3.11", "talk_alter3.11", "rel_alter3.11", "dear_alter3.11", "work_a3.11",
+                         "educ_alter4.11","gender_alter4.11", "origin_alter4.11", "prof_alter4.11", "age_alter4.11", "poltalk_alter4.11", "talk_alter4.11", "rel_alter4.11", "dear_alter4.11", "work_a4.11",
+                         "educ_alter5.11","gender_alter5.11", "origin_alter5.11", "prof_alter5.11", "age_alter5.11", "poltalk_alter5.11", "talk_alter5.11", "rel_alter5.11", "dear_alter5.11", "work_a5.11",
+                         "close_12.1", "close_13.1",  "close_14.1",  "close_15.1",  "close_23.1",  "close_24.1", "close_25.1", "close_34.1", "close_35.1", "close_45.1",
+                         "close_12.2", "close_13.2",  "close_14.2",  "close_15.2",  "close_23.2",  "close_24.2", "close_25.2", "close_34.2", "close_35.2", "close_45.2",
+                         "close_12.3", "close_13.3",  "close_14.3",  "close_15.3",  "close_23.3",  "close_24.3", "close_25.3", "close_34.3", "close_35.3", "close_45.3",
+                         "close_12.4", "close_13.4",  "close_14.4",  "close_15.4",  "close_23.4",  "close_24.4", "close_25.4", "close_34.4", "close_35.4", "close_45.4",
+                         "close_12.5", "close_13.5",  "close_14.5",  "close_15.5",  "close_23.5",  "close_24.5", "close_25.5", "close_34.5", "close_35.5", "close_45.5",
+                         "close_12.6", "close_13.6",  "close_14.6",  "close_15.6",  "close_23.6",  "close_24.6", "close_25.6", "close_34.6", "close_35.6", "close_45.6",
+                         "close_12.7", "close_13.7",  "close_14.7",  "close_15.7",  "close_23.7",  "close_24.7", "close_25.7", "close_34.7", "close_35.7", "close_45.7",
+                         "close_12.8", "close_13.8",  "close_14.8",  "close_15.8",  "close_23.8",  "close_24.8", "close_25.8", "close_34.8", "close_35.8", "close_45.8",
+                         "close_12.9", "close_13.9",  "close_14.9",  "close_15.9",  "close_23.9",  "close_24.9", "close_25.9", "close_34.9", "close_35.9", "close_45.9",
+                         "close_12.10", "close_13.10",  "close_14.10",  "close_15.10",  "close_23.10",  "close_24.10", "close_25.10", "close_34.10", "close_35.10", "close_45.10",
+                         "close_12.11", "close_13.11",  "close_14.11",  "close_15.11",  "close_23.11",  "close_24.11", "close_25.11", "close_34.11", "close_35.11", "close_45.11"
+                        )
+
+
+#combine the different data sources into one wide data file. 
+lisscdn_wide <- cbind(liss_pol, liss_avars, liss_alters ,liss_alter_id, liss_origin)
+
+
+#------------------------------------- Variable recode -----------------------------------------------#
+#reverse code political discussion frequency and eu_integration.
+
+# JT: this section could definitely benefit from more comments. Dont forget if you recode also recode the val labels. (have a look at the variable attributes!)
+
+#pol discussion. 
+list <- lisscdn_wide[,grep(names(lisscdn_wide), pattern = "poltalk_alter", value = T)]
+#reverse code in another list and compare the two: it works. 
+list2 <- apply(list, 2, function(x)7 - x)
+#replace original variables with the reverse coded variable. 
+lisscdn_wide[,grep(names(lisscdn_wide), pattern = "poltalk_alter", value = T)] <- list2
+
+#eu integration.
+list <- lisscdn_wide[,grep(names(lisscdn_wide), pattern = "eu_integration", value = T)]
+#reverse code in another list and compare the two: it works. 
+list2 <- apply(list, 2, function(x)5 - x)
+#replace original variables with the reverse coded variable. 
+lisscdn_wide[,grep(names(lisscdn_wide), pattern = "eu_integration", value = T)] <- list2
+
+##recode the educ alter variables
+list <- lisscdn_wide[,grep(names(lisscdn_wide), pattern = "educ_alter", value = T)]
+
+# create function to recode education into education in years. 
+func1 <- function(x) {
+  x2 <- ifelse(x == 1, 4, x)
+  x3 <- ifelse(x == 2, 6, x2)
+  x4 <- ifelse(x == 3, 10, x3)
+  x5 <- ifelse(x == 4, 11.5, x4)
+  x6 <- ifelse(x == 5, 10.5, x5)
+  x7 <- ifelse(x == 6, 15, x6)
+  x8<- ifelse(x == 7, 16, x7)
+  return(x8)
+}
+ 
+list2 <- apply(list, 2, FUN = func1)
+#replace original variables with the reverse coded variable. 
+lisscdn_wide[,grep(names(lisscdn_wide), pattern = "educ_alter", value = T)] <- list2
+
+#clean the global environment
+rm(liss_alters, liss_avars, liss_origin, liss_pol, list, list2, liss_alter_id, func1)
+
+
+#--------------------------- Reshape to long file. -------------------------#
+#to be sure rest variable to numeric. 
+lisscdn_wide <- as.data.frame(apply(lisscdn_wide, 2, as.numeric))
+
+#create a long file.
+lisscdn_long <- reshape(lisscdn_wide, direction = "long",
+                     varying = names(lisscdn_wide[,2:1332]),
+                     idvar = "nomem_encr",
+                     timevar = "survey_wave",
+                     times = c(1:11))
+
+#convert tbl to DF as some stat programs do not work with tbl.
+#JT. I would not do this here. save as tbl. we can always convert to df later. 
+lisscdn_wide <- lisscdn_wide[base::order(lisscdn_wide$nomem_encr),]
+lisscdn_long <- lisscdn_long[base::order(lisscdn_long$nomem_encr),]
+
+#Export the data #
+#save RData.
+save.image("data-processed/liss_merged_core_file_v1_201124.Rdata")
+
+
+
+```
+
 
 ## Dataprep Partner Paper
 In this document I will show how I progammed the partner data. I will first show the procedure using the original SPSS file with the background data variables that we need. First, this is *nohouse_encr* which contains the unique HH id. Second, we use the variable *positie* which shows the position of a respondent in the HH, when this value is lower than 5, the respondent is a partner.(See the variable for the labelling in the original SPSS). The files are in a seperate zipfile. 
 
 For the dataprep I use the following packages as well as the base R functions.
 
-```{r packages}
-library(dplyr)
-library(purrr)
-library(haven)
-
-```
-
 
 ### Procedure of creating partner data
 
 In this section the procedure of creating the parner dyads is explained on the original spss file.  
+
+Okay, once we agree on the procedure, we can delete this section. 
 ```{r procedure explanation}
 #import data
 MyData <- read_sav('data-raw/avars_201912_EN_1.0p.sav')
@@ -148,19 +636,19 @@ test_2 <- reshape(test,
                   timevar = 'partner')
 
 #use this method for the complete df 
-MyData$partner <- rep(1:2, 2581)
+#MyData$partner <- rep(1:2, 2581)
 
-MyData <- reshape(MyData,
-                  direction = 'wide',
-                  v.names = names(MyData[,2:34]),
-                  idvar = 'nohouse_encr',
-                  timevar = 'partner')
+# MyData <- reshape(MyData,
+#                   direction = 'wide',
+#                   v.names = names(MyData[,2:34]),
+#                   idvar = 'nohouse_encr',
+#                   timevar = 'partner')
 ```
 
 `r colorize("MOETEN WE NIET POSITIE<4 SELECTEREN", "red")`
 
 ### Application to the whole partner data
-```{r prep of the partner data 1}
+```{r prep of the partner data 1, eval=F}
 #use this procedure for the whole liss_core data. 
 #load the merged liss core file
 load('data-processed/liss_merged_core_file_v1_201124.Rdata')
