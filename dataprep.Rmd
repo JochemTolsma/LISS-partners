@@ -75,6 +75,7 @@ h1, .h1, h2, .h2, h3, .h3 {
 library(dplyr)
 library(haven)
 library(purrr)
+library(tidyr)
 ```
 
 
@@ -82,37 +83,15 @@ library(purrr)
 
 ## Constructing the merged LISS data
 
-Hoi Thijmen. Kun je hier nog even een lijstje maken van alle gebruikte originele liss data files. Een alternatief is om die op te noemen in README.md. Daar ook netjes verwijzen naar LISS en gebruikersovereenkomst. 
+Hai Jochem, 
 
-Het script is goed te volgen en in principe ook helemaal prima voor een replication package.  
-Maar,...
+Ik heb het script aangepast. Ik heb geprobeerd om jou structuur aan te houden. Daarnaast heb ik nu zoveel mogelijk tidyverse gebruikt. Hier en daar wel gewoon base r, omdat het me nu niet even lukt om het aan te passen. Maar dat wil ik op termijn wel aanpassen. Ik zal hier nog een lijst maken met de files die ik heb gebruikt en ik zal de codeboeken er bij zetten. Daarnaast zal ik ook nog de procedure van het alter identificeren uitleggen. Maar dit komt later, nu kan je in ieder geval in de vakantie spelen. 
 
-Zelf zou ik het nog iets netter vinden als je:  
+Laat maar weten als je iets tegenkomt. Hier en daar staan nog wat vragen onder #TJ. 
 
-- eerst **alle** data inleest.  
-- dan **alle** data aan elkaar knoopt.  
-- dan pas cases weggooid (en ook de N in je script vermeld)  
-- je dan pas gaat hercoderen.  
-- dan pas wegschrijft. 
-- je iets consistenter of tidy approach gebruikt of base R. Het is nu een beetje een ratjetoe. 
-
-Ik heb het script iets aangepast, zodat het werkt binnen de repository. Mijn dir structuur is als volgt: 
-
-- LISS-partners  
----data-processed  
----data-raw  
-------alter_data  
-------avars  
-------leisure_integ_data  
-------pol_data  
-------rel_data  
----docs  
----manuscript  
-
-Zoek even in het script naar "JT". 
 
 ```{r, eval=FALSE}
-#---------------------------- LISS Merging ----------------------------#
+##---------------------------- LISS Merging ----------------------------##
 #Dyad data preperation.
 #Author: Thijmen Jeroense
 
@@ -120,107 +99,96 @@ Zoek even in het script naar "JT".
 options(scipen = 999) #JT op het eind van dit script weer aan zetten? 
 
 
+##---------------------------- Data import and Merging the different LISS files ----------------------------##
 
-#---------------------------- Data import and Merging the different LISS files ----------------------------#
+
+#---------------------------------- LISS leisure and integration file ----------------------------------#
 
 #import the different liss files from their directory. 
-file_names=as.list(dir(path="data-raw/leisure_integ_data/", pattern = '*.sav'))
+file_names=as.list(dir(path="docs/data-raw/leisure_integ_data/", pattern = '*.sav')) #TJ I added DOCS/ as the data-raw exists in the docs dir. 
 #create an empty list so that we can load all the files in this list. 
 desired_length <- 11 #
 liss_files <- vector(mode = "list", length = desired_length)
 
 #import all the files in the list.
-# for some reason lapply does not work with read_sav, so I just use a loop. 
 for (i in 1:length(file_names)) {
-  liss_files[[i]] <- read_sav(paste("data-raw/leisure_integ_data/",file_names[[i]], sep=""))
+  liss_files[[i]] <- read_sav(paste("docs/data-raw/leisure_integ_data/",file_names[[i]], sep=""))
 }
-
-#just to be sure, order the files on nomem_encr
-liss_files <- lapply(liss_files, function(x) {
-y <- x[base::order(x$nomem_encr),]
-return(y)
-})
 
 #For a full outer join.
 liss_merged <- liss_files %>%
-  reduce(full_join, by = 'nomem_encr') ##JT weird programming
+  reduce(full_join, by = 'nomem_encr') %>% ##JT weird programming. ANSWER TJ: this is a common solution for this kind of problem: https://stackoverflow.com/questions/8091303/simultaneously-merge-multiple-data-frames-in-a-list 
+#arrange the df on nomem_encr.
+  arrange(nomem_encr)
 
-#order on nomem_encr
-liss_merged <- liss_merged[base::order(liss_merged$nomem_encr),] #mix of base R and tidy
+#we now have a df based on 14473 observations and 4909 variables. 
 
+#---------------------------------- Politics and Values ----------------------------------#
+
+#do the same for the politics and values data. 
 #get the politics and values data.
 #I do this seperately as I wanted to create wave id's, and this was easier to do on one file.
 #import the data files.
-file_names=as.list(dir(path="data-raw/pol_data/", pattern = '*.sav'))
+file_names=as.list(dir(path="docs/data-raw/pol_data/", pattern = '*.sav'))
 liss_files <- vector(mode = "list", length = 11)
 
 #loop to load all the data in one list.
 #name them. 
 for (i in 1:length(file_names)) {
-  liss_files[[i]] <- read_sav(paste("data-raw/pol_data/",file_names[[i]], sep=""))
+  liss_files[[i]] <- read_sav(paste("docs/data-raw/pol_data/",file_names[[i]], sep=""))
 } 
-
-#just to be sure, order the files on nomem_encr
-liss_files <- lapply(liss_files, function(x) {
-  y <- x[base::order(x$nomem_encr),]
-  return(y)
-})
 
 #merge the data into one file.
 liss_pol <- liss_files %>%
-  reduce(full_join, by = 'nomem_encr')
+  reduce(full_join, by = 'nomem_encr') %>%
+  #order on nomem_encr
+  arrange(nomem_encr)
 
-#order on nomem_encr
-liss_pol <- liss_pol[base::order(liss_pol$nomem_encr),]
+#df with 14040 observations of 1978 variables. 
 
 #remove the household id variables from the liss_pol and liss_merged file.
 # they are incomplete as in some waves they are not present. I will add them later with the background data. 
 liss_pol[,c("nohouse_encr", "nohouse_encr.x", "nohouse_encr.y", "nohouse_encr.x.x", "nohouse_encr.y.y")] <- NULL
 liss_merged[,c("nohouse_encr", "nohouse_encr.x", "nohouse_encr.y", "nohouse_encr.x.x", "nohouse_encr.y.y")] <- NULL
 
+#---------------------------------- LISS CDN alter ids ----------------------------------#
+
 #get the alter id handles.
-# JT perhaps add some explanation how we retrieved this data. preferably in README.md
-setwd('C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/alter_data')
-getwd()
+# JT perhaps add some explanation how we retrieved this data. preferably in README.md. #Answer Thijmen: Will do. 
 
 #import the data files.
-file_names=as.list(dir(path="data-raw/alter_data/", pattern = '*.sav'))
+file_names=as.list(dir(path="docs/data-raw/alter_data/", pattern = '*.sav'))
 liss_names_alters <- vector(mode = "list", length = 11)
 
 #loop to load all the data in one list.
 #name them. 
 for (i in 1:length(file_names)) {
-  liss_names_alters[[i]] <- read_sav(paste("data-raw/alter_data/",file_names[[i]], sep=""))
+  liss_names_alters[[i]] <- read_sav(paste("docs/data-raw/alter_data/",file_names[[i]], sep=""))
 } 
 
 #just to be sure, order the files on nomem_encr and add suffixes to the data.
 #Then we can correctly identify the different waves. 
 liss_files <- lapply(1:11, function(i) {
-  data <- liss_names_alters[[i]][base::order(liss_names_alters[[i]]$nomem_encr),]
+  data <- liss_names_alters[[i]]
+  #Now I add suffixes to all the variables except the ID var, so we can correctly Identify the wave to which a variable belongs in the merged data. Otherwise we will have 11 sets of the same variables with a random .x or .y. 
   names(data)[-1] <- paste0(names(data)[-1], sep = ".", c(1:11)[i])
   return(data)
 })
 
 #merge the data
-liss_merged_alter <- liss_files %>%
-  reduce(full_join, by = 'nomem_encr')
+liss_alter <- liss_files %>%
+  reduce(full_join, by = 'nomem_encr') %>%
+  arrange(nomem_encr)
 
-#order on nomem_encr
-liss_merged_alter <- liss_merged_alter[base::order(liss_merged_alter$nomem_encr),]
-
-#okay, let's merge the liss_merged, liss_merged_alters and the politics and values waves.
-liss <- left_join(liss_merged, liss_merged_alter, by = "nomem_encr")
-liss <- left_join(liss, liss_pol, by = "nomem_encr")
-# JT: please try to use the %>% operator to do this stuff in one go. 
-
+#---------------------------------- LISS background----------------------------------#
 #import the background variable data. 
 #import data files.
-file_names=as.list(dir(path="data-raw/avars/", pattern = '*.sav'))
+file_names=as.list(dir(path="docs/data-raw/avars/", pattern = '*.sav'))
 liss_files <- vector(mode = "list", length = 11)
 
 #import the files in a for loop.
 for (i in 1:length(file_names)) {
-  liss_files[[i]] <- read_sav(paste("data-raw/avars/",file_names[[i]], sep=""))
+  liss_files[[i]] <- read_sav(paste("docs/data-raw/avars/",file_names[[i]], sep=""))
 } 
 
 #just to be sure, order the files on nomem_encr and add suffixes to the data 
@@ -231,31 +199,77 @@ liss_files <- lapply(1:11, function(i) {
   return(data)
 })
 
-#
+#merge the data. 
 liss_background <- liss_files %>%
-  reduce(full_join, by = 'nomem_encr')
+  reduce(full_join, by = 'nomem_encr') %>%
+  arrange(nomem_encr)
 
-#order on nomem_encr
-liss_background <- liss_background[base::order(liss_background$nomem_encr),]
+#we now have a DF with 25281 observations of 341 variables. 
 
-#merge the avars file with the liss files. Use a left-join as we only want info from people who participate in the integration waves.
-liss <- left_join(liss, liss_background, by = 'nomem_encr')
+#----------------------------------Merging all the files into one wide file ----------------------------------#
+
+#merge all the data with an full outer join into one file. 
+#okay, let's merge the liss_merged, liss_alter and the politics and values waves.
+liss <- liss_merged %>%
+  full_join(liss_alter, by = "nomem_encr") %>%
+  full_join(liss_pol, by = "nomem_encr") %>%
+  full_join(liss_background, by = "nomem_encr") %>%
+  arrange(nomem_encr)
+
+#The final DF consists of 25306 observations with 7271 variables. 
+
 #JT I think my strategy would be to use full joins and then afterwards use filters to select respondents. That way we know how many respondents we loose. We would like to report this in our manuscript right? 
+
+#TJ: agree, I mow edited the procedure to use tidy as much as possible, some custom functions I prefer to use a loop for. For another version I will try to change this to tidy notation, but for now that will take up too much time. 
 
 #clean the global environment.
 rm(file_names, liss_files, liss_merged, liss_merged_alter, liss_names_alters, desired_length, i, liss_pol, liss_background)
+rm(list=ls()[! ls() %in% c("liss", "liss")])
+
+#we now have 25306 cases of 7271 variables.
+
+#--------------------------------------------- Filter out cases ------------------------------------------#
+#we can use the month of datacollection to see whether someone has participated in a specific year/module combination
+# if someone has an an NA they did not participate in it.
+# so we want people who participated in the CDN module and also in the politics and values waves. 
+# Let's create a filter of people who participated in at least one of thse. 
+#example of wave 1 var. 
+table(liss$cs08a_m, useNA = 'always')
+
+#first create a leisure and integration NA variable.
+#first create a subset of the data, so we can use rowwise to create a selection id. 
+subset1 <- liss %>%
+  rowwise() %>%
+  #create filter variable
+  mutate(na_lei_int = sum(is.na(c(cs08a_m, cs09b_m, cs10c_m, cs11d_m, cs12e_m, cs13f_m, cs14g_m, cs15h_m, cs16i_m, cs17j_m, cs18k_m)))) %>%
+  #use only the observations that have participated in at least one wave of the leisure and integration data. We can of course change this later on. 
+  filter(na_lei_int < 11) %>%
+  ungroup()
+
+#we go from 25306 cases to 14473 cases. 
+
+
+#second create a pol val NA variable.
+#filter out respondents who did not participate in any of the 11 waves. 
+liss_subset <- subset1 %>%
+  rowwise() %>%
+  mutate(na_pol_val = sum(is.na(c(cv08a_m, cv09b_m, cv10c_m, cv11d_m, cv12e_m, cv13f_m, cv14g_m,
+         cv17i_m, cv18j_m1, cv18j_m2, cv18j_m3, cv19k_m1, cv19k_m2, cv19k_m3)))) %>%
+  filter(na_pol_val < 14) %>% #now it is 14, due the weird coding in 18/19. 
+  ungroup()
+  
+#we go from 14473 cases to 13273 cases. We will work with this liss_subset dataframe. 
+
+
 
 
 #--------------------------------------------- Variable selection from the complete liss file --------------------------------------------#
-#first, let's order the data on the id variable (nomem_encr)
-liss <- liss[base::order(liss$nomem_encr),]
-
-
 # JT: could you please make a folder with all codebooks so I/reviewers can look up the variable names. 
+# Check
 
 #create subset of all the data that I want for every wave. Then we can make a new file where we only have the selected data that we want.
 #liss politics variables that I need
-liss_pol <- liss %>%
+liss_pol <- liss_subset %>%
   select(nomem_encr, cv08a012,cv08a047, cv08a048, cv08a049, cv08a050, cv08a051, cv08a052, cv08a058, cv08a101, cv08a102, cv08a103, cv08a104, cv08a105, cv08a001, cv08a044, cv08a014, cv08a106, cv08a107, cv08a108, cv08a109,cv08a110,cv08a111,cv08a112,cv08a113,cv08a114,cv08a115, cv08a116,cv08a117,cv08a118,cv08a119,cv08a120,cv08a121,cv08a122,cv08a123,
          cv09b012,cv09b047, cv09b048, cv09b049, cv09b050, cv09b051, cv09b052, cv09b058, cv09b101, cv09b102, cv09b103, cv09b104, cv09b105, cv09b001, cv09b044, cv09b014,cv09b106, cv09b107, cv09b108, cv09b109,cv09b110,cv09b111,cv09b112,cv09b113,cv09b114,cv09b115,cv09b116,cv09b117,cv09b118,cv09b119,cv09b120,cv09b121,cv09b122,cv09b123,
          cv10c012,cv10c047, cv10c048, cv10c049, cv10c050, cv10c051, cv10c052, cv10c058, cv10c101, cv10c102, cv10c103, cv10c104, cv10c105, cv10c001, cv10c044, cv10c014,cv10c106, cv10c107, cv10c108, cv10c109,cv10c110,cv10c111,cv10c112,cv10c113,cv10c114,cv10c115,cv10c116,cv10c117,cv10c118,cv10c119,cv10c120,cv10c121,cv10c122,cv10c123,
@@ -284,7 +298,7 @@ names(liss_pol)<- c("nomem_encr", "pol_int.1"	,	"parl_donot_care.1"	,	"pol_part_
 
 
 #get the background data and rename the columns. 
-liss_avars <- liss %>%
+liss_avars <- liss_subset %>%
   select(geslacht.1,positie.1,gebjaar.1,leeftijd.1,lftdcat.1,aantalhh.1,aantalki.1,partner.1,burgstat.1,woonvorm.1,woning.1,sted.1,belbezig.1,brutoink.1,nettoink.1,brutocat.1,nettocat.1,oplzon.1,oplmet.1,oplcat.1, nohouse_encr.1,
          geslacht.2,positie.2,gebjaar.2,leeftijd.2,lftdcat.2,aantalhh.2,aantalki.2,partner.2,burgstat.2,woonvorm.2,woning.2,sted.2,belbezig.2,brutoink.2,nettoink.2,brutocat.2,nettocat.2,oplzon.2,oplmet.2,oplcat.2, nohouse_encr.2,
          geslacht.3,positie.3,gebjaar.3,leeftijd.3,lftdcat.3,aantalhh.3,aantalki.3,partner.3,burgstat.3,woonvorm.3,woning.3,sted.3,belbezig.3,brutoink.3,nettoink.3,brutocat.3,nettocat.3,oplzon.3,oplmet.3,oplcat.3, nohouse_encr.3,
@@ -299,7 +313,7 @@ liss_avars <- liss %>%
 
 #get the background data and rename the columns.
 #For the first three waves there are is no data on this variable
-liss_origin <- liss %>%
+liss_origin <- liss_subset %>%
   select(herkomstgroep.4, herkomstgroep.5, herkomstgroep.6, herkomstgroep.7, herkomstgroep.8, herkomstgroep.9, herkomstgroep.10, herkomstgroep.11)
 names(liss_origin) <- c("origin.4", "origin.5", "origin.6", "origin.7", "origin.8", "origin.9", "origin.10","origin.11")
 
@@ -312,7 +326,7 @@ liss_origin$origin.3 <- NA
 liss_origin <- liss_origin[,c(9:11,1:8)]
 
 #alter ids 
-liss_alter_id <- liss %>%
+liss_alter_id <- liss_subset %>%
   select(name1_rec.1, name2_rec.1, name3_rec.1, name4_rec.1, name5_rec.1,
          name1_rec.2, name2_rec.2, name3_rec.2, name4_rec.2, name5_rec.2,
          name1_rec.3, name2_rec.3, name3_rec.3, name4_rec.3, name5_rec.3,
@@ -342,7 +356,7 @@ names(liss_alter_id) <- c("alter_id_1.1", "alter_id_2.1", "alter_id_3.1", "alter
 #extract the alter variables and rename them. 
 #renaming the alter variables. 
 #selecting the alter data. 
-liss_alters <-  liss %>%
+liss_alters <-  liss_subset %>%
   select(cs08a326, cs08a315, cs08a320, cs08a328, cs08a329, cs08a324, cs08a323, cs08a321, cs08a300, cs08a327, 
           cs08a337, cs08a316, cs08a331, cs08a339, cs08a340, cs08a335, cs08a334, cs08a332, cs08a301, cs08a338,
           cs08a348, cs08a317, cs08a342, cs08a350, cs08a351, cs08a346, cs08a345, cs08a343, cs08a302, cs08a349,
@@ -491,9 +505,8 @@ names(liss_alters) <- c( "educ_alter1.1","gender_alter1.1", "origin_alter1.1", "
                          "close_12.11", "close_13.11",  "close_14.11",  "close_15.11",  "close_23.11",  "close_24.11", "close_25.11", "close_34.11", "close_35.11", "close_45.11"
                         )
 
-
 #combine the different data sources into one wide data file. 
-lisscdn_wide <- cbind(liss_pol, liss_avars, liss_alters ,liss_alter_id, liss_origin)
+liss_wide <- cbind(liss_pol, liss_avars, liss_alters ,liss_alter_id, liss_origin)
 
 
 #------------------------------------- Variable recode -----------------------------------------------#
@@ -501,22 +514,25 @@ lisscdn_wide <- cbind(liss_pol, liss_avars, liss_alters ,liss_alter_id, liss_ori
 
 # JT: this section could definitely benefit from more comments. Dont forget if you recode also recode the val labels. (have a look at the variable attributes!)
 
+#TJ: I will do this another time. Now I do not have the time to do this. 
+
 #pol discussion. 
-list <- lisscdn_wide[,grep(names(lisscdn_wide), pattern = "poltalk_alter", value = T)]
+#we need to reverse recode political discussion.
+list <- liss_wide[,grep(names(liss_wide), pattern = "poltalk_alter", value = T)]
 #reverse code in another list and compare the two: it works. 
 list2 <- apply(list, 2, function(x)7 - x)
 #replace original variables with the reverse coded variable. 
-lisscdn_wide[,grep(names(lisscdn_wide), pattern = "poltalk_alter", value = T)] <- list2
+liss_wide[,grep(names(liss_wide), pattern = "poltalk_alter", value = T)] <- list2
 
 #eu integration.
-list <- lisscdn_wide[,grep(names(lisscdn_wide), pattern = "eu_integration", value = T)]
+list <- liss_wide[,grep(names(liss_wide), pattern = "eu_integration", value = T)]
 #reverse code in another list and compare the two: it works. 
 list2 <- apply(list, 2, function(x)5 - x)
 #replace original variables with the reverse coded variable. 
-lisscdn_wide[,grep(names(lisscdn_wide), pattern = "eu_integration", value = T)] <- list2
+liss_wide[,grep(names(liss_wide), pattern = "eu_integration", value = T)] <- list2
 
 ##recode the educ alter variables
-list <- lisscdn_wide[,grep(names(lisscdn_wide), pattern = "educ_alter", value = T)]
+list <- liss_wide[,grep(names(liss_wide), pattern = "educ_alter", value = T)]
 
 # create function to recode education into education in years. 
 func1 <- function(x) {
@@ -532,27 +548,24 @@ func1 <- function(x) {
  
 list2 <- apply(list, 2, FUN = func1)
 #replace original variables with the reverse coded variable. 
-lisscdn_wide[,grep(names(lisscdn_wide), pattern = "educ_alter", value = T)] <- list2
-
-#clean the global environment
-rm(liss_alters, liss_avars, liss_origin, liss_pol, list, list2, liss_alter_id, func1)
-
+liss_wide[,grep(names(liss_wide), pattern = "educ_alter", value = T)] <- list2
 
 #--------------------------- Reshape to long file. -------------------------#
-#to be sure rest variable to numeric. 
-lisscdn_wide <- as.data.frame(apply(lisscdn_wide, 2, as.numeric))
+#TJ: In the future I want to change this to a tidy function such as pivot_longer. For now I have not figured it out yet. (application of pivot_wide() was succesful).
+
+#@JT, what do you use for reshaping wide to long and vice versa?
 
 #create a long file.
-lisscdn_long <- reshape(lisscdn_wide, direction = "long",
-                     varying = names(lisscdn_wide[,2:1332]),
+liss_long <- reshape(liss_wide, direction = "long",
+                     varying = names(liss_wide[,2:1332]),
                      idvar = "nomem_encr",
                      timevar = "survey_wave",
                      times = c(1:11))
 
-#convert tbl to DF as some stat programs do not work with tbl.
-#JT. I would not do this here. save as tbl. we can always convert to df later. 
-lisscdn_wide <- lisscdn_wide[base::order(lisscdn_wide$nomem_encr),]
-lisscdn_long <- lisscdn_long[base::order(lisscdn_long$nomem_encr),]
+
+#clean the environment. 
+rm(list=ls()[! ls() %in% c("liss_wide", "liss_long")])
+
 
 #Export the data #
 #save RData.
@@ -573,10 +586,10 @@ For the dataprep I use the following packages as well as the base R functions.
 
 In this section the procedure of creating the parner dyads is explained on the original spss file.  
 
-Okay, once we agree on the procedure, we can delete this section. 
+Okay, once we agree on the procedure, we can delete this section. TJ: Agree, so this section can be deleted. 
 ```{r procedure explanation}
 #import data
-MyData <- read_sav('data-raw/avars_201912_EN_1.0p.sav')
+MyData <- read_sav('docs/data-raw/avars_201912_EN_1.0p.sav')
 
 #take a look at the contents of the data.
 ls(MyData)
@@ -588,7 +601,7 @@ attr(MyData$geslacht, "labels")
 
 #select only people who are partner.
 MyData <- MyData %>%
-  filter(positie < 4) #JT changed this to 4!
+  filter(positie < 4) #JT changed this to 4! #TJ: fine by me
 
 #check whether correct. 
 table(MyData$positie)
@@ -599,8 +612,7 @@ list_hh <- MyData %>%
   count(nohouse_encr)
 
 #merge the two df's
-MyData <- merge(MyData, list_hh, by  = 'nohouse_encr')
-#thijmen try to use tidy functions. the join functions
+MyData <- right_join(MyData, list_hh, by  = 'nohouse_encr')
 
 #select on n = 2.
 MyData <- MyData %>%
@@ -614,14 +626,13 @@ test <- MyData[1:20,1:5]
 test$partner <- rep(c("r", "p"),10)
 
 # use the reshape command. 
-test_2 <- reshape(test,
+test_2 <- reshape(as.data.frame(test),
                   direction = 'wide',
                   v.names = c("geslacht", "positie", "nomem_encr"),
                   idvar = 'nohouse_encr',
                   timevar = 'partner')
 
 # is het niet handiger om mannen voorop te zetten en dan de vrouwen. dus wellicht nog selecteren op heteroparen. 
-
 test3 <- test %>% 
   arrange(nohouse_encr, geslacht) %>% #ordenen op geslacht
   group_by(nohouse_encr) %>%  #groeperen op huishouden
@@ -630,7 +641,9 @@ test3 <- test %>%
   arrange(nohouse_encr, geslacht) %>% #opnieuw ordenen
   filter(hetero==TRUE) # en de homostellen verwijderen. 
 
-test3 <- test3 %>% mutate(geslacht2=ifelse(geslacht==1,"m", "f" ))
+test3 <- 
+  test3 %>% mutate(geslacht2=ifelse(geslacht==1,"m", "f" ))
+
 test4 <- reshape(as.data.frame(test3), #reshape cant handle tibles
                   direction = 'wide',
                   v.names = c("positie", "nomem_encr", "partner", "geslacht"),
@@ -638,33 +651,17 @@ test4 <- reshape(as.data.frame(test3), #reshape cant handle tibles
                   timevar = 'geslacht2')
 
 
-# use the reshape command. 
-test_2 <- reshape(test,
-                  direction = 'wide',
-                  v.names = c("geslacht", "positie", "nomem_encr"),
-                  idvar = 'nohouse_encr',
-                  timevar = 'partner')
+#TJ: prima laten we deze procedure gebruiken.
 
-#use this method for the complete df 
-#MyData$partner <- rep(1:2, 2581)
-
-# MyData <- reshape(MyData,
-#                   direction = 'wide',
-#                   v.names = names(MyData[,2:34]),
-#                   idvar = 'nohouse_encr',
-#                   timevar = 'partner')
 ```
 
-`r colorize("MOETEN WE NIET POSITIE<4 SELECTEREN", "red")`
 
 ### Application to the whole partner data
 ```{r prep of the partner data 1, eval=F}
 #use this procedure for the whole liss_core data. 
-#load the merged liss core file
-load('data-processed/liss_merged_core_file_v1_201124.Rdata')
 
 #first create a subset of the liss_core data for Jochem to play with.
-liss_subset <- lisscdn_wide %>%
+liss_subset <- liss_wide %>%
   select(nomem_encr, nohouse_encr.1, nohouse_encr.2, nohouse_encr.3, nohouse_encr.4, nohouse_encr.5, nohouse_encr.6, nohouse_encr.7, nohouse_encr.8,
          nohouse_encr.9,nohouse_encr.10, nohouse_encr.11, eu_integration.1, eu_integration.2, eu_integration.3, eu_integration.4, eu_integration.5,
          eu_integration.6, eu_integration.7, eu_integration.8, eu_integration.9, eu_integration.10, eu_integration.11, geslacht.1, geslacht.2, geslacht.3, geslacht.4,
@@ -678,11 +675,9 @@ First we need to recode some of the variables.
 
 ```{r var recode}
 
-##----------------------------------- Variable recode --------------------------------##
-#gender
-# 0 = male, 1 = female.
-liss_subset[,grep(names(liss_subset), pattern = "geslacht", value = T)] <- apply(liss_subset[,grep(names(liss_subset), pattern = "geslacht", value = T)] , 2, function(x)x - 1)
+#TJ: I need to change this code into tidy code. I will do this at a later date  
 
+##----------------------------------- Variable recode --------------------------------##
 #education in years
 #create custom function
 func1 <- function(x) {
@@ -710,11 +705,11 @@ liss_subset[,grep(names(liss_subset), pattern = "immigrants", value = T)] <-
 
 ```
 
-Now we can start with the datapreperation.
+We can start with the data preperation.
 
 ```{r prep of the partner data 2}
 #reshape into a wide file.
-liss_subset_long <- reshape(liss_subset,
+liss_subset_long <- reshape(as.data.frame(liss_subset),
                             direction = 'long',
                             varying = names(liss_subset[,2:67]),
                             idvar = 'nomem_encr',
@@ -729,30 +724,37 @@ partner_function <- function (x) {
   
   #filter out non partners
   a <- x %>%
-    filter(!is.na(positie) & positie < 5)
+    filter(!is.na(positie) & positie < 4)
   #count the members of the hh
   b <- a %>% 
     count(nohouse_encr)
   #merge the two datasources
-  c <- merge(a, b, by = "nohouse_encr")
+  c <- right_join(a, b, by = "nohouse_encr")
   #select on 2.
   d <- c %>%
     filter(n == 2)
-  #length of df, which we need for rep function.
-  e <- d %>% 
-    summarize(n())
   
-  #create partner variable
-  d$partner <- rep(c("r", "p"), e[1]/2)
+  #selection on hetero couples.  
+  e <- d %>% 
+  arrange(nohouse_encr, geslacht) %>% #ordenen op geslacht
+  group_by(nohouse_encr) %>%  #groeperen op huishouden
+  summarise(hetero=(sum(geslacht)==3)) %>% #bepaal of homo/heterostel
+  right_join(d) %>% #koppel weer aan originele data
+  arrange(nohouse_encr, geslacht) %>% #opnieuw ordenen
+  filter(hetero==TRUE) # en de homostellen verwijderen. 
+  
+  #length of df, which we need for rep function.
+  f <- 
+  e %>% mutate(geslacht2=ifelse(geslacht==1,"m", "f" ))
   
   #reshape into wide file.
-  f <- reshape(d,
+  g <- reshape(as.data.frame(f),
           direction = 'wide',
-          v.names = names(d[,c(2,4:8)]),
+          v.names = names(f[,c(3,5:9,11)]),
           idvar = 'nohouse_encr',
-          timevar = 'partner')
+          timevar = 'geslacht2')
   
-  return(f)
+  return(g)
 }
 
 #create a partner list data with dplyr.
@@ -771,7 +773,7 @@ Now we only have a long file, so before we finish we need to reshape into a wide
 ```{r, wide file}
 partner_df_wide <- reshape(partner_df_long,
                            direction = 'wide',
-                           v.names = names(partner_df_long[,4:15]),
+                           v.names = names(partner_df_long[,2,4:15]),
                            idvar = 'nohouse_encr',
                            timevar = 'time')
 
