@@ -791,7 +791,10 @@ save.image('data-processed/partner_dataprepped.Rdata')
 
 ### Description of the data
 
-The *partner_dataprepped_v1_210209.Rdata* consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables. The suffices .r and .p denote respondent and partner, .1 etc denotes the wave in the wide format. 
+The *partner_dataprepped_v1_210209.Rdata* consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables.  
+
+- The suffices **.m** and **.f** denote the gender of the partner within the heterosexual couples (male, female)  
+- .x, where x is a number, denotes the wave in the wide format.  
 
 Variables of interest and value labels:
 
@@ -803,4 +806,5 @@ Variables of interest and value labels:
 - immigrants = 0 = immigrants should adjust / 4 immigrants can retain their own culture.
 
 
+---  
 
