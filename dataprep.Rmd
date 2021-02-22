@@ -89,6 +89,9 @@ Ik heb het script aangepast. Ik heb geprobeerd om jou structuur aan te houden. D
 
 Laat maar weten als je iets tegenkomt. Hier en daar staan nog wat vragen onder #TJ. 
 
+Okee thijmen. 
+hierbij wat reacties:
+- TJ I added DOCS/ as the data-raw exists in the docs dir.: colorize("Nee niet doen!", "red"). de 'docs' folder is voor de website en staat ook in de gitignore. niet via deze dir werken dus.  
 
 ```{r, eval=FALSE}
 ##---------------------------- LISS Merging ----------------------------##
