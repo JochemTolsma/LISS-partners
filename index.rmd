@@ -12,7 +12,7 @@ output:
     code_download: yes
 
 ---
-  
+   
 ```{r, globalsettings, echo=FALSE, warning=FALSE}
 library(knitr)
 opts_chunk$set(tidy.opts=list(width.cutoff=100),tidy=TRUE, warning = FALSE, message = FALSE,comment = "#>", cache=TRUE, class.source=c("test"), class.output=c("test2"))
@@ -136,16 +136,27 @@ dat$x3 <- partner_df_wide$eu_integration.m.3
 dat$x4 <- partner_df_wide$eu_integration.m.4
 dat$x5 <- partner_df_wide$eu_integration.m.5
 dat$x6 <- partner_df_wide$eu_integration.m.6
+dat$x7 <- partner_df_wide$eu_integration.m.7
+dat$x8 <- partner_df_wide$eu_integration.m.8
+dat$x9 <- partner_df_wide$eu_integration.m.9
+dat$x10 <- partner_df_wide$eu_integration.m.10
+dat$x11 <- partner_df_wide$eu_integration.m.11
+
 dat$y1 <- partner_df_wide$eu_integration.f.1
 dat$y2 <- partner_df_wide$eu_integration.f.2
 dat$y3 <- partner_df_wide$eu_integration.f.3
 dat$y4 <- partner_df_wide$eu_integration.f.4
 dat$y5 <- partner_df_wide$eu_integration.f.5
 dat$y6 <- partner_df_wide$eu_integration.f.6
+dat$y7 <- partner_df_wide$eu_integration.f.7
+dat$y8 <- partner_df_wide$eu_integration.f.8
+dat$y9 <- partner_df_wide$eu_integration.f.9
+dat$y10 <- partner_df_wide$eu_integration.f.10
+dat$y11 <- partner_df_wide$eu_integration.f.11
 
 #treat education as a time stable. And use all available data. 
-dat$oplx <- rowMeans(partner_df_wide[,c("oplmet.m.1", "oplmet.m.2",  "oplmet.m.3", "oplmet.m.4", "oplmet.m.5", "oplmet.m.6")], na.rm=T)
-dat$oply <- rowMeans(partner_df_wide[,c("oplmet.f.1", "oplmet.f.2",  "oplmet.f.3", "oplmet.f.4", "oplmet.f.5", "oplmet.f.6")], na.rm=T)
+dat$oplx <- rowMeans(partner_df_wide[,c("oplmet.m.1", "oplmet.m.2",  "oplmet.m.3", "oplmet.m.4", "oplmet.m.5", "oplmet.m.6", "oplmet.m.7",  "oplmet.m.8", "oplmet.m.9", "oplmet.m.10", "oplmet.m.11")], na.rm=T)
+dat$oply <- rowMeans(partner_df_wide[,c("oplmet.f.1", "oplmet.f.2",  "oplmet.f.3", "oplmet.f.4", "oplmet.f.5", "oplmet.f.6", "oplmet.f.7",  "oplmet.f.8", "oplmet.f.9", "oplmet.f.10", "oplmet.f.11")], na.rm=T)
 
 #calculate diff in education between men and women
 dat$oplxy <- dat$oplx - dat$oply
@@ -158,8 +169,9 @@ dat$oplgroup <- ifelse(dat$oplxy < -1, "womenhigher", dat$oplgroup)
 dat$oplgroup <- ifelse(dat$oplxy <= 1 & dat$oplxy >= -1, "equal", dat$oplgroup)
 #table(dat$oplgroup, useNA = "always")
 
-selectie <- rowSums(is.na(dat[,1:12])) < 8 # bijna lege cases identificeren
-dat <- dat[selectie,]
+dat_ori <- dat
+selectie <- rowSums(is.na(dat_ori[,1:12])) < 8 # bijna lege cases identificeren
+dat <- dat_ori[selectie,]
 
 ```
 
@@ -246,7 +258,7 @@ summary(fit, standardized = T)
   
 ## HYPO1: partner-influence-effects (RI-CLPM) {.tabset .tabset-fade}
   
-### RI-model 
+### RI-model (6 waves)
 
 `r colorize("DONT FORGET TO SOLVE THE FITTING PROBLEMS", "red")`  
 Changing optimizer seems to help a bit. Need to check what happens if we use all 11 waves. 
@@ -331,6 +343,125 @@ summary(RICLPM.fit, standardized = T)
 
 ---  
 
+### RI-model (11 waves)
+
+`r colorize("DONT FORGET TO SOLVE THE FITTING PROBLEMS", "red")`  
+Changing optimizer seems to help a bit. Need to check what happens if we use all 11 waves. 
+
+- We assume similar effect for men and women.  
+- We assume time-constant effects.  
+- We assume no structural changes (time trends).  
+- We include education as predictor for the RI/latent variable  
+
+```{r}
+RICLPM <- '
+  # Create between components (random intercepts)
+  RIx =~ 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5 + 1*x6 + 1*x7 + 1*x8 + 1*x9 + 1*x10 + 1*x11
+  RIy =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5 + 1*y6 + 1*y7 + 1*y8 + 1*y9 + 1*y10 + 1*y11  
+  
+  RIx ~ e*oplx
+  RIy ~ e*oply
+  
+  # Create within-person centered variables
+  wx1 =~ 1*x1
+  wx2 =~ 1*x2
+  wx3 =~ 1*x3 
+  wx4 =~ 1*x4
+  wx5 =~ 1*x5
+  wx6 =~ 1*x6
+  wx7 =~ 1*x7
+  wx8 =~ 1*x8 
+  wx9 =~ 1*x9
+  wx10 =~ 1*x10
+  wx11 =~ 1*x11
+ 
+  wy1 =~ 1*y1
+  wy2 =~ 1*y2
+  wy3 =~ 1*y3
+  wy4 =~ 1*y4
+  wy5 =~ 1*y5
+  wy6 =~ 1*y6
+  wy7 =~ 1*y7
+  wy8 =~ 1*y8
+  wy9 =~ 1*y9
+  wy10 =~ 1*y10
+  wy11 =~ 1*y11
+
+  # Estimate the lagged effects between the within-person centered variables.
+  wx2 ~ a*wx1 + b*wy1
+  wx3 ~ a*wx2 + b*wy2
+  wx4 ~ a*wx3 + b*wy3
+  wx5 ~ a*wx4 + b*wy4
+  wx6 ~ a*wx5 + b*wy5
+  wx7 ~ a*wx6 + b*wy6
+  wx8 ~ a*wx7 + b*wy7
+  wx9 ~ a*wx8 + b*wy8
+  wx10 ~ a*wx9 + b*wy9
+  wx11 ~ a*wx10 + b*wy10
+  
+  wy2 ~ b*wx1 + a*wy1
+  wy3 ~ b*wx2 + a*wy2
+  wy4 ~ b*wx3 + a*wy3
+  wy5 ~ b*wx4 + a*wy4
+  wy6 ~ b*wx5 + a*wy6
+  wy7 ~ a*wy6 + b*wy6
+  wy8 ~ a*wy7 + b*wy7
+  wy9 ~ a*wy8 + b*wy8
+  wy10 ~ a*wy9 + b*wy9
+  wy11 ~ a*wy10 + b*wy10
+
+  # Estimate the (residual) covariance between the within-person centered variables
+  wx1 ~~ wy1 # Covariance
+  wx2 ~~ wy2
+  wx3 ~~ wy3
+  wx4 ~~ wy4
+  wx5 ~~ wy5
+  wx6 ~~ wy6
+  wx7 ~~ wy7
+  wx8 ~~ wy8
+  wx9 ~~ wy9
+  wx10 ~~ wy10
+  wx11 ~~ wy11
+  
+  # Estimate the variance and covariance of the random intercepts. 
+  RIx ~~ RIx
+  RIy ~~ RIy
+  RIx ~~ RIy
+
+  # Estimate the (residual) variance of the within-person centered variables.
+  wx1 ~~ wx1 # Variances
+  wy1 ~~ wy1 
+  wx2 ~~ wx2 # Residual variances
+  wy2 ~~ wy2 
+  wx3 ~~ wx3 
+  wy3 ~~ wy3 
+  wx4 ~~ wx4 
+  wy4 ~~ wy4 
+  wx5 ~~ wx5
+  wy5 ~~ wy5
+  wx6 ~~ wx6
+  wy6 ~~ wy6
+  wx7 ~~ wx7
+  wy7 ~~ wy7 
+  wx8 ~~ wx8 
+  wy8 ~~ wy8 
+  wx9 ~~ wx9 
+  wy9 ~~ wy9 
+  wx10 ~~ wx10
+  wy10 ~~ wy10
+  wx11 ~~ wx11
+  wy11 ~~ wy11
+'
+RICLPM.fit <- lavaan(RICLPM, data = dat_ori, missing = 'ml.x', meanstructure = T, int.ov.free = T) 
+summary(RICLPM.fit, standardized = T)
+```
+
+**Conclusions:**  
+
+- We observe significant stability and influence pathways. 
+- Please note, we do not know if partners reach consensus, we observe that if a partner is relatively high in time T1, the other partner is likely to become relatively high in time T2. 
+
+---  
 
 
 ### structural change -model 
