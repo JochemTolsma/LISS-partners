@@ -51,7 +51,8 @@ pre.test2 {
   overflow-y: auto;
   overflow-x: auto;
   margin: 0px;
-  background-color: white
+  background-color: white;
+  color: rgb(201, 76, 76);
 }
 
 
