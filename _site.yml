@@ -1,5 +1,6 @@
 name: "Replication package LISS-partners"
 output_dir: "docs"
+exclude: "data-raw"
 navbar:
   title: "Replication package"
   left:
