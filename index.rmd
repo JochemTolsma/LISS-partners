@@ -81,13 +81,13 @@ if (!require("haven", character.only = TRUE)) {install.packages("haven", depende
 #if (!require("purr", character.only = TRUE)) {install.packages("purr", dependencies=TRUE)}
 if (!require("lavaan", character.only = TRUE)) {install.packages("lavaan", dependencies=TRUE)}
 
-
 #load packages.
 library(dplyr)
 library(haven)
 library(purrr)
 library(tidyr)
 library(lavaan)
+
 ```
 
 
@@ -131,6 +131,11 @@ Variables of interest and value labels:
 Met de originele data krijg ik onverklaarbare problemen met de namen van de dataset. Dus dan maar deze detour. 
 
 ```{r, results='hold'}
+datalist <- list()
+datalist_ori <- list()
+
+# eu_integration
+
 dat <- data.frame(x1=partner_df_wide$eu_integration.m.1)
 dat$x2 <- partner_df_wide$eu_integration.m.2
 dat$x3 <- partner_df_wide$eu_integration.m.3
@@ -174,92 +179,89 @@ dat_ori <- dat
 selectie <- rowSums(is.na(dat_ori[,1:12])) < 8 # bijna lege cases identificeren
 dat <- dat_ori[selectie,]
 
+datalist_ori[[1]] <- dat_ori
+datalist[[1]] <- dat
+
+
+# immigrants
+
+dat <- data.frame(x1=partner_df_wide$immigrants.m.1)
+dat$x2 <- partner_df_wide$immigrants.m.2
+dat$x3 <- partner_df_wide$immigrants.m.3
+dat$x4 <- partner_df_wide$immigrants.m.4
+dat$x5 <- partner_df_wide$immigrants.m.5
+dat$x6 <- partner_df_wide$immigrants.m.6
+dat$x7 <- partner_df_wide$immigrants.m.7
+dat$x8 <- partner_df_wide$immigrants.m.8
+dat$x9 <- partner_df_wide$immigrants.m.9
+dat$x10 <- partner_df_wide$immigrants.m.10
+dat$x11 <- partner_df_wide$immigrants.m.11
+
+dat$y1 <- partner_df_wide$immigrants.f.1
+dat$y2 <- partner_df_wide$immigrants.f.2
+dat$y3 <- partner_df_wide$immigrants.f.3
+dat$y4 <- partner_df_wide$immigrants.f.4
+dat$y5 <- partner_df_wide$immigrants.f.5
+dat$y6 <- partner_df_wide$immigrants.f.6
+dat$y7 <- partner_df_wide$immigrants.f.7
+dat$y8 <- partner_df_wide$immigrants.f.8
+dat$y9 <- partner_df_wide$immigrants.f.9
+dat$y10 <- partner_df_wide$immigrants.f.10
+dat$y11 <- partner_df_wide$immigrants.f.11
+
+#treat education as a time stable. And use all available data. 
+dat$oplx <- rowMeans(partner_df_wide[,c("oplmet.m.1", "oplmet.m.2",  "oplmet.m.3", "oplmet.m.4", "oplmet.m.5", "oplmet.m.6", "oplmet.m.7",  "oplmet.m.8", "oplmet.m.9", "oplmet.m.10", "oplmet.m.11")], na.rm=T)
+dat$oply <- rowMeans(partner_df_wide[,c("oplmet.f.1", "oplmet.f.2",  "oplmet.f.3", "oplmet.f.4", "oplmet.f.5", "oplmet.f.6", "oplmet.f.7",  "oplmet.f.8", "oplmet.f.9", "oplmet.f.10", "oplmet.f.11")], na.rm=T)
+
+#calculate diff in education between men and women
+dat$oplxy <- dat$oplx - dat$oply
+#table(dat$oplx, dat$oply, useNA = "always")
+#hist(dat$oplxy)
+
+#define three groups for multigroup analyses
+dat$oplgroup <- ifelse(dat$oplxy > 1, "menhigher", NA)
+dat$oplgroup <- ifelse(dat$oplxy < -1, "womenhigher", dat$oplgroup)
+dat$oplgroup <- ifelse(dat$oplxy <= 1 & dat$oplxy >= -1, "equal", dat$oplgroup)
+#table(dat$oplgroup, useNA = "always")
+
+dat_ori <- dat
+selectie <- rowSums(is.na(dat_ori[,1:12])) < 8 # bijna lege cases identificeren
+dat <- dat_ori[selectie,]
+
+datalist_ori[[2]] <- dat_ori
+datalist[[2]] <- dat
+
+
+
+
 ```
 
 ---  
 
 ## Modelling strategy  
 
-I favour the RI-CLPM. 
-  
-## CLPM six waves
+- We will test our hypotheses for three different dependent variables:  
+  - **eu-integration**  
+  - immigration  
+  - euthanasia  
+- We will test our hypotheses among different (sub)samples of the LISS:  
+  - **total**  
+  - couples among which initial opinion differs substantially  
+- We will compare the results across four different modelling strategies:
+  - CLPM (11 waves)  
+  - **RI-CLPM (11 waves)**  
+  - RI-CLPM + structural time trends (11 waves)
+  - RI/RS-CLPM (11 waves)
 
-I use this model as a baseline model. But I think the RI-CLPM fits better with our theory. Will expand later.   
-
-```{r}
-
-myModel <- "
-  ### Estimate the lagged effects
-  eu_integration.m.2 ~ a*eu_integration.m.1 + b*eu_integration.f.1
-  eu_integration.f.2 ~ c*eu_integration.f.1 + d*eu_integration.m.1
-  
-  eu_integration.m.3 ~ a*eu_integration.m.2 + b*eu_integration.f.2
-  eu_integration.f.3 ~ c*eu_integration.f.2 + d*eu_integration.m.2
-  
-  eu_integration.m.4 ~ a*eu_integration.m.3 + b*eu_integration.f.3
-  eu_integration.f.4 ~ c*eu_integration.f.3 + d*eu_integration.m.3
-  
-  eu_integration.m.5 ~ a*eu_integration.m.4 + b*eu_integration.f.4
-  eu_integration.f.5 ~ c*eu_integration.f.4 + d*eu_integration.m.4
-  
-  eu_integration.m.6 ~ a*eu_integration.m.5 + b*eu_integration.f.5
-  eu_integration.f.6 ~ c*eu_integration.f.5 + d*eu_integration.m.5
-  
-  ### Estimate the covariance at the first wave. 
-  eu_integration.m.1 ~~ eu_integration.f.1 # Covariance
-  
-  # Estimate the variance at the first wave
-  eu_integration.m.1 ~~ eu_integration.m.1 
-  eu_integration.f.1 ~~ eu_integration.f.1 
-
-  ### Estimate the residual covariance
-  eu_integration.m.2 ~~ eu_integration.f.2
-  eu_integration.m.3 ~~ eu_integration.f.3 
-  eu_integration.m.4 ~~ eu_integration.f.4 
-  eu_integration.m.5 ~~ eu_integration.f.5 
-  eu_integration.m.6 ~~ eu_integration.f.6 
-  
-  # Estimate the residual variance
-  eu_integration.m.2 ~~ eu_integration.m.2 
-  eu_integration.f.2 ~~ eu_integration.f.2 
-  eu_integration.m.3 ~~ eu_integration.m.3 
-  eu_integration.f.3 ~~ eu_integration.f.3 
-  eu_integration.m.4 ~~ eu_integration.m.4 
-  eu_integration.f.4 ~~ eu_integration.f.4 
-  eu_integration.m.5 ~~ eu_integration.m.5 
-  eu_integration.f.5 ~~ eu_integration.f.5 
-  eu_integration.m.6 ~~ eu_integration.m.6 
-  eu_integration.f.6 ~~ eu_integration.f.6 
-  
-  # intercepts
-  eu_integration.m.1 ~ 1
-  eu_integration.f.1 ~ 1
-  eu_integration.m.2 ~ 1
-  eu_integration.f.2 ~ 1
-  eu_integration.m.3 ~ 1
-  eu_integration.f.3 ~ 1
-  eu_integration.m.4 ~ 1
-  eu_integration.f.4 ~ 1
-  eu_integration.m.5 ~ 1
-  eu_integration.f.5 ~ 1
-  eu_integration.m.6 ~ 1
-  eu_integration.f.6 ~ 1
-  
-"
-
-
-
-fit <- lavaan(myModel, data = partner_df_wide, missing = "ml", meanstructure = T)
-summary(fit, standardized = T)
-
-```
-
+In **bold face** above refers to the 'base line' which we will describe in detail in the paper.  
+Our hypotheses refers to how the attitude of partner/alter at time T is related to the attitude of the other partern/ego at time T+1. 
 
 ---  
+
+## Hypo1 {.tabset .tabset-fade}
+
   
-## HYPO1: partner-influence-effects (RI-CLPM) {.tabset .tabset-fade}
-  
-### RI-model (6 waves)
+### CLPM 
 
 `r colorize("DONT FORGET TO SOLVE THE FITTING PROBLEMS", "red")`  
 Changing optimizer seems to help a bit. Need to check what happens if we use all 11 waves. 
@@ -267,82 +269,114 @@ Changing optimizer seems to help a bit. Need to check what happens if we use all
 - We assume similar effect for men and women.  
 - We assume time-constant effects.  
 - We assume no structural changes (time trends).  
-- We include education as predictor for the RI/latent variable  
+
 
 ```{r}
-RICLPM <- '
-  # Create between components (random intercepts)
-  RIx =~ 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5 + 1*x6
-  RIy =~ 1*y1 + 1*y2 + 1*y3 + 1*y4 + 1*y5 + 1*y6
-  
-  RIx ~ e*oplx
-  RIy ~ e*oply
-  
-  # Create within-person centered variables
-  wx1 =~ 1*x1
-  wx2 =~ 1*x2
-  wx3 =~ 1*x3 
-  wx4 =~ 1*x4
-  wx5 =~ 1*x5
-  wx6 =~ 1*x6
-  
-  wy1 =~ 1*y1
-  wy2 =~ 1*y2
-  wy3 =~ 1*y3
-  wy4 =~ 1*y4
-  wy5 =~ 1*y5
-  wy6 =~ 1*y6
+results <- list()
 
-  # Estimate the lagged effects between the within-person centered variables.
-  wx2 ~ a*wx1 + b*wy1
-  wx3 ~ a*wx2 + b*wy2
-  wx4 ~ a*wx3 + b*wy3
-  wx5 ~ a*wx4 + b*wy4
-  wx6 ~ a*wx5 + b*wy5
+myModel <- "
+  ### Estimate the lagged effects
+  x2 ~ a*x1 + b*y1
+  x3 ~ a*x2 + b*y2
+  x4 ~ a*x3 + b*y3
+  x5 ~ a*x4 + b*y4
+  x6 ~ a*x5 + b*y5
+  x7 ~ a*x6 + b*y6
+  x8 ~ a*x7 + b*y7
+  x9 ~ a*x8 + b*y8
+  x10 ~ a*x9 + b*y9
+  x11 ~ a*x10 + b*y10
   
-  wy2 ~ b*wx1 + a*wy1
-  wy3 ~ b*wx2 + a*wy2
-  wy4 ~ b*wx3 + a*wy3
-  wy5 ~ b*wx4 + a*wy4
-  wy6 ~ b*wx5 + a*wy6
+  y2 ~ b*x1 + a*y1
+  y3 ~ b*x2 + a*y2
+  y4 ~ b*x3 + a*y3
+  y5 ~ b*x4 + a*y4
+  y6 ~ b*x5 + a*y6
+  y7 ~ a*y6 + b*y6
+  y8 ~ a*y7 + b*y7
+  y9 ~ a*y8 + b*y8
+  y10 ~ a*y9 + b*y9
+  y11 ~ a*y10 + b*y10
 
-  # Estimate the (residual) covariance between the within-person centered variables
-  wx1 ~~ wy1 # Covariance
-  wx2 ~~ wy2
-  wx3 ~~ wy3
-  wx4 ~~ wy4
-  wx5 ~~ wy5
-  wx6 ~~ wy6
+  # Estimate the (residual) covariance between the variables
+  x1 ~~ y1 # Covariance
+  x2 ~~ y2
+  x3 ~~ y3
+  x4 ~~ y4
+  x5 ~~ y5
+  x6 ~~ y6
+  x7 ~~ y7
+  x8 ~~ y8
+  x9 ~~ y9
+  x10 ~~ y10
+  x11 ~~ y11
   
-  # Estimate the variance and covariance of the random intercepts. 
-  RIx ~~ RIx
-  RIy ~~ RIy
-  RIx ~~ RIy
+  # Estimate the (residual) variance of the variables.
+  x1 ~~ x1 # Variances
+  y1 ~~ y1 
+  x2 ~~ x2 # Residual variances
+  y2 ~~ y2 
+  x3 ~~ x3 
+  y3 ~~ y3 
+  x4 ~~ x4 
+  y4 ~~ y4 
+  x5 ~~ x5
+  y5 ~~ y5
+  x6 ~~ x6
+  y6 ~~ y6
+  x7 ~~ x7
+  y7 ~~ y7 
+  x8 ~~ x8 
+  y8 ~~ y8 
+  x9 ~~ x9 
+  y9 ~~ y9 
+  x10 ~~ x10
+  y10 ~~ y10
+  x11 ~~ x11
+  y11 ~~ y11
+  
+  #intercepts
+  x1 ~ 1
+  y1 ~ 1
+  x2 ~ 1
+  y2 ~ 1
+  x3 ~ 1
+  y3 ~ 1
+  x4 ~ 1
+  y4 ~ 1
+  x5 ~ 1
+  y5 ~ 1
+  x6 ~ 1
+  y6 ~ 1
+  x7 ~ 1
+  y7 ~ 1
+  x8 ~ 1
+  y8 ~ 1
+  x9 ~ 1
+  y9 ~ 1
+  x10 ~ 1
+  y10 ~ 1
+  x11 ~ 1
+  y11 ~ 1
+  
+  
+"
 
-  # Estimate the (residual) variance of the within-person centered variables.
-  wx1 ~~ wx1 # Variances
-  wy1 ~~ wy1 
-  wx2 ~~ wx2 # Residual variances
-  wy2 ~~ wy2 
-  wx3 ~~ wx3 
-  wy3 ~~ wy3 
-  wx4 ~~ wx4 
-  wy4 ~~ wy4 
-  wx5 ~~ wx5
-  wy5 ~~ wy5
-  wx6 ~~ wx6
-  wy6 ~~ wy6
-'
-RICLPM.fit <- lavaan(RICLPM, data = dat, missing = 'ml.x', meanstructure = T, int.ov.free = T) 
-summary(RICLPM.fit, standardized = T)
+# L-BFGS-B / ,optim.method="BFGS" 
+
+fitm1h1y1 <- lavaan(myModel, data = datalist_ori[[1]], missing = "ml", meanstructure = T )
+summary(fitm1h1y1, standardized = T)
+fitm1h1y2 <- lavaan(myModel, data = datalist_ori[[2]], missing = "ml", meanstructure = T)
+summary(fitm1h1y2, standardized = T)
+
+results[[1]] <- fitm1h1y1
+results[[2]] <- fitm1h1y2
+
 ```
 
-**Conclusions:**  
-
-- We observe significant stability and influence pathways. 
-- Please note, we do not know if partners reach consensus, we observe that if a partner is relatively high in time T1, the other partner is likely to become relatively high in time T2. 
 
 ---  
+
 
 ### RI-model (11 waves)
 
@@ -453,8 +487,17 @@ RICLPM <- '
   wx11 ~~ wx11
   wy11 ~~ wy11
 '
-RICLPM.fit <- lavaan(RICLPM, data = dat_ori, missing = 'ml.x', meanstructure = T, int.ov.free = T) 
-summary(RICLPM.fit, standardized = T)
+
+
+fitm2h1y1 <- lavaan(RICLPM, data = datalist_ori[[1]], missing = "ml", meanstructure = T , int.ov.free = T)
+summary(fitm2h1y1, standardized = T)
+fitm2h1y2 <- lavaan(RICLPM, data = datalist_ori[[2]], missing = "ml", meanstructure = T, int.ov.free = T)
+summary(fitm2h1y2, standardized = T)
+
+results[[3]] <- fitm2h1y1
+results[[4]] <- fitm2h1y2
+
+
 ```
 
 **Conclusions:**  
@@ -466,11 +509,12 @@ summary(RICLPM.fit, standardized = T)
 
 
 ### structural change -model 
+
 ```{r}
-RICLPM <- '
-  # Create between components (random intercepts)
-  RIx =~ 1*x1 + x2 + x3 + x4 + x5 + x6
-  RIy =~ 1*y1 + y2 + y3 + y4 + y5 + y6
+SCCLPM <- '
+  # Create between components 
+  RIx =~ 1*x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11
+  RIy =~ 1*y1 + y2 + y3 + y4 + y5 + y6 + y7 + y8 + y9 + y10 + y11  
   
   RIx ~ e*oplx
   RIy ~ e*oply
@@ -482,13 +526,23 @@ RICLPM <- '
   wx4 =~ 1*x4
   wx5 =~ 1*x5
   wx6 =~ 1*x6
-  
+  wx7 =~ 1*x7
+  wx8 =~ 1*x8 
+  wx9 =~ 1*x9
+  wx10 =~ 1*x10
+  wx11 =~ 1*x11
+ 
   wy1 =~ 1*y1
   wy2 =~ 1*y2
   wy3 =~ 1*y3
   wy4 =~ 1*y4
   wy5 =~ 1*y5
   wy6 =~ 1*y6
+  wy7 =~ 1*y7
+  wy8 =~ 1*y8
+  wy9 =~ 1*y9
+  wy10 =~ 1*y10
+  wy11 =~ 1*y11
 
   # Estimate the lagged effects between the within-person centered variables.
   wx2 ~ a*wx1 + b*wy1
@@ -496,12 +550,22 @@ RICLPM <- '
   wx4 ~ a*wx3 + b*wy3
   wx5 ~ a*wx4 + b*wy4
   wx6 ~ a*wx5 + b*wy5
+  wx7 ~ a*wx6 + b*wy6
+  wx8 ~ a*wx7 + b*wy7
+  wx9 ~ a*wx8 + b*wy8
+  wx10 ~ a*wx9 + b*wy9
+  wx11 ~ a*wx10 + b*wy10
   
   wy2 ~ b*wx1 + a*wy1
   wy3 ~ b*wx2 + a*wy2
   wy4 ~ b*wx3 + a*wy3
   wy5 ~ b*wx4 + a*wy4
   wy6 ~ b*wx5 + a*wy6
+  wy7 ~ a*wy6 + b*wy6
+  wy8 ~ a*wy7 + b*wy7
+  wy9 ~ a*wy8 + b*wy8
+  wy10 ~ a*wy9 + b*wy9
+  wy11 ~ a*wy10 + b*wy10
 
   # Estimate the (residual) covariance between the within-person centered variables
   wx1 ~~ wy1 # Covariance
@@ -510,6 +574,11 @@ RICLPM <- '
   wx4 ~~ wy4
   wx5 ~~ wy5
   wx6 ~~ wy6
+  wx7 ~~ wy7
+  wx8 ~~ wy8
+  wx9 ~~ wy9
+  wx10 ~~ wy10
+  wx11 ~~ wy11
   
   # Estimate the variance and covariance of the random intercepts. 
   RIx ~~ RIx
@@ -529,9 +598,26 @@ RICLPM <- '
   wy5 ~~ wy5
   wx6 ~~ wx6
   wy6 ~~ wy6
+  wx7 ~~ wx7
+  wy7 ~~ wy7 
+  wx8 ~~ wx8 
+  wy8 ~~ wy8 
+  wx9 ~~ wx9 
+  wy9 ~~ wy9 
+  wx10 ~~ wx10
+  wy10 ~~ wy10
+  wx11 ~~ wx11
+  wy11 ~~ wy11
 '
-RICLPM.fit <- lavaan(RICLPM, data = dat, missing = 'ml.x', meanstructure = T, int.ov.free = T) 
-summary(RICLPM.fit, standardized = T)
+
+
+fitm3h1y1 <- lavaan(SCCLPM, data = datalist_ori[[1]], missing = "ml", meanstructure = T , int.ov.free = T)
+summary(fitm3h1y1, standardized = T)
+fitm3h1y2 <- lavaan(SCCLPM, data = datalist_ori[[2]], missing = "ml", meanstructure = T, int.ov.free = T)
+summary(fitm3h1y2, standardized = T)
+
+results[[5]] <- fitm3h1y1
+results[[6]] <- fitm3h1y2
 ```
 
 **Conclusions:**  
@@ -541,10 +627,10 @@ summary(RICLPM.fit, standardized = T)
 
 ---  
 
-
-
 ### linear trend-model 
-```{r}
+
+not yet run
+```{r, eval=FALSE, echo=FALSE}
 RICLPM <- '
   # Create between components (random intercepts)
   RIx =~ 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5 + 1*x6
@@ -626,6 +712,7 @@ RICLPM.fit <- lavaan(RICLPM, data = dat, missing = 'ml.x', meanstructure = T, in
 summary(RICLPM.fit, standardized = T)
 ```
 
+<!---
 **Conclusions:**  
 
 - We observe significant stability paths but no longer influence paths.  
@@ -635,8 +722,74 @@ summary(RICLPM.fit, standardized = T)
   - intercept and slope negatively correlate: ceiling effect / regression to mean  
   - intercept of partner does not impact own slope: they don't grow towards one another (AGAINST INFLUENCE)  
 - The influence paths are 'explained' by the similar trends.  
+--->
+---  
+
+### results hypo1
+
+```{r, results='asis'}
+
+#https://bookdown.org/yihui/rmarkdown-cookbook/kableextra.html
+#https://haozhu233.github.io/kableExtra/awesome_table_in_html.html
+
+library(knitr) #for kable/kables
+library(kableExtra)
+
+
+#retrieving data to show
+a <- parameterEstimates(results[[1]])[parameterEstimates(results[[1]])$label=="a",][1,c(5,6,8)]
+b <- parameterEstimates(results[[1]])[parameterEstimates(results[[1]])$label=="b",][1,c(5,6,8)]
+m1h1y1 <- rbind(a,b)
+
+a <- parameterEstimates(results[[2]])[parameterEstimates(results[[2]])$label=="a",][1,c(5,6,8)]
+b <- parameterEstimates(results[[2]])[parameterEstimates(results[[2]])$label=="b",][1,c(5,6,8)]
+m1h1y2 <- rbind(a,b)
+
+a <- parameterEstimates(results[[3]])[parameterEstimates(results[[3]])$label=="a",][1,c(5,6,8)]
+b <- parameterEstimates(results[[3]])[parameterEstimates(results[[3]])$label=="b",][1,c(5,6,8)]
+m2h1y1 <- rbind(a,b)
+
+a <- parameterEstimates(results[[4]])[parameterEstimates(results[[4]])$label=="a",][1,c(5,6,8)]
+b <- parameterEstimates(results[[4]])[parameterEstimates(results[[4]])$label=="b",][1,c(5,6,8)]
+m2h1y2 <- rbind(a,b)
+
+a <- parameterEstimates(results[[5]])[parameterEstimates(results[[5]])$label=="a",][1,c(5,6,8)]
+b <- parameterEstimates(results[[5]])[parameterEstimates(results[[5]])$label=="b",][1,c(5,6,8)]
+m3h1y1 <- rbind(a,b)
+
+a <- parameterEstimates(results[[6]])[parameterEstimates(results[[6]])$label=="a",][1,c(5,6,8)]
+b <- parameterEstimates(results[[6]])[parameterEstimates(results[[6]])$label=="b",][1,c(5,6,8)]
+m3h1y2 <- rbind(a,b)
+
+#combine
+#put deps under each other
+m1h1y1y2 <- rbind(m1h1y1, m1h1y2)
+m2h1y1y2 <- rbind(m2h1y1, m2h1y2)
+m3h1y1y2 <- rbind(m3h1y1, m3h1y2)
+#put methods next to each other
+h1y1y2 <- cbind(m1h1y1y2, m2h1y1y2, m3h1y1y2)
+
+row.names(h1y1y2) <- NULL
+
+paths <- rep(c("stability", "partner-effect"),2)
+h1y1y2 <- cbind(paths,h1y1y2)
+
+
+kbl(h1y1y2, booktabs=TRUE, digits=2, caption="Results Hypo1", align = "lccccccccc") %>%
+  add_header_above(c(" ", "CLPM" = 3, "RI-CLPM" = 3, "SC-CLPM" = 3)) %>%
+  pack_rows(index=c("eu-integration"=2, "immigrants"=2)) %>%
+  kable_classic(full_width = F, html_font = "Cambria") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+
+```
+
 
 ---  
+
+
+
+
 
 ## Hypo2: men influence stronger than women.  {.tabset .tabset-fade}
 
@@ -1076,8 +1229,37 @@ summary(RICLPM.fit, standardized = T)
 ```
 
 
+## results
+
+
+```{r, results='asis'}
+
+#https://bookdown.org/yihui/rmarkdown-cookbook/kableextra.html
+#https://haozhu233.github.io/kableExtra/awesome_table_in_html.html
+
+library(knitr) #for kable/kables
+library(kableExtra)
+
+#saving data
+m1 <- parameterEstimates(fit)[parameterEstimates(fit)$label=="b",][1,5:10]
+m1 <- rbind(m1,m1,m1)
+m1 <- rbind(m1,m1)
+m1 <- cbind(m1,m1,m1)
+m1
+
+kbl(m1, booktabs=TRUE, digits=2, caption="our results") %>%
+  add_header_above(c(" "=1, "CLPM" = 6, "RI-CLPM" = 6, "latent-CLPM" = 6)) %>%
+  pack_rows(index=c("dep1"=3, "dep2"=3)) %>%
+  kable_classic(full_width = F, html_font = "Cambria") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
+
+
 ---  
 
-## References
+## References 
+
+
   
   
