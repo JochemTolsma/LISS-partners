@@ -231,8 +231,31 @@ dat <- dat_ori[selectie,]
 datalist_ori[[2]] <- dat_ori
 datalist[[2]] <- dat
 
+table(partner_df_long$oplmet.f, useNA = 'always')
+table(partner_df_long$oplmet.m, useNA = 'always')
 
+#check the missings on education. 
 
+#create a new df.
+#select respondents that have a missing on either education of male or female or both partners. 
+educ_na <- partner_df_long %>%
+  filter(is.na(oplmet.m) | is.na(oplmet.f))
+
+#in the long file there are 914 missings.
+
+#check the number of unique households.
+head(educ_na, 100)
+unique(educ_na$nohouse_encr)
+
+#so in the wide file there are around 185 with at least one missing on education. This is probably more so when we only want complete education observations. So let's check that.
+partner_df_wide <- partner_df_wide %>%
+  select(contains("oplmet.")) %>%
+  rowwise() %>%
+  mutate(na_check = sum(is.na(c(oplmet.m.1, oplmet.m.2, oplmet.m.3, oplmet.m.4, oplmet.m.5, oplmet.m.6, oplmet.m.7, oplmet.m.8, oplmet.m.9, oplmet.m.10, oplmet.m.11,oplmet.f.1, oplmet.f.2, oplmet.f.3, oplmet.f.4, oplmet.f.5, oplmet.f.6, oplmet.f.7, oplmet.f.8, oplmet.f.9, oplmet.f.10, oplmet.f.11 )))) %>%
+  ungroup()
+
+#so, now we are at the core of the problem. Only of 745 households do we have complete data. I'm not really suprised by it, in most panel data this is the case. Still, I can try to increase this number. 
+table(partner_df_wide$na_check)
 
 ```
 
