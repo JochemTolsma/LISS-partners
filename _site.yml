@@ -10,6 +10,8 @@ navbar:
   #    href: SM.html
     - text: "Data preperation"
       href: dataprep.html
+    - text: "Trends SRV"
+      href: trends.html
   right:
     - icon: fab fa-github
       href: https://github.com/JochemTolsma/LISS-partners

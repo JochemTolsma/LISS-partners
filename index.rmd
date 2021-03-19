@@ -1255,7 +1255,7 @@ summary(RICLPM.fit, standardized = T)
 ## results
 
 
-```{r, results='asis'}
+```{r, results='asis', eval=FALSE}
 
 #https://bookdown.org/yihui/rmarkdown-cookbook/kableextra.html
 #https://haozhu233.github.io/kableExtra/awesome_table_in_html.html
@@ -1275,6 +1275,16 @@ kbl(m1, booktabs=TRUE, digits=2, caption="our results") %>%
   pack_rows(index=c("dep1"=3, "dep2"=3)) %>%
   kable_classic(full_width = F, html_font = "Cambria") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
++#can we estimate stuff quicker. We need this if we add more dependent variables
+estimate <- function(x) lavaan(myModel, data=x, missing = "ml", meanstructure = T )
+library(future.apply)
+plan(multisession)
+results <- future_lapply(datalist_ori, estimate)
+
+#this seems to work. 1 model takes 10% of cpu, two models 18%!!
+
+
 
 ```
 
