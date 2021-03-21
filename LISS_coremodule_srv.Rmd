@@ -330,13 +330,6 @@ liss_wide <- cbind(liss_pol, liss_avars, liss_origin)
 #------------------------------------- Variable recode -----------------------------------------------#
 #reverse code political discussion frequency and eu_integration.
 
-#eu integration.
-list <- liss_wide[,grep(names(liss_wide), pattern = "eu_integration", value = T)]
-#reverse code in another list and compare the two: it works. 
-list2 <- apply(list, 2, function(x)5 - x)
-#replace original variables with the reverse coded variable. 
-liss_wide[,grep(names(liss_wide), pattern = "eu_integration", value = T)] <- list2
-
 #--------------------------- Reshape to long file. -------------------------#
 #TJ: In the future I want to change this to a tidy function such as pivot_longer. For now I have not figured it out yet. (application of pivot_wide() was succesful).
 
@@ -345,16 +338,18 @@ liss_srv_subset <- liss_wide  %>%
   select(nomem_encr, oplmet.1, oplmet.2, oplmet.3, oplmet.4, oplmet.5, oplmet.6, oplmet.7, oplmet.8, oplmet.9, oplmet.10, oplmet.11, oplmet.12,
          eu_integration.1, eu_integration.2, eu_integration.3, eu_integration.4, eu_integration.5, eu_integration.6, eu_integration.7, eu_integration.8, eu_integration.9, eu_integration.10, eu_integration.11, eu_integration.12,
          immigrants.1, immigrants.2, immigrants.3, immigrants.4, immigrants.5, immigrants.6, immigrants.7, immigrants.8, immigrants.9, immigrants.10, immigrants.11, immigrants.12,
-         sted.1, sted.2, sted.3, sted.4, sted.5, sted.6, sted.7, sted.8, sted.9, sted.10, sted.11, sted.12)
+         sted.1, sted.2, sted.3, sted.4, sted.5, sted.6, sted.7, sted.8, sted.9, sted.10, sted.11, sted.12,
+         leeftijd.1, leeftijd.2, leeftijd.3, leeftijd.4, leeftijd.5, leeftijd.6, leeftijd.7, leeftijd.8, leeftijd.9, leeftijd.10, leeftijd.11, leeftijd.12)
          
 
 #create a long file.
 liss_srv_subset <- reshape(liss_srv_subset, direction = "long",
-                     varying = names(liss_srv_subset[,2:49]),
+                     varying = names(liss_srv_subset[,2:61]),
                      idvar = "nomem_encr",
                      timevar = "survey_wave",
                      times = c(1:12))
 
+table(liss_srv_subset$eu_integration)
 
 #clean the environment. 
 rm(list=ls()[! ls() %in% c("liss_srv_subset", "liss_wide")])

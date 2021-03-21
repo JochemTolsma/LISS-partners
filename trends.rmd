@@ -118,14 +118,30 @@ Iets vergelijkbaars zien we bij de stelling over de integratie van mensen met ee
 rm(list=ls())
 load('data-processed/partner_dataprepped.Rdata')
 load('data-processed/liss_merged_core_file_v1_201124.Rdata')
-
+load('data-processed/LISS_srv_blog_polar.Rdata')
 ```
   
   
 
 ```{r}
-dataplot <- liss_long
-dataplot$jaar <- dataplot$survey_wave + 2007
+dataplot <- liss_srv_subset #use the srv data. 
+
+#dataplot$jaar <- dataplot$survey_wave + 2007 #probleem is dat het jaar 2015 mist. 
+
+#Daarom gebruik ik zelf deze omslachtige code 
+dataplot$jaar <- ifelse(dataplot$survey_wave == 1, 2008, dataplot$survey_wave)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 2, 2009, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 3, 2010, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 4, 2011, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 5, 2012, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 6, 2013, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 7, 2014, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 8, 2016, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 9, 2017, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 10, 2018, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 11, 2019, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
+
 dataplot <- dataplot[dataplot$leeftijd>17,]
 
 #prop.table(table(dataplot$eu_integration,dataplot$jaar ))
@@ -134,11 +150,11 @@ dataplot <- dataplot[dataplot$leeftijd>17,]
 ## Get counts for each risk class on each date
 frequencies <- with(dataplot, prop.table(table(eu_integration,jaar ), margin=2))
 
-
 frequencies <- as.data.frame(frequencies)
-frequencies <- frequencies[frequencies$eu_integration==0 | frequencies$eu_integration==4, ]
-frequencies$eu_integratie[frequencies$eu_integration==0] <- "EU integratie te ver"
-frequencies$eu_integratie[frequencies$eu_integration==4] <- "EU integratie niet ver genoeg"
+#changed the eu_integration values in line with the adjusted specification of the values (so no reverse code; use the original 1-5 scale. Changed the coding accordingly)
+frequencies <- frequencies[frequencies$eu_integration==1 | frequencies$eu_integration==5, ]
+frequencies$eu_integratie[frequencies$eu_integration==5] <- "EU integratie te ver"
+frequencies$eu_integratie[frequencies$eu_integration==1] <- "EU integratie niet ver genoeg"
 frequencies$eu_integratie <- factor(frequencies$eu_integratie,  levels = c("EU integratie te ver", "EU integratie niet ver genoeg"))
 frequencies$Freq <- round(frequencies$Freq*100, 2)
 
@@ -158,8 +174,21 @@ ggplotly(ggp, tooltip = c("y", "x"))
 
 
 ```{r}
-dataplot <- liss_long
-dataplot$jaar <- dataplot$survey_wave + 2007
+dataplot <- liss_srv_subset
+
+dataplot$jaar <- ifelse(dataplot$survey_wave == 1, 2008, dataplot$survey_wave)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 2, 2009, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 3, 2010, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 4, 2011, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 5, 2012, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 6, 2013, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 7, 2014, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 8, 2016, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 9, 2017, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 10, 2018, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 11, 2019, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
+
 dataplot <- dataplot[dataplot$leeftijd>17,]
 
 ## Get counts for each risk class on each date
@@ -226,7 +255,8 @@ Als we allereerst kijken naar de meningen over EU integratie en de sociale dimen
 
 ```{r}
 
-dataplot <- liss_long
+dataplot <- liss_srv_subset
+
 dataplot <- dataplot[dataplot$leeftijd>24,]
 
 dataplot$opleiding[dataplot$oplmet==1] <- "laag"
@@ -243,8 +273,23 @@ dataplot$opleiding <- factor(dataplot$opleiding,  levels = c("hoog", "midden", "
 
 
 dataplot <- dataplot[!is.na(dataplot$opleiding),]
-dataplot$jaar <- dataplot$survey_wave + 2007
-dataplot$eu_integration <- 5 - dataplot$eu_integration
+
+dataplot$jaar <- ifelse(dataplot$survey_wave == 1, 2008, dataplot$survey_wave)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 2, 2009, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 3, 2010, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 4, 2011, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 5, 2012, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 6, 2013, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 7, 2014, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 8, 2016, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 9, 2017, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 10, 2018, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 11, 2019, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
+
+#dataprep aangepast dus dit hoeft niet meer. 
+#dataplot$eu_integration <- 5 - dataplot$eu_integration
+
 #table(dataplot$eu_integration)
 
 ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= opleiding)) +           # Create basic ggplot
@@ -252,7 +297,7 @@ ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= opleiding)) +     
   geom_smooth() + 
   #xlim(0,13) +
   #ylim(0,4) + 
-  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
   scale_y_continuous(labels=c("Helemaal oneens ", "Oneens", "Niet eens, niet oneens", "Eens","Helemaal eens"), limits = c(1,5)) + 
   labs(title="Figuur 3. EU integratie te ver gegaan", subtitle= "Opleidingsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
     theme(plot.caption = element_text(hjust = 0))
@@ -268,9 +313,11 @@ Indien we de meningen over EU integratie uitsplitsen naar mensen uit verschillen
 
 ```{r stedelijkheid}
 
-dataplot <- liss_long
+dataplot <- liss_srv_subset
 dataplot <- dataplot[dataplot$leeftijd>17,]
-dataplot$eu_integration <- 5 - dataplot$eu_integration
+
+#dit is niet mee nodig, want ik heb dit aangepast in de dataprep voor de srv data. 
+#dataplot$eu_integration <- 5 - dataplot$eu_integration
 
 dataplot$stedelijkheid <- as.factor(dataplot$sted)
 
@@ -279,14 +326,27 @@ levels(dataplot$stedelijkheid) <- c("Zeer sterk", "Sterk", "Matig", "Weinig", "N
 dataplot$stedelijkheid <- factor(dataplot$stedelijkheid,  levels = c("Zeer sterk", "Sterk", "Matig", "Weinig", "Niet"))
 
 dataplot <- dataplot[!is.na(dataplot$stedelijkheid),]
-dataplot$jaar <- dataplot$survey_wave + 2007
+
+dataplot$jaar <- ifelse(dataplot$survey_wave == 1, 2008, dataplot$survey_wave)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 2, 2009, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 3, 2010, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 4, 2011, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 5, 2012, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 6, 2013, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 7, 2014, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 8, 2016, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 9, 2017, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 10, 2018, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 11, 2019, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
+
 
 ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= stedelijkheid)) +           # Create basic ggplot
   #geom_smooth(method = "lm", formula = y ~ x) + 
   geom_smooth() + 
   #xlim(0,13) +
   #ylim(0,4) + 
-  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
   scale_y_continuous(labels=c("Helemaal oneens ", "Oneens", "Niet eens, niet oneens", "Eens","Helemaal eens"), limits = c(1,5)) + 
   labs(title="Figuur 4. EU integratie te ver gegaan", subtitle= "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
     theme(plot.caption = element_text(hjust = 0))
@@ -301,8 +361,7 @@ ggplotly(ggp)
 We zien min of meer hetzelfde beeld als we kijken naar verschillen in meningen over migratie/integratie. Ja, er bestaan zeker verschillen tussen groepen. De hogeropgeleiden en mensen in stedelijke gebieden zijn (iets) minder vaak van mening dat migranten zich volledig dienen aan te passen. Maar van toenemende sociale scheidslijnen is ook hier geen sprake. 
 
 ```{r}
-
-dataplot <- liss_long
+dataplot <- liss_srv_subset
 dataplot <- dataplot[dataplot$leeftijd>24,]
 
 dataplot$opleiding[dataplot$oplmet==1] <- "laag"
@@ -317,13 +376,25 @@ dataplot$opleiding[dataplot$oplmet==9] <- "laag"
 
 dataplot$opleiding <- factor(dataplot$opleiding,  levels = c("hoog", "midden", "laag"))
 
-
 dataplot <- dataplot[!is.na(dataplot$opleiding),]
-dataplot$jaar <- dataplot$survey_wave + 2007
+
+dataplot$jaar <- ifelse(dataplot$survey_wave == 1, 2008, dataplot$survey_wave)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 2, 2009, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 3, 2010, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 4, 2011, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 5, 2012, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 6, 2013, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 7, 2014, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 8, 2016, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 9, 2017, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 10, 2018, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 11, 2019, dataplot$jaar)
+dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
+
 
 ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= opleiding)) +           # Create basic ggplot
   geom_smooth() + 
-  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
   scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
   labs(title="Figuur 5. Migratie/integratie", subtitle = "Opleidingsscheidslijn", caption="DATA van LISS", x="jaar", y=" ") + 
     theme(plot.caption = element_text(hjust = 0))
@@ -348,7 +419,7 @@ dataplot$jaar <- dataplot$survey_wave + 2007
 
 ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= stedelijkheid)) +           # Create basic ggplot
   geom_smooth() + 
-  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2018)) +
   scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
   labs(title="Figuur 6. Migratie/integratie", subtitle = "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y=" ") + 
     theme(plot.caption = element_text(hjust = 0))
