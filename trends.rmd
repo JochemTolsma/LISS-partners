@@ -116,8 +116,8 @@ Iets vergelijkbaars zien we bij de stelling over de integratie van mensen met ee
 ```{r}
 #clean the environment. 
 rm(list=ls())
-load('data-processed/partner_dataprepped.Rdata')
-load('data-processed/liss_merged_core_file_v1_201124.Rdata')
+#load('data-processed/partner_dataprepped.Rdata')
+#load('data-processed/liss_merged_core_file_v1_201124.Rdata')
 load('data-processed/LISS_srv_blog_polar.Rdata')
 ```
   
@@ -142,6 +142,7 @@ dataplot$jaar <- ifelse(dataplot$survey_wave == 10, 2018, dataplot$jaar)
 dataplot$jaar <- ifelse(dataplot$survey_wave == 11, 2019, dataplot$jaar)
 dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
 
+
 dataplot <- dataplot[dataplot$leeftijd>17,]
 
 #prop.table(table(dataplot$eu_integration,dataplot$jaar ))
@@ -150,25 +151,33 @@ dataplot <- dataplot[dataplot$leeftijd>17,]
 ## Get counts for each risk class on each date
 frequencies <- with(dataplot, prop.table(table(eu_integration,jaar ), margin=2))
 
+
 frequencies <- as.data.frame(frequencies)
 #changed the eu_integration values in line with the adjusted specification of the values (so no reverse code; use the original 1-5 scale. Changed the coding accordingly)
 frequencies <- frequencies[frequencies$eu_integration==1 | frequencies$eu_integration==5, ]
-frequencies$eu_integratie[frequencies$eu_integration==5] <- "EU integratie te ver"
-frequencies$eu_integratie[frequencies$eu_integration==1] <- "EU integratie niet ver genoeg"
-frequencies$eu_integratie <- factor(frequencies$eu_integratie,  levels = c("EU integratie te ver", "EU integratie niet ver genoeg"))
+frequencies$eu_integratie[frequencies$eu_integration==5] <- "al te ver"
+frequencies$eu_integratie[frequencies$eu_integration==1] <- "moet nog verder"
+frequencies$eu_integratie <- factor(frequencies$eu_integratie,  levels = c("al te ver", "moet nog verder"))
 frequencies$Freq <- round(frequencies$Freq*100, 2)
+
+frequencies$jaar <- as.numeric(as.character(frequencies$jaar))
 
 
 ggp <- ggplot(frequencies, aes(x=jaar, y=Freq, group=eu_integratie, color= eu_integratie)) + 
         geom_line() + 
-       geom_point(size = 4, shape = 21, fill = "white") + 
-      scale_color_discrete(name = "EU integratie")  + 
+        geom_point(size = 4, shape = 21, fill = "white") + 
+        scale_color_discrete(name = "EU integratie")  + 
+        scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
       ylim(0,50) + 
       labs(title="Figuur 1. Polarisatie over EU-integratie", caption="DATA: LISS", x="jaar", y="% met extreme mening") + 
     theme(plot.caption = element_text(hjust = 0))
       
 ggp
-ggplotly(ggp, tooltip = c("y", "x"))  
+ggsave(filename="plots/figuur1.png", plot=ggp)
+ggplotly(ggp, tooltip = c("y", "x")) 
+figuur1 <- ggplotly(ggp, tooltip = c("y", "x"))  
+htmlwidgets::saveWidget(figuur1, file.path("plots", 'figuur1.html'))
+
 
 ```
 
@@ -200,16 +209,23 @@ frequencies <- frequencies[frequencies$immigrants==1 | frequencies$immigrants==5
 frequencies$immigrants2[frequencies$immigrants==1] <- "eigen cultuur behouden"
 frequencies$immigrants2[frequencies$immigrants==5] <- "volledig aan passen"
 frequencies$Freq <- round(frequencies$Freq*100, 2)
+frequencies$jaar <- as.numeric(as.character(frequencies$jaar))
+
 
 ggp <- ggplot(frequencies, aes(x=jaar, y=Freq, group=immigrants2, color= immigrants2)) + 
         geom_line() + 
        geom_point(size = 4, shape = 21, fill = "white") + 
       scale_color_discrete(name = "migratie/integratie")  + 
+      scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
       ylim(0,50) +
       labs(title="Figuur 2. Polarisatie over migratie/integratie", caption="DATA: LISS", x="jaar", y="% met extreme mening") + 
     theme(plot.caption = element_text(hjust = 0))
+
 ggp
-ggplotly(ggp, tooltip = c("y", "x"))  
+ggsave(filename="plots/figuur2.png", plot=ggp)
+ggplotly(ggp, tooltip = c("y", "x")) 
+figuur2 <- ggplotly(ggp, tooltip = c("y", "x"))  
+htmlwidgets::saveWidget(figuur2, file.path("plots", 'figuur2.html'))
 
 ```
 ## Sociale scheidslijnen
@@ -297,14 +313,18 @@ ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= opleiding)) +     
   geom_smooth() + 
   #xlim(0,13) +
   #ylim(0,4) + 
-  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
-  scale_y_continuous(labels=c("Helemaal oneens ", "Oneens", "Niet eens, niet oneens", "Eens","Helemaal eens"), limits = c(1,5)) + 
-  labs(title="Figuur 3. EU integratie te ver gegaan", subtitle= "Opleidingsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
+  scale_x_continuous(name="jaar", breaks=c(2008:2020), limits=c(2008,2020)) +
+  scale_y_continuous(labels=c("De Europese eenwording \n zou nog verder \n moeten gaan", "2", "3", "4","De Europese eenwording \n is al te ver \n  gegaan"), limits = c(1,5)) + 
+  labs(title="Figuur 3. EU integratie", subtitle= "Opleidingsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
     theme(plot.caption = element_text(hjust = 0))
 
-ggp
 
-ggplotly(ggp)
+
+ggp
+ggsave(filename="plots/figuur3.png", plot=ggp)
+ggplotly(ggp) 
+figuur3 <- ggplotly(ggp)  
+htmlwidgets::saveWidget(figuur3, file.path("plots", 'figuur3.html'))
 
 
 ```
@@ -346,14 +366,17 @@ ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= stedelijkheid)) + 
   geom_smooth() + 
   #xlim(0,13) +
   #ylim(0,4) + 
-  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
-  scale_y_continuous(labels=c("Helemaal oneens ", "Oneens", "Niet eens, niet oneens", "Eens","Helemaal eens"), limits = c(1,5)) + 
-  labs(title="Figuur 4. EU integratie te ver gegaan", subtitle= "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
-    theme(plot.caption = element_text(hjust = 0))
+  scale_x_continuous(name="jaar", breaks=c(2008:2020), limits=c(2008,2020)) +
+  scale_y_continuous(labels=c("De Europese eenwording \n zou nog verder \n moeten gaan", "2", "3", "4","De Europese eenwording \n is al te ver \n  gegaan"), limits = c(1,5)) + 
+  labs(title="Figuur 4. EU integratie", subtitle= "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
+    theme(plot.caption = element_text(hjust = 0))  
+    # + theme(legend.position="bottom")
 
 ggp
-ggplotly(ggp)
-
+ggsave(filename="plots/figuur4.png", plot=ggp)
+ggplotly(ggp) 
+figuur4 <- ggplotly(ggp)  
+htmlwidgets::saveWidget(figuur4, file.path("plots", 'figuur4.html'))
 
 ```
 
@@ -394,21 +417,23 @@ dataplot$jaar <- ifelse(dataplot$survey_wave == 12, 2020, dataplot$jaar)
 
 ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= opleiding)) +           # Create basic ggplot
   geom_smooth() + 
-  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2020)) +
+  scale_x_continuous(name="jaar", breaks=c(2008:2020), limits=c(2008,2020)) +
   scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
   labs(title="Figuur 5. Migratie/integratie", subtitle = "Opleidingsscheidslijn", caption="DATA van LISS", x="jaar", y=" ") + 
     theme(plot.caption = element_text(hjust = 0))
 
 ggp
-ggplotly(ggp)
-
+ggsave(filename="plots/figuur5.png", plot=ggp)
+ggplotly(ggp) 
+figuur5 <- ggplotly(ggp)  
+htmlwidgets::saveWidget(figuur5, file.path("plots", 'figuur5.html'))
 
 ```
 
 
 ```{r}
 
-dataplot <- liss_long
+dataplot <- liss_srv_subset
 dataplot <- dataplot[dataplot$leeftijd>17,]
 dataplot$stedelijkheid <- as.factor(dataplot$sted)
 levels(dataplot$stedelijkheid) <- c("Zeer sterk", "Sterk", "Matig", "Weinig", " Niet")
@@ -419,15 +444,14 @@ dataplot$jaar <- dataplot$survey_wave + 2007
 
 ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= stedelijkheid)) +           # Create basic ggplot
   geom_smooth() + 
-  scale_x_continuous(name="jaar", breaks=c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020), limits=c(2008,2018)) +
+  scale_x_continuous(name="jaar", breaks=c(2008:2020), limits=c(2008,2018)) +
   scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
   labs(title="Figuur 6. Migratie/integratie", subtitle = "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y=" ") + 
     theme(plot.caption = element_text(hjust = 0))
 
 ggp
-
 ggsave(filename="plots/figuur6.png", plot=ggp)
-
+ggplotly(ggp)
 figuur6 <- ggplotly(ggp)
 htmlwidgets::saveWidget(figuur6, file.path("plots", 'figuur6.html'))
 ```
