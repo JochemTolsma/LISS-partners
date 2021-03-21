@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Thijmen Jeroense" />
+
+
+<title>Dataprep LISS SRV</title>
+
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/clipboard-1.7.1/clipboard.min.js"></script>
+<link href="site_libs/primer-tooltips-1.4.0/build.css" rel="stylesheet" />
+<link href="site_libs/klippy-0.0.0.9500/css/klippy.min.css" rel="stylesheet" />
+<script src="site_libs/klippy-0.0.0.9500/js/klippy.min.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Replication package</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Tables Manuscript</a>
+</li>
+<li>
+  <a href="dataprep.html">Data preperation</a>
+</li>
+<li>
+  <a href="trends.html">Trends SRV</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/JochemTolsma/LISS-partners">
+    <span class="fab fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+<li role="separator" class="divider"></li>
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Dataprep LISS SRV</h1>
+<h4 class="author">Thijmen Jeroense</h4>
+<h4 class="date">Last compiled on March, 2021</h4>
+
+</div>
+
+
+<script>
+  addClassKlippyTo("pre.r, pre.markdown");
+  addKlippy('right', 'top', 'auto', '1', 'Copy code', 'Copied!');
+</script>
+<style type="text/css">
+
+.watch-out {
+  background-color: lightpink;
+  border: 3px solid red;
+  font-weight: bold;
+}
+
+
+pre.test {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+}
+
+pre.test2 {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+  background-color: white
+}
+
+
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 24px;
+}
+
+
+</style>
+<pre class="r watch-out"><code># load packages.
+library(dplyr)
+library(haven)
+library(purrr)
+library(tidyr)</code></pre>
+<div id="constructing-the-merged-liss-data" class="section level2">
+<h2>Constructing the merged LISS data</h2>
+<pre class="r test"><code>##---------------------------- LISS Merging ----------------------------##
+#Dyad data preperation.
+#Author: Thijmen Jeroense
+
+#disable the scientific notation in R (else all the id&#39;s will be in scientific notation)
+options(scipen = 999) #JT op het eind van dit script weer aan zetten? 
+
+getwd()
+setwd(&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/&quot;)
+
+
+rm(list = ls())
+##---------------------------- Data import and Merging the different LISS files ----------------------------##
+
+
+#---------------------------------- LISS leisure and integration file ----------------------------------#
+
+#import the different liss files from their directory. 
+#file_names=as.list(dir(path=&quot;docs/data-raw/leisure_integ_data/&quot;, pattern = &#39;*.sav&#39;)) #TJ I added DOCS/ as the data-raw exists in the docs dir. 
+#create an empty list so that we can load all the files in this list. 
+#desired_length &lt;- 11 #
+#liss_files &lt;- vector(mode = &quot;list&quot;, length = desired_length)
+
+#import all the files in the list.
+#for (i in 1:length(file_names)) {
+#  liss_files[[i]] &lt;- read_sav(paste(&quot;docs/data-raw/leisure_integ_data/&quot;,file_names[[i]], sep=&quot;&quot;))
+#}
+
+#For a full outer join.
+#liss_merged &lt;- liss_files %&gt;%
+#  reduce(full_join, by = &#39;nomem_encr&#39;) %&gt;% ##JT weird programming. ANSWER TJ: this is a common solution for this kind of problem: https://stackoverflow.com/questions/8091303/simultaneously-merge-multiple-data-frames-in-a-list 
+#arrange the df on nomem_encr.
+# arrange(nomem_encr)
+
+#we now have a df based on 14473 observations and 4909 variables. 
+
+#---------------------------------- Politics and Values ----------------------------------#
+
+#do the same for the politics and values data. 
+#get the politics and values data.
+#I do this seperately as I wanted to create wave id&#39;s, and this was easier to do on one file.
+#import the data files.
+file_names=as.list(dir(path=&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/pol_data/&quot;, pattern = &#39;*.sav&#39;))
+liss_files &lt;- list()
+
+#loop to load all the data in one list.
+#name them. 
+for (i in 1:length(file_names)) {
+  liss_files[[i]] &lt;- read_sav(paste(&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/pol_data/&quot;,file_names[[i]], sep=&quot;&quot;))
+} 
+
+#merge the data into one file.
+liss_pol &lt;- liss_files %&gt;%
+  reduce(full_join, by = &#39;nomem_encr&#39;) %&gt;%
+  #order on nomem_encr
+  arrange(nomem_encr)
+
+#df with 14040 observations of 1978 variables. 
+
+#remove the household id variables from the liss_pol and liss_merged file.
+# they are incomplete as in some waves they are not present. I will add them later with the background data. 
+liss_pol[,c(&quot;nohouse_encr&quot;, &quot;nohouse_encr.x&quot;, &quot;nohouse_encr.y&quot;, &quot;nohouse_encr.x.x&quot;, &quot;nohouse_encr.y.y&quot;)] &lt;- NULL
+#liss_merged[,c(&quot;nohouse_encr&quot;, &quot;nohouse_encr.x&quot;, &quot;nohouse_encr.y&quot;, &quot;nohouse_encr.x.x&quot;, &quot;nohouse_encr.y.y&quot;)] &lt;- NULL
+
+#---------------------------------- LISS CDN alter ids ----------------------------------#
+
+#get the alter id handles.
+# JT perhaps add some explanation how we retrieved this data. preferably in README.md. #Answer Thijmen: Will do. 
+
+#import the data files.
+#file_names=as.list(dir(path=&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/alter_data/&quot;, pattern = &#39;*.sav&#39;))
+#liss_names_alters &lt;- vector(mode = &quot;list&quot;, length = 11)
+
+#loop to load all the data in one list.
+#name them. 
+#for (i in 1:length(file_names)) {
+#  liss_names_alters[[i]] &lt;- read_sav(paste(&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS #data/original_data/alter_data/&quot;,file_names[[i]], sep=&quot;&quot;))
+#} 
+
+#just to be sure, order the files on nomem_encr and add suffixes to the data.
+#Then we can correctly identify the different waves. 
+#liss_files &lt;- lapply(1:11, function(i) {
+#  data &lt;- liss_names_alters[[i]]
+  #Now I add suffixes to all the variables except the ID var, so we can correctly Identify the wave to which a variable belongs in the merged data. Otherwise we will have 11 sets of the same variables with a random .x or .y. 
+#  names(data)[-1] &lt;- paste0(names(data)[-1], sep = &quot;.&quot;, c(1:11)[i])
+#  return(data)
+#})
+
+#merge the data
+#liss_alter &lt;- liss_files %&gt;%
+#  reduce(full_join, by = &#39;nomem_encr&#39;) %&gt;%
+#  arrange(nomem_encr)
+
+#---------------------------------- LISS background----------------------------------#
+#import the background variable data. 
+#import data files.
+file_names=as.list(dir(path=&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/avars/&quot;, pattern = &#39;*.sav&#39;))
+liss_files &lt;- list()
+
+#import the files in a for loop.
+for (i in 1:length(file_names)) {
+  liss_files[[i]] &lt;- read_sav(paste(&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/original_data/avars/&quot;,file_names[[i]], sep=&quot;&quot;))
+} 
+
+#just to be sure, order the files on nomem_encr and add suffixes to the data 
+# JT Please explain the suffixes here and in text
+liss_files &lt;- lapply(1:12, function(i) {
+  data &lt;- liss_files[[i]][base::order(liss_files[[i]]$nomem_encr),]
+  names(data)[-1] &lt;- paste0(names(data)[-1], sep = &quot;.&quot;, c(1:12)[i])
+  return(data)
+})
+
+#merge the data. 
+liss_background &lt;- liss_files %&gt;%
+  reduce(full_join, by = &#39;nomem_encr&#39;) %&gt;%
+  arrange(nomem_encr)
+
+#we now have a DF with 25281 observations of 341 variables. 
+
+#----------------------------------Merging all the files into one wide file ----------------------------------#
+
+#merge all the data with an full outer join into one file. 
+#okay, let&#39;s merge the liss_merged, liss_alter and the politics and values waves.
+liss &lt;- liss_pol %&gt;%
+ # full_join(liss_alter, by = &quot;nomem_encr&quot;) %&gt;%
+ # full_join(liss_pol, by = &quot;nomem_encr&quot;) %&gt;%
+  full_join(liss_background, by = &quot;nomem_encr&quot;) %&gt;%
+  arrange(nomem_encr)
+
+#The final DF consists of 25306 observations with 7271 variables. 
+
+#JT I think my strategy would be to use full joins and then afterwards use filters to select respondents. That way we know how many respondents we loose. We would like to report this in our manuscript right? 
+
+#TJ: agree, I mow edited the procedure to use tidy as much as possible, some custom functions I prefer to use a loop for. For another version I will try to change this to tidy notation, but for now that will take up too much time. 
+
+#clean the global environment.
+#rm(file_names, liss_files, #liss_merged, liss_merged_alter, liss_names_alters, 
+# desired_length, i, liss_pol, liss_background)
+rm(list=ls()[! ls() %in% c(&quot;liss&quot;)])
+
+#we now have 25306 cases of 7271 variables.
+
+#--------------------------------------------- Filter out cases ------------------------------------------#
+#we can use the month of datacollection to see whether someone has participated in a specific year/module combination
+# if someone has an an NA they did not participate in it.
+# so we want people who participated in the CDN module and also in the politics and values waves. 
+# Let&#39;s create a filter of people who participated in at least one of thse. 
+#example of wave 1 var. 
+#table(liss$cs08a_m, useNA = &#39;always&#39;)
+
+#first create a leisure and integration NA variable.
+#first create a subset of the data, so we can use rowwise to create a selection id. 
+#subset1 &lt;- liss %&gt;%
+#  rowwise() %&gt;%
+  #create filter variable
+#  mutate(na_lei_int = sum(is.na(c(cs08a_m, cs09b_m, cs10c_m, cs11d_m, cs12e_m, cs13f_m, cs14g_m, cs15h_m, cs16i_m, cs17j_m, cs18k_m)))) %&gt;%
+  #use only the observations that have participated in at least one wave of the leisure and integration data. We can of course change this later on. 
+#  filter(na_lei_int &lt; 11) %&gt;%
+#  ungroup()
+
+#we go from 25306 cases to 14473 cases. 
+
+
+#second create a pol val NA variable.
+#filter out respondents who did not participate in any of the 11 waves. 
+liss_subset &lt;- liss %&gt;%
+  rowwise() %&gt;%
+  mutate(na_pol_val = sum(is.na(c(cv08a_m, cv09b_m, cv10c_m, cv11d_m, cv12e_m, cv13f_m, cv14g_m,
+         cv17i_m, cv18j_m1, cv18j_m2, cv18j_m3, cv19k_m1, cv19k_m2, cv19k_m3,cv20l_m1, cv20l_m2, cv20l_m3)))) %&gt;%
+  filter(na_pol_val &lt; 17) %&gt;% #now it is 14, due the weird coding in 18/19. 
+  ungroup()
+  
+#we go from 14473 cases to 13273 cases. We will work with this liss_subset dataframe. 
+
+#--------------------------------------------- Variable selection from the complete liss file --------------------------------------------#
+# JT: could you please make a folder with all codebooks so I/reviewers can look up the variable names. 
+# Check
+
+#create subset of all the data that I want for every wave. Then we can make a new file where we only have the selected data that we want.
+#liss politics variables that I need
+liss_pol &lt;- liss_subset %&gt;%
+  select(nomem_encr, cv08a012,cv08a047, cv08a048, cv08a049, cv08a050, cv08a051, cv08a052, cv08a058, cv08a101, cv08a102, cv08a103, cv08a104, cv08a105, cv08a001, cv08a044, cv08a014, cv08a106, cv08a107, cv08a108, cv08a109,cv08a110,cv08a111,cv08a112,cv08a113,cv08a114,cv08a115, cv08a116,cv08a117,cv08a118,cv08a119,cv08a120,cv08a121,cv08a122,cv08a123,
+         cv09b012,cv09b047, cv09b048, cv09b049, cv09b050, cv09b051, cv09b052, cv09b058, cv09b101, cv09b102, cv09b103, cv09b104, cv09b105, cv09b001, cv09b044, cv09b014,cv09b106, cv09b107, cv09b108, cv09b109,cv09b110,cv09b111,cv09b112,cv09b113,cv09b114,cv09b115,cv09b116,cv09b117,cv09b118,cv09b119,cv09b120,cv09b121,cv09b122,cv09b123,
+         cv10c012,cv10c047, cv10c048, cv10c049, cv10c050, cv10c051, cv10c052, cv10c058, cv10c101, cv10c102, cv10c103, cv10c104, cv10c105, cv10c001, cv10c044, cv10c014,cv10c106, cv10c107, cv10c108, cv10c109,cv10c110,cv10c111,cv10c112,cv10c113,cv10c114,cv10c115,cv10c116,cv10c117,cv10c118,cv10c119,cv10c120,cv10c121,cv10c122,cv10c123,
+         cv11d012,cv11d047, cv11d048, cv11d049, cv11d050, cv11d051, cv11d052, cv11d171, cv11d101, cv11d102, cv11d103, cv11d104, cv11d105, cv11d001, cv11d044, cv11d014,cv11d106, cv11d107, cv11d108, cv11d109,cv11d110,cv11d111,cv11d112,cv11d113,cv11d114,cv11d115, cv11d116,cv11d117,cv11d118,cv11d119,cv11d120,cv11d121,cv11d122,cv11d123,
+         cv12e012,cv12e047, cv12e048, cv12e049, cv12e050, cv12e051, cv12e052, cv12e171, cv12e101, cv12e102, cv12e103, cv12e104, cv12e105, cv12e001, cv12e044, cv12e014,cv12e106, cv12e107, cv12e108, cv12e109,cv12e110,cv12e111,cv12e112,cv12e113,cv12e114,cv12e115, cv12e116,cv12e117,cv12e118,cv12e119,cv12e120,cv12e121,cv12e122,cv12e123,
+         cv13f012,cv13f047, cv13f048, cv13f049, cv13f050, cv13f051, cv13f052, cv13f209, cv13f101, cv13f102, cv13f103, cv13f104, cv13f105, cv13f001, cv13f044, cv13f014,cv13f106, cv13f107, cv13f108, cv13f109,cv13f110,cv13f111,cv13f112,cv13f113,cv13f114,cv13f115, cv13f116,cv13f117,cv13f118,cv13f119,cv13f120,cv13f121,cv13f122,cv13f123,
+         cv14g012,cv14g047, cv14g048, cv14g049, cv14g050, cv14g051, cv14g052, cv14g209, cv14g101, cv14g102, cv14g103, cv14g104, cv14g105, cv14g001, cv14g044, cv14g014,cv14g106, cv14g107, cv14g108, cv14g109,cv14g110,cv14g111,cv14g112,cv14g113,cv14g114,cv14g115, cv14g116,cv14g117,cv14g118,cv14g119,cv14g120,cv14g121,cv14g122,cv14g123,
+         cv16h012,cv16h047, cv16h048, cv16h049, cv16h050, cv16h051, cv16h052, cv16h209, cv16h101, cv16h102, cv16h103, cv16h104, cv16h105, cv16h001, cv16h044, cv16h014,cv16h106, cv16h107, cv16h108, cv16h109,cv16h110,cv16h111,cv16h112,cv16h113,cv16h114,cv16h115, cv16h116,cv16h117,cv16h118,cv16h119,cv16h120,cv16h121,cv16h122,cv16h123,
+         cv17i012,cv17i047, cv17i048, cv17i049, cv17i050, cv17i051, cv17i052, cv17i244, cv17i101, cv17i102, cv17i103, cv17i104, cv17i105, cv17i001, cv17i044, cv17i014,cv17i106, cv17i107, cv17i108, cv17i109,cv17i110,cv17i111,cv17i112,cv17i113,cv17i114,cv17i115, cv17i116,cv17i117,cv17i118,cv17i119,cv17i120,cv17i121,cv17i122,cv17i123,
+         cv18j012,cv18j047, cv18j048, cv18j049, cv18j050, cv18j051, cv18j052, cv18j243, cv18j101, cv18j102, cv18j103, cv18j104, cv18j105, cv18j001, cv18j044, cv18j014,cv18j106, cv18j107, cv18j108, cv18j109,cv18j110,cv18j111,cv18j112,cv18j113,cv18j114,cv18j115, cv18j116,cv18j117,cv18j118,cv18j119,cv18j120,cv18j121,cv18j122,cv18j123,
+         cv19k012,cv19k047, cv19k048, cv19k049, cv19k050, cv19k051, cv19k052, cv19k243, cv19k101, cv19k102, cv19k103, cv19k104, cv19k105, cv19k001, cv19k044, cv19k014,cv19k106, cv19k107, cv19k108, cv19k109,cv19k110,cv19k111,cv19k112,cv19k113,cv19k114,cv19k115, cv19k116,cv19k117,cv19k118,cv19k119,cv19k120,cv19k121,cv19k122,cv19k123,
+         cv20l012,cv20l047, cv20l048, cv20l049, cv20l050, cv20l051, cv20l052, cv20l243, cv20l101, cv20l102, cv20l103, cv20l104, cv20l105, cv20l001, cv20l044, cv20l014,cv20l106, cv20l107, cv20l108, cv20l109,cv20l110,cv20l111,cv20l112,cv20l113,cv20l114,cv20l115, cv20l116,cv20l117,cv20l118,cv20l119,cv20l120,cv20l121,cv20l122,cv20l123)
+
+
+#change names.
+names(liss_pol)&lt;- c(&quot;nomem_encr&quot;, &quot;pol_int.1&quot;   ,   &quot;parl_donot_care.1&quot; ,   &quot;pol_part_int.1&quot;    ,   &quot;no_influece.1&quot; ,   &quot;cap_act_pol.1&quot; ,   &quot;clear_picture.1&quot;   ,   &quot;pol_compl.1&quot;   ,   &quot;vote_int.1&quot;    ,   &quot;lr_scale.1&quot;    ,   &quot;euthanasia.1&quot;  ,   &quot;income_diff.1&quot; ,   &quot;immigrants.1&quot;, &quot;eu_integration.1&quot;  ,&quot;gov_sat.1&quot;, &quot;satdem.1&quot;, &quot;poltrust.1&quot;, &quot;postmatfirst.1&quot;, &quot;postmatsecond.1&quot;, &quot;postmatthird.1&quot;, &quot;workingmother.1&quot;, &quot;childjobmother.1&quot;, &quot;fulltimemother.1&quot;, &quot;equalcontribution.1&quot;, &quot;fatherworks.1&quot;, &quot;fatherhousehold.1&quot;, &quot;fatherschildcare.1&quot;, &quot;differentculture.1&quot;, &quot;foreignerculture.1&quot;, &quot;asylum.1&quot;, &quot;foreignsocsec.1&quot;, &quot;toomanyforeigners.1&quot;, &quot;foreignnotaccepted.1&quot;, &quot;foreigneconomy.1&quot;, &quot;neighborhood.1&quot;, 
+                    &quot;pol_int.2&quot; ,   &quot;parl_donot_care.2&quot; ,   &quot;pol_part_int.2&quot;    ,   &quot;no_influece.2&quot; ,   &quot;cap_act_pol.2&quot; ,   &quot;clear_picture.2&quot;   ,   &quot;pol_compl.2&quot;   ,   &quot;vote_int.2&quot;    ,   &quot;lr_scale.2&quot;    ,   &quot;euthanasia.2&quot;  ,   &quot;income_diff.2&quot; ,   &quot;immigrants.2&quot;  ,   &quot;eu_integration.2&quot;  ,&quot;gov_sat.2&quot;, &quot;satdem.2&quot;, &quot;poltrust.2&quot;,&quot;postmatfirst.2&quot;, &quot;postmatsecond.2&quot;, &quot;postmatthird.2&quot;, &quot;workingmother.2&quot;, &quot;childjobmother.2&quot;, &quot;fulltimemother.2&quot;, &quot;equalcontribution.2&quot;, &quot;fatherworks.2&quot;, &quot;fatherhousehold.2&quot;, &quot;fatherschildcare.2&quot;, &quot;differentculture.2&quot;, &quot;foreignerculture.2&quot;, &quot;asylum.2&quot;, &quot;foreignsocsec.2&quot;, &quot;toomanyforeigners.2&quot;, &quot;foreignnotaccepted.2&quot;, &quot;foreigneconomy.2&quot;, &quot;neighborhood.2&quot;,
+                    &quot;pol_int.3&quot; ,   &quot;parl_donot_care.3&quot; ,   &quot;pol_part_int.3&quot;    ,   &quot;no_influece.3&quot; ,   &quot;cap_act_pol.3&quot; ,   &quot;clear_picture.3&quot;   ,   &quot;pol_compl.3&quot;   ,   &quot;vote_int.3&quot;    ,   &quot;lr_scale.3&quot;    ,   &quot;euthanasia.3&quot;  ,   &quot;income_diff.3&quot; ,   &quot;immigrants.3&quot;  ,   &quot;eu_integration.3&quot;  ,&quot;gov_sat.3&quot;, &quot;satdem.3&quot;, &quot;poltrust.3&quot;,&quot;postmatfirst.3&quot;, &quot;postmatsecond.3&quot;, &quot;postmatthird.3&quot;, &quot;workingmother.3&quot;, &quot;childjobmother.3&quot;, &quot;fulltimemother.3&quot;, &quot;equalcontribution.3&quot;, &quot;fatherworks.3&quot;, &quot;fatherhousehold.3&quot;, &quot;fatherschildcare.3&quot;, &quot;differentculture.3&quot;, &quot;foreignerculture.3&quot;, &quot;asylum.3&quot;, &quot;foreignsocsec.3&quot;, &quot;toomanyforeigners.3&quot;, &quot;foreignnotaccepted.3&quot;, &quot;foreigneconomy.3&quot;, &quot;neighborhood.3&quot;,
+                    &quot;pol_int.4&quot; ,   &quot;parl_donot_care.4&quot; ,   &quot;pol_part_int.4&quot;    ,   &quot;no_influece.4&quot; ,   &quot;cap_act_pol.4&quot; ,   &quot;clear_picture.4&quot;   ,   &quot;pol_compl.4&quot;   ,   &quot;vote_int.4&quot;    ,   &quot;lr_scale.4&quot;    ,   &quot;euthanasia.4&quot;  ,   &quot;income_diff.4&quot; ,   &quot;immigrants.4&quot;  ,   &quot;eu_integration.4&quot;  ,&quot;gov_sat.4&quot;, &quot;satdem.4&quot;, &quot;poltrust.4&quot;,&quot;postmatfirst.4&quot;, &quot;postmatsecond.4&quot;, &quot;postmatthird.4&quot;, &quot;workingmother.4&quot;, &quot;childjobmother.4&quot;, &quot;fulltimemother.4&quot;, &quot;equalcontribution.4&quot;, &quot;fatherworks.4&quot;, &quot;fatherhousehold.4&quot;, &quot;fatherschildcare.4&quot;,&quot;differentculture.4&quot;, &quot;foreignerculture.4&quot;, &quot;asylum.4&quot;, &quot;foreignsocsec.4&quot;, &quot;toomanyforeigners.4&quot;, &quot;foreignnotaccepted.4&quot;, &quot;foreigneconomy.4&quot;, &quot;neighborhood.4&quot;,
+                    &quot;pol_int.5&quot; ,   &quot;parl_donot_care.5&quot; ,   &quot;pol_part_int.5&quot;    ,   &quot;no_influece.5&quot; ,   &quot;cap_act_pol.5&quot; ,   &quot;clear_picture.5&quot;   ,   &quot;pol_compl.5&quot;   ,   &quot;vote_int.5&quot;    ,   &quot;lr_scale.5&quot;    ,   &quot;euthanasia.5&quot;  ,   &quot;income_diff.5&quot; ,   &quot;immigrants.5&quot;  ,   &quot;eu_integration.5&quot;  ,&quot;gov_sat.5&quot;, &quot;satdem.5&quot;, &quot;poltrust.5&quot;,&quot;postmatfirst.5&quot;, &quot;postmatsecond.5&quot;, &quot;postmatthird.5&quot;, &quot;workingmother.5&quot;, &quot;childjobmother.5&quot;, &quot;fulltimemother.5&quot;, &quot;equalcontribution.5&quot;, &quot;fatherworks.5&quot;, &quot;fatherhousehold.5&quot;, &quot;fatherschildcare.5&quot;,&quot;differentculture.5&quot;, &quot;foreignerculture.5&quot;, &quot;asylum.5&quot;, &quot;foreignsocsec.5&quot;, &quot;toomanyforeigners.5&quot;, &quot;foreignnotaccepted.5&quot;, &quot;foreigneconomy.5&quot;, &quot;neighborhood.5&quot;,
+                    &quot;pol_int.6&quot; ,   &quot;parl_donot_care.6&quot; ,   &quot;pol_part_int.6&quot;    ,   &quot;no_influece.6&quot; ,   &quot;cap_act_pol.6&quot; ,   &quot;clear_picture.6&quot;   ,   &quot;pol_compl.6&quot;   ,   &quot;vote_int.6&quot;    ,   &quot;lr_scale.6&quot;    ,   &quot;euthanasia.6&quot;  ,   &quot;income_diff.6&quot; ,   &quot;immigrants.6&quot;  ,   &quot;eu_integration.6&quot;  ,&quot;gov_sat.6&quot;, &quot;satdem.6&quot;, &quot;poltrust.6&quot;,&quot;postmatfirst.6&quot;, &quot;postmatsecond.6&quot;, &quot;postmatthird.6&quot;, &quot;workingmother.6&quot;, &quot;childjobmother.6&quot;, &quot;fulltimemother.6&quot;, &quot;equalcontribution.6&quot;, &quot;fatherworks.6&quot;, &quot;fatherhousehold.6&quot;, &quot;fatherschildcare.6&quot;,&quot;differentculture.6&quot;, &quot;foreignerculture.6&quot;, &quot;asylum.6&quot;, &quot;foreignsocsec.6&quot;, &quot;toomanyforeigners.6&quot;, &quot;foreignnotaccepted.6&quot;, &quot;foreigneconomy.6&quot;, &quot;neighborhood.6&quot;,
+                    &quot;pol_int.7&quot; ,   &quot;parl_donot_care.7&quot; ,   &quot;pol_part_int.7&quot;    ,   &quot;no_influece.7&quot; ,   &quot;cap_act_pol.7&quot; ,   &quot;clear_picture.7&quot;   ,   &quot;pol_compl.7&quot;   ,   &quot;vote_int.7&quot;    ,   &quot;lr_scale.7&quot;    ,   &quot;euthanasia.7&quot;  ,   &quot;income_diff.7&quot; ,   &quot;immigrants.7&quot;  ,   &quot;eu_integration.7&quot;  ,&quot;gov_sat.7&quot;, &quot;satdem.7&quot;, &quot;poltrust.7&quot;,&quot;postmatfirst.7&quot;, &quot;postmatsecond.7&quot;, &quot;postmatthird.7&quot;, &quot;workingmother.7&quot;, &quot;childjobmother.7&quot;, &quot;fulltimemother.7&quot;, &quot;equalcontribution.7&quot;, &quot;fatherworks.7&quot;, &quot;fatherhousehold.7&quot;, &quot;fatherschildcare.7&quot;,&quot;differentculture.7&quot;, &quot;foreignerculture.7&quot;, &quot;asylum.7&quot;, &quot;foreignsocsec.7&quot;, &quot;toomanyforeigners.7&quot;, &quot;foreignnotaccepted.7&quot;, &quot;foreigneconomy.7&quot;, &quot;neighborhood.7&quot;,
+                    &quot;pol_int.8&quot; ,   &quot;parl_donot_care.8&quot; ,   &quot;pol_part_int.8&quot;    ,   &quot;no_influece.8&quot; ,   &quot;cap_act_pol.8&quot; ,   &quot;clear_picture.8&quot;   ,   &quot;pol_compl.8&quot;   ,   &quot;vote_int.8&quot;    ,   &quot;lr_scale.8&quot;    ,   &quot;euthanasia.8&quot;  ,   &quot;income_diff.8&quot; ,   &quot;immigrants.8&quot;  ,   &quot;eu_integration.8&quot;  ,&quot;gov_sat.8&quot;, &quot;satdem.8&quot;, &quot;poltrust.8&quot;,&quot;postmatfirst.8&quot;, &quot;postmatsecond.8&quot;, &quot;postmatthird.8&quot;, &quot;workingmother.8&quot;, &quot;childjobmother.8&quot;, &quot;fulltimemother.8&quot;, &quot;equalcontribution.8&quot;, &quot;fatherworks.8&quot;, &quot;fatherhousehold.8&quot;, &quot;fatherschildcare.8&quot;,&quot;differentculture.8&quot;, &quot;foreignerculture.8&quot;, &quot;asylum.8&quot;, &quot;foreignsocsec.8&quot;, &quot;toomanyforeigners.8&quot;, &quot;foreignnotaccepted.8&quot;, &quot;foreigneconomy.8&quot;, &quot;neighborhood.8&quot;,
+                    &quot;pol_int.9&quot; ,   &quot;parl_donot_care.9&quot; ,   &quot;pol_part_int.9&quot;    ,   &quot;no_influece.9&quot; ,   &quot;cap_act_pol.9&quot; ,   &quot;clear_picture.9&quot;   ,   &quot;pol_compl.9&quot;   ,   &quot;vote_int.9&quot;    ,   &quot;lr_scale.9&quot;    ,   &quot;euthanasia.9&quot;  ,   &quot;income_diff.9&quot; ,   &quot;immigrants.9&quot;  ,   &quot;eu_integration.9&quot;,&quot;gov_sat.9&quot;, &quot;satdem.9&quot;, &quot;poltrust.9&quot;,&quot;postmatfirst.9&quot;, &quot;postmatsecond.9&quot;, &quot;postmatthird.9&quot;, &quot;workingmother.9&quot;, &quot;childjobmother.9&quot;, &quot;fulltimemother.9&quot;, &quot;equalcontribution.9&quot;, &quot;fatherworks.9&quot;, &quot;fatherhousehold.9&quot;, &quot;fatherschildcare.9&quot;,&quot;differentculture.9&quot;, &quot;foreignerculture.9&quot;, &quot;asylum.9&quot;, &quot;foreignsocsec.9&quot;, &quot;toomanyforeigners.9&quot;, &quot;foreignnotaccepted.9&quot;, &quot;foreigneconomy.9&quot;, &quot;neighborhood.9&quot;,
+                    &quot;pol_int.10&quot;    ,   &quot;parl_donot_care.10&quot;    ,   &quot;pol_part_int.10&quot;   ,   &quot;no_influece.10&quot;    ,   &quot;cap_act_pol.10&quot;    ,   &quot;clear_picture.10&quot;  ,   &quot;pol_compl.10&quot;  ,   &quot;vote_int.10&quot;   ,   &quot;lr_scale.10&quot;   ,   &quot;euthanasia.10&quot; ,   &quot;income_diff.10&quot;    ,   &quot;immigrants.10&quot; ,   &quot;eu_integration.10&quot;,&quot;gov_sat.10&quot;, &quot;satdem.10&quot;, &quot;poltrust.10&quot;, &quot;postmatfirst.10&quot;, &quot;postmatsecond.10&quot;, &quot;postmatthird.10&quot;, &quot;workingmother.10&quot;, &quot;childjobmother.10&quot;, &quot;fulltimemother.10&quot;, &quot;equalcontribution.10&quot;, &quot;fatherworks.10&quot;, &quot;fatherhousehold.10&quot;, &quot;fatherschildcare.10&quot;,&quot;differentculture.10&quot;, &quot;foreignerculture.10&quot;, &quot;asylum.10&quot;, &quot;foreignsocsec.10&quot;, &quot;toomanyforeigners.10&quot;, &quot;foreignnotaccepted.10&quot;, &quot;foreigneconomy.10&quot;, &quot;neighborhood.10&quot;,
+                    &quot;pol_int.11&quot;    ,   &quot;parl_donot_care.11&quot;    ,   &quot;pol_part_int.11&quot;   ,   &quot;no_influece.11&quot;    ,   &quot;cap_act_pol.11&quot;    ,   &quot;clear_picture.11&quot;  ,   &quot;pol_compl.11&quot;  ,   &quot;vote_int.11&quot;   ,   &quot;lr_scale.11&quot;   ,   &quot;euthanasia.11&quot; ,   &quot;income_diff.11&quot;    ,   &quot;immigrants.11&quot; ,   &quot;eu_integration.11&quot;,&quot;gov_sat.11&quot;, &quot;satdem.11&quot;, &quot;poltrust.11&quot;, &quot;postmatfirst.11&quot;, &quot;postmatsecond.11&quot;, &quot;postmatthird.11&quot;, &quot;workingmother.11&quot;, &quot;childjobmother.11&quot;, &quot;fulltimemother.11&quot;, &quot;equalcontribution.11&quot;, &quot;fatherworks.11&quot;, &quot;fatherhousehold.11&quot;, &quot;fatherschildcare.11&quot;,&quot;differentculture.11&quot;, &quot;foreignerculture.11&quot;, &quot;asylum.11&quot;, &quot;foreignsocsec.11&quot;, &quot;toomanyforeigners.11&quot;, &quot;foreignnotaccepted.11&quot;, &quot;foreigneconomy.11&quot;, &quot;neighborhood.11&quot;, 
+                    &quot;pol_int.12&quot;    ,   &quot;parl_donot_care.12&quot;    ,   &quot;pol_part_int.12&quot;   ,   &quot;no_influece.12&quot;    ,   &quot;cap_act_pol.12&quot;    ,   &quot;clear_picture.12&quot;  ,   &quot;pol_compl.12&quot;  ,   &quot;vote_int.12&quot;   ,   &quot;lr_scale.12&quot;   ,   &quot;euthanasia.12&quot; ,   &quot;income_diff.12&quot;    ,   &quot;immigrants.12&quot; ,   &quot;eu_integration.12&quot;,&quot;gov_sat.12&quot;, &quot;satdem.12&quot;, &quot;poltrust.12&quot;, &quot;postmatfirst.12&quot;, &quot;postmatsecond.12&quot;, &quot;postmatthird.12&quot;, &quot;workingmother.12&quot;, &quot;childjobmother.12&quot;, &quot;fulltimemother.12&quot;, &quot;equalcontribution.12&quot;, &quot;fatherworks.12&quot;, &quot;fatherhousehold.12&quot;, &quot;fatherschildcare.12&quot;,&quot;differentculture.12&quot;, &quot;foreignerculture.12&quot;, &quot;asylum.12&quot;, &quot;foreignsocsec.12&quot;, &quot;toomanyforeigners.12&quot;, &quot;foreignnotaccepted.12&quot;, &quot;foreigneconomy.12&quot;, &quot;neighborhood.12&quot;) 
+
+
+#get the background data and rename the columns. 
+liss_avars &lt;- liss_subset %&gt;%
+  select(geslacht.1,positie.1,gebjaar.1,leeftijd.1,lftdcat.1,aantalhh.1,aantalki.1,partner.1,burgstat.1,woonvorm.1,woning.1,sted.1,belbezig.1,brutoink.1,nettoink.1,brutocat.1,nettocat.1,oplzon.1,oplmet.1,oplcat.1, nohouse_encr.1,
+         geslacht.2,positie.2,gebjaar.2,leeftijd.2,lftdcat.2,aantalhh.2,aantalki.2,partner.2,burgstat.2,woonvorm.2,woning.2,sted.2,belbezig.2,brutoink.2,nettoink.2,brutocat.2,nettocat.2,oplzon.2,oplmet.2,oplcat.2, nohouse_encr.2,
+         geslacht.3,positie.3,gebjaar.3,leeftijd.3,lftdcat.3,aantalhh.3,aantalki.3,partner.3,burgstat.3,woonvorm.3,woning.3,sted.3,belbezig.3,brutoink.3,nettoink.3,brutocat.3,nettocat.3,oplzon.3,oplmet.3,oplcat.3, nohouse_encr.3,
+         geslacht.4,positie.4,gebjaar.4,leeftijd.4,lftdcat.4,aantalhh.4,aantalki.4,partner.4,burgstat.4,woonvorm.4,woning.4,sted.4,belbezig.4,brutoink.4,nettoink.4,brutocat.4,nettocat.4,oplzon.4,oplmet.4,oplcat.4, nohouse_encr.4,
+         geslacht.5,positie.5,gebjaar.5,leeftijd.5,lftdcat.5,aantalhh.5,aantalki.5,partner.5,burgstat.5,woonvorm.5,woning.5,sted.5,belbezig.5,brutoink.5,nettoink.5,brutocat.5,nettocat.5,oplzon.5,oplmet.5,oplcat.5, nohouse_encr.5,
+         geslacht.6,positie.6,gebjaar.6,leeftijd.6,lftdcat.6,aantalhh.6,aantalki.6,partner.6,burgstat.6,woonvorm.6,woning.6,sted.6,belbezig.6,brutoink.6,nettoink.6,brutocat.6,nettocat.6,oplzon.6,oplmet.6,oplcat.6, nohouse_encr.6,
+         geslacht.7,positie.7,gebjaar.7,leeftijd.7,lftdcat.7,aantalhh.7,aantalki.7,partner.7,burgstat.7,woonvorm.7,woning.7,sted.7,belbezig.7,brutoink.7,nettoink.7,brutocat.7,nettocat.7,oplzon.7,oplmet.7,oplcat.7, nohouse_encr.7,
+         geslacht.8,positie.8,gebjaar.8,leeftijd.8,lftdcat.8,aantalhh.8,aantalki.8,partner.8,burgstat.8,woonvorm.8,woning.8,sted.8,belbezig.8,brutoink.8,nettoink.8,brutocat.8,nettocat.8,oplzon.8,oplmet.8,oplcat.8, nohouse_encr.8,
+         geslacht.9,positie.9,gebjaar.9,leeftijd.9,lftdcat.9,aantalhh.9,aantalki.9,partner.9,burgstat.9,woonvorm.9,woning.9,sted.9,belbezig.9,brutoink.9,nettoink.9,brutocat.9,nettocat.9,oplzon.9,oplmet.9,oplcat.9, nohouse_encr.9,
+         geslacht.10,positie.10,gebjaar.10,leeftijd.10,lftdcat.10,aantalhh.10,aantalki.10,partner.10,burgstat.10,woonvorm.10,woning.10,sted.10,belbezig.10,brutoink.10,nettoink.10,brutocat.10,nettocat.10,oplzon.10,oplmet.10,oplcat.10, nohouse_encr.10,
+         geslacht.11,positie.11,gebjaar.11,leeftijd.11,lftdcat.11,aantalhh.11,aantalki.11,partner.11,burgstat.11,woonvorm.11,woning.11,sted.11,belbezig.11,brutoink.11,nettoink.11,brutocat.11,nettocat.11,oplzon.11,oplmet.11,oplcat.11, nohouse_encr.11,
+         geslacht.12,positie.12,gebjaar.12,leeftijd.12,lftdcat.12,aantalhh.12,aantalki.12,partner.12,burgstat.12,woonvorm.12,woning.12,sted.12,belbezig.12,brutoink.12,nettoink.12,brutocat.12,nettocat.12,oplzon.12,oplmet.12,oplcat.12, nohouse_encr.12)
+
+#get the background data and rename the columns.
+#For the first three waves there are is no data on this variable
+liss_origin &lt;- liss_subset %&gt;%
+  select(herkomstgroep.4, herkomstgroep.5, herkomstgroep.6, herkomstgroep.7, herkomstgroep.8, herkomstgroep.9, herkomstgroep.10, herkomstgroep.11, herkomstgroep.12)
+names(liss_origin) &lt;- c(&quot;origin.4&quot;, &quot;origin.5&quot;, &quot;origin.6&quot;, &quot;origin.7&quot;, &quot;origin.8&quot;, &quot;origin.9&quot;, &quot;origin.10&quot;,&quot;origin.11&quot;, &quot;origin.12&quot;)
+
+#create ego origin 1-3 with NA&#39;s so we can later merge them into a long file. 
+liss_origin$origin.1 &lt;- NA
+liss_origin$origin.2 &lt;- NA
+liss_origin$origin.3 &lt;- NA
+
+#For some reason the reshape command bugs when the ordering is not correct. 
+liss_origin &lt;- liss_origin[,c(9:11,1:8)]
+
+#combine the different data sources into one wide data file. 
+liss_wide &lt;- cbind(liss_pol, liss_avars, liss_origin)
+
+
+#------------------------------------- Variable recode -----------------------------------------------#
+#reverse code political discussion frequency and eu_integration.
+
+#--------------------------- Reshape to long file. -------------------------#
+#TJ: In the future I want to change this to a tidy function such as pivot_longer. For now I have not figured it out yet. (application of pivot_wide() was succesful).
+
+#@JT, what do you use for reshaping wide to long and vice versa?
+liss_srv_subset &lt;- liss_wide  %&gt;%
+  select(nomem_encr, oplmet.1, oplmet.2, oplmet.3, oplmet.4, oplmet.5, oplmet.6, oplmet.7, oplmet.8, oplmet.9, oplmet.10, oplmet.11, oplmet.12,
+         eu_integration.1, eu_integration.2, eu_integration.3, eu_integration.4, eu_integration.5, eu_integration.6, eu_integration.7, eu_integration.8, eu_integration.9, eu_integration.10, eu_integration.11, eu_integration.12,
+         immigrants.1, immigrants.2, immigrants.3, immigrants.4, immigrants.5, immigrants.6, immigrants.7, immigrants.8, immigrants.9, immigrants.10, immigrants.11, immigrants.12,
+         sted.1, sted.2, sted.3, sted.4, sted.5, sted.6, sted.7, sted.8, sted.9, sted.10, sted.11, sted.12,
+         leeftijd.1, leeftijd.2, leeftijd.3, leeftijd.4, leeftijd.5, leeftijd.6, leeftijd.7, leeftijd.8, leeftijd.9, leeftijd.10, leeftijd.11, leeftijd.12)
+         
+
+#create a long file.
+liss_srv_subset &lt;- reshape(liss_srv_subset, direction = &quot;long&quot;,
+                     varying = names(liss_srv_subset[,2:61]),
+                     idvar = &quot;nomem_encr&quot;,
+                     timevar = &quot;survey_wave&quot;,
+                     times = c(1:12))
+
+table(liss_srv_subset$eu_integration)
+
+#clean the environment. 
+rm(list=ls()[! ls() %in% c(&quot;liss_srv_subset&quot;, &quot;liss_wide&quot;)])
+
+
+#Export the data #
+#save RData.
+save.image(&quot;C:/Users/u399171/surfdrive/Research/PhD project/data/LISS data/created_data/LISS_srv_blog_polar.Rdata&quot;)</code></pre>
+</div>
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRhdGFwcmVwIExJU1MgU1JWIg0KYXV0aG9yOiAiVGhpam1lbiBKZXJvZW5zZSINCmJpYmxpb2dyYXBoeTogcmVmZXJlbmNlcy5iaWINCmRhdGU6ICJMYXN0IGNvbXBpbGVkIG9uIGByIGZvcm1hdChTeXMudGltZSgpLCAnJUIsICVZJylgIg0Kb3V0cHV0OiANCiAgaHRtbF9kb2N1bWVudDoNCiAgICB0b2M6ICB0cnVlDQogICAgdG9jX2Zsb2F0OiB0cnVlDQogICAgbnVtYmVyX3NlY3Rpb25zOiBmYWxzZQ0KICAgIGNvZGVfZm9sZGluZzogc2hvdw0KICAgIGNvZGVfZG93bmxvYWQ6IHllcw0KLS0tDQoNCmBgYHtyIHNldHVwLGdsb2JhbHNldHRpbmdzLCBpbmNsdWRlPUZBTFNFfQ0KI2tuaXRyOjpvcHRzX2NodW5rJHNldChlY2hvID0gVFJVRSwgY2FjaGU9VFJVRSwgcmVzdWx0cz0iaG9sZCIsIGV2YWw9RkFMU0UsIGNsYXNzLnNvdXJjZT1jKCJ0ZXN0IikpDQpsaWJyYXJ5KGtuaXRyKQ0Kb3B0c19jaHVuayRzZXQodGlkeS5vcHRzPWxpc3Qod2lkdGguY3V0b2ZmPTEwMCksdGlkeT1UUlVFLCB3YXJuaW5nID0gRkFMU0UsIG1lc3NhZ2UgPSBGQUxTRSxjb21tZW50ID0gIiM+IiwgY2FjaGU9VFJVRSwgY2xhc3Muc291cmNlPWMoInRlc3QiKSwgY2xhc3Mub3V0cHV0PWMoInRlc3QyIiksIHJlc3VsdHM9ImhvbGQiLCBldmFsPUZBTFNFKQ0Kb3B0aW9ucyh3aWR0aCA9IDEwMCkNCg0KY29sb3JpemUgPC0gZnVuY3Rpb24oeCwgY29sb3IpIHsNCiAgaWYgKGtuaXRyOjppc19sYXRleF9vdXRwdXQoKSkgew0KICAgIHNwcmludGYoIlxcdGV4dGNvbG9yeyVzfXslc30iLCBjb2xvciwgeCkNCiAgfSBlbHNlIGlmIChrbml0cjo6aXNfaHRtbF9vdXRwdXQoKSkgew0KICAgIHNwcmludGYoIjxzcGFuIHN0eWxlPSdjb2xvcjogJXM7Jz4lczwvc3Bhbj4iLCBjb2xvciwgDQogICAgICB4KQ0KICB9IGVsc2UgeA0KfQ0KDQpgYGANCg0KDQpgYGB7ciBrbGlwcHksIGVjaG89RkFMU0UsIGluY2x1ZGU9VFJVRSwgZXZhbD1UUlVFfQ0Ka2xpcHB5OjprbGlwcHkocG9zaXRpb24gPSBjKCd0b3AnLCAncmlnaHQnKSkNCiNrbGlwcHk6OmtsaXBweShjb2xvciA9ICdkYXJrcmVkJykNCiNrbGlwcHk6OmtsaXBweSh0b29sdGlwX21lc3NhZ2UgPSAnQ2xpY2sgdG8gY29weScsIHRvb2x0aXBfc3VjY2VzcyA9ICdEb25lJykNCmBgYA0KDQoNCg0KYGBge2NzcywgZWNobz1GQUxTRSwgZXZhbD1UUlVFfQ0KDQoud2F0Y2gtb3V0IHsNCiAgYmFja2dyb3VuZC1jb2xvcjogbGlnaHRwaW5rOw0KICBib3JkZXI6IDNweCBzb2xpZCByZWQ7DQogIGZvbnQtd2VpZ2h0OiBib2xkOw0KfQ0KDQoNCnByZS50ZXN0IHsNCiAgbWF4LWhlaWdodDogMzAwcHg7DQogIG92ZXJmbG93LXk6IGF1dG87DQogIG92ZXJmbG93LXg6IGF1dG87DQogIG1hcmdpbjogMHB4Ow0KfQ0KDQpwcmUudGVzdDIgew0KICBtYXgtaGVpZ2h0OiAzMDBweDsNCiAgb3ZlcmZsb3cteTogYXV0bzsNCiAgb3ZlcmZsb3cteDogYXV0bzsNCiAgbWFyZ2luOiAwcHg7DQogIGJhY2tncm91bmQtY29sb3I6IHdoaXRlDQp9DQoNCg0KaDEsIC5oMSwgaDIsIC5oMiwgaDMsIC5oMyB7DQogICAgbWFyZ2luLXRvcDogMjRweDsNCn0NCg0KDQpgYGANCg0KYGBge3IgcGFja2FnZXMsIGNsYXNzLnNvdXJjZT0id2F0Y2gtb3V0In0NCiNsb2FkIHBhY2thZ2VzLg0KbGlicmFyeShkcGx5cikNCmxpYnJhcnkoaGF2ZW4pDQpsaWJyYXJ5KHB1cnJyKQ0KbGlicmFyeSh0aWR5cikNCmBgYA0KDQoNCg0KDQojIyBDb25zdHJ1Y3RpbmcgdGhlIG1lcmdlZCBMSVNTIGRhdGENCg0KYGBge3IsIGV2YWw9RkFMU0V9DQojIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gTElTUyBNZXJnaW5nIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0jIw0KI0R5YWQgZGF0YSBwcmVwZXJhdGlvbi4NCiNBdXRob3I6IFRoaWptZW4gSmVyb2Vuc2UNCg0KI2Rpc2FibGUgdGhlIHNjaWVudGlmaWMgbm90YXRpb24gaW4gUiAoZWxzZSBhbGwgdGhlIGlkJ3Mgd2lsbCBiZSBpbiBzY2llbnRpZmljIG5vdGF0aW9uKQ0Kb3B0aW9ucyhzY2lwZW4gPSA5OTkpICNKVCBvcCBoZXQgZWluZCB2YW4gZGl0IHNjcmlwdCB3ZWVyIGFhbiB6ZXR0ZW4/IA0KDQpnZXR3ZCgpDQpzZXR3ZCgiQzovVXNlcnMvdTM5OTE3MS9zdXJmZHJpdmUvUmVzZWFyY2gvUGhEIHByb2plY3QvZGF0YS9MSVNTIGRhdGEvIikNCg0KDQpybShsaXN0ID0gbHMoKSkNCiMjLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBEYXRhIGltcG9ydCBhbmQgTWVyZ2luZyB0aGUgZGlmZmVyZW50IExJU1MgZmlsZXMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMjDQoNCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gTElTUyBsZWlzdXJlIGFuZCBpbnRlZ3JhdGlvbiBmaWxlIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0jDQoNCiNpbXBvcnQgdGhlIGRpZmZlcmVudCBsaXNzIGZpbGVzIGZyb20gdGhlaXIgZGlyZWN0b3J5LiANCiNmaWxlX25hbWVzPWFzLmxpc3QoZGlyKHBhdGg9ImRvY3MvZGF0YS1yYXcvbGVpc3VyZV9pbnRlZ19kYXRhLyIsIHBhdHRlcm4gPSAnKi5zYXYnKSkgI1RKIEkgYWRkZWQgRE9DUy8gYXMgdGhlIGRhdGEtcmF3IGV4aXN0cyBpbiB0aGUgZG9jcyBkaXIuIA0KI2NyZWF0ZSBhbiBlbXB0eSBsaXN0IHNvIHRoYXQgd2UgY2FuIGxvYWQgYWxsIHRoZSBmaWxlcyBpbiB0aGlzIGxpc3QuIA0KI2Rlc2lyZWRfbGVuZ3RoIDwtIDExICMNCiNsaXNzX2ZpbGVzIDwtIHZlY3Rvcihtb2RlID0gImxpc3QiLCBsZW5ndGggPSBkZXNpcmVkX2xlbmd0aCkNCg0KI2ltcG9ydCBhbGwgdGhlIGZpbGVzIGluIHRoZSBsaXN0Lg0KI2ZvciAoaSBpbiAxOmxlbmd0aChmaWxlX25hbWVzKSkgew0KIyAgbGlzc19maWxlc1tbaV1dIDwtIHJlYWRfc2F2KHBhc3RlKCJkb2NzL2RhdGEtcmF3L2xlaXN1cmVfaW50ZWdfZGF0YS8iLGZpbGVfbmFtZXNbW2ldXSwgc2VwPSIiKSkNCiN9DQoNCiNGb3IgYSBmdWxsIG91dGVyIGpvaW4uDQojbGlzc19tZXJnZWQgPC0gbGlzc19maWxlcyAlPiUNCiMgIHJlZHVjZShmdWxsX2pvaW4sIGJ5ID0gJ25vbWVtX2VuY3InKSAlPiUgIyNKVCB3ZWlyZCBwcm9ncmFtbWluZy4gQU5TV0VSIFRKOiB0aGlzIGlzIGEgY29tbW9uIHNvbHV0aW9uIGZvciB0aGlzIGtpbmQgb2YgcHJvYmxlbTogaHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvODA5MTMwMy9zaW11bHRhbmVvdXNseS1tZXJnZS1tdWx0aXBsZS1kYXRhLWZyYW1lcy1pbi1hLWxpc3QgDQojYXJyYW5nZSB0aGUgZGYgb24gbm9tZW1fZW5jci4NCiMgYXJyYW5nZShub21lbV9lbmNyKQ0KDQojd2Ugbm93IGhhdmUgYSBkZiBiYXNlZCBvbiAxNDQ3MyBvYnNlcnZhdGlvbnMgYW5kIDQ5MDkgdmFyaWFibGVzLiANCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gUG9saXRpY3MgYW5kIFZhbHVlcyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIw0KDQojZG8gdGhlIHNhbWUgZm9yIHRoZSBwb2xpdGljcyBhbmQgdmFsdWVzIGRhdGEuIA0KI2dldCB0aGUgcG9saXRpY3MgYW5kIHZhbHVlcyBkYXRhLg0KI0kgZG8gdGhpcyBzZXBlcmF0ZWx5IGFzIEkgd2FudGVkIHRvIGNyZWF0ZSB3YXZlIGlkJ3MsIGFuZCB0aGlzIHdhcyBlYXNpZXIgdG8gZG8gb24gb25lIGZpbGUuDQojaW1wb3J0IHRoZSBkYXRhIGZpbGVzLg0KZmlsZV9uYW1lcz1hcy5saXN0KGRpcihwYXRoPSJDOi9Vc2Vycy91Mzk5MTcxL3N1cmZkcml2ZS9SZXNlYXJjaC9QaEQgcHJvamVjdC9kYXRhL0xJU1MgZGF0YS9vcmlnaW5hbF9kYXRhL3BvbF9kYXRhLyIsIHBhdHRlcm4gPSAnKi5zYXYnKSkNCmxpc3NfZmlsZXMgPC0gbGlzdCgpDQoNCiNsb29wIHRvIGxvYWQgYWxsIHRoZSBkYXRhIGluIG9uZSBsaXN0Lg0KI25hbWUgdGhlbS4gDQpmb3IgKGkgaW4gMTpsZW5ndGgoZmlsZV9uYW1lcykpIHsNCiAgbGlzc19maWxlc1tbaV1dIDwtIHJlYWRfc2F2KHBhc3RlKCJDOi9Vc2Vycy91Mzk5MTcxL3N1cmZkcml2ZS9SZXNlYXJjaC9QaEQgcHJvamVjdC9kYXRhL0xJU1MgZGF0YS9vcmlnaW5hbF9kYXRhL3BvbF9kYXRhLyIsZmlsZV9uYW1lc1tbaV1dLCBzZXA9IiIpKQ0KfSANCg0KI21lcmdlIHRoZSBkYXRhIGludG8gb25lIGZpbGUuDQpsaXNzX3BvbCA8LSBsaXNzX2ZpbGVzICU+JQ0KICByZWR1Y2UoZnVsbF9qb2luLCBieSA9ICdub21lbV9lbmNyJykgJT4lDQogICNvcmRlciBvbiBub21lbV9lbmNyDQogIGFycmFuZ2Uobm9tZW1fZW5jcikNCg0KI2RmIHdpdGggMTQwNDAgb2JzZXJ2YXRpb25zIG9mIDE5NzggdmFyaWFibGVzLiANCg0KI3JlbW92ZSB0aGUgaG91c2Vob2xkIGlkIHZhcmlhYmxlcyBmcm9tIHRoZSBsaXNzX3BvbCBhbmQgbGlzc19tZXJnZWQgZmlsZS4NCiMgdGhleSBhcmUgaW5jb21wbGV0ZSBhcyBpbiBzb21lIHdhdmVzIHRoZXkgYXJlIG5vdCBwcmVzZW50LiBJIHdpbGwgYWRkIHRoZW0gbGF0ZXIgd2l0aCB0aGUgYmFja2dyb3VuZCBkYXRhLiANCmxpc3NfcG9sWyxjKCJub2hvdXNlX2VuY3IiLCAibm9ob3VzZV9lbmNyLngiLCAibm9ob3VzZV9lbmNyLnkiLCAibm9ob3VzZV9lbmNyLngueCIsICJub2hvdXNlX2VuY3IueS55IildIDwtIE5VTEwNCiNsaXNzX21lcmdlZFssYygibm9ob3VzZV9lbmNyIiwgIm5vaG91c2VfZW5jci54IiwgIm5vaG91c2VfZW5jci55IiwgIm5vaG91c2VfZW5jci54LngiLCAibm9ob3VzZV9lbmNyLnkueSIpXSA8LSBOVUxMDQoNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIExJU1MgQ0ROIGFsdGVyIGlkcyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIw0KDQojZ2V0IHRoZSBhbHRlciBpZCBoYW5kbGVzLg0KIyBKVCBwZXJoYXBzIGFkZCBzb21lIGV4cGxhbmF0aW9uIGhvdyB3ZSByZXRyaWV2ZWQgdGhpcyBkYXRhLiBwcmVmZXJhYmx5IGluIFJFQURNRS5tZC4gI0Fuc3dlciBUaGlqbWVuOiBXaWxsIGRvLiANCg0KI2ltcG9ydCB0aGUgZGF0YSBmaWxlcy4NCiNmaWxlX25hbWVzPWFzLmxpc3QoZGlyKHBhdGg9IkM6L1VzZXJzL3UzOTkxNzEvc3VyZmRyaXZlL1Jlc2VhcmNoL1BoRCBwcm9qZWN0L2RhdGEvTElTUyBkYXRhL29yaWdpbmFsX2RhdGEvYWx0ZXJfZGF0YS8iLCBwYXR0ZXJuID0gJyouc2F2JykpDQojbGlzc19uYW1lc19hbHRlcnMgPC0gdmVjdG9yKG1vZGUgPSAibGlzdCIsIGxlbmd0aCA9IDExKQ0KDQojbG9vcCB0byBsb2FkIGFsbCB0aGUgZGF0YSBpbiBvbmUgbGlzdC4NCiNuYW1lIHRoZW0uIA0KI2ZvciAoaSBpbiAxOmxlbmd0aChmaWxlX25hbWVzKSkgew0KIyAgbGlzc19uYW1lc19hbHRlcnNbW2ldXSA8LSByZWFkX3NhdihwYXN0ZSgiQzovVXNlcnMvdTM5OTE3MS9zdXJmZHJpdmUvUmVzZWFyY2gvUGhEIHByb2plY3QvZGF0YS9MSVNTICNkYXRhL29yaWdpbmFsX2RhdGEvYWx0ZXJfZGF0YS8iLGZpbGVfbmFtZXNbW2ldXSwgc2VwPSIiKSkNCiN9IA0KDQojanVzdCB0byBiZSBzdXJlLCBvcmRlciB0aGUgZmlsZXMgb24gbm9tZW1fZW5jciBhbmQgYWRkIHN1ZmZpeGVzIHRvIHRoZSBkYXRhLg0KI1RoZW4gd2UgY2FuIGNvcnJlY3RseSBpZGVudGlmeSB0aGUgZGlmZmVyZW50IHdhdmVzLiANCiNsaXNzX2ZpbGVzIDwtIGxhcHBseSgxOjExLCBmdW5jdGlvbihpKSB7DQojICBkYXRhIDwtIGxpc3NfbmFtZXNfYWx0ZXJzW1tpXV0NCiAgI05vdyBJIGFkZCBzdWZmaXhlcyB0byBhbGwgdGhlIHZhcmlhYmxlcyBleGNlcHQgdGhlIElEIHZhciwgc28gd2UgY2FuIGNvcnJlY3RseSBJZGVudGlmeSB0aGUgd2F2ZSB0byB3aGljaCBhIHZhcmlhYmxlIGJlbG9uZ3MgaW4gdGhlIG1lcmdlZCBkYXRhLiBPdGhlcndpc2Ugd2Ugd2lsbCBoYXZlIDExIHNldHMgb2YgdGhlIHNhbWUgdmFyaWFibGVzIHdpdGggYSByYW5kb20gLnggb3IgLnkuIA0KIyAgbmFtZXMoZGF0YSlbLTFdIDwtIHBhc3RlMChuYW1lcyhkYXRhKVstMV0sIHNlcCA9ICIuIiwgYygxOjExKVtpXSkNCiMgIHJldHVybihkYXRhKQ0KI30pDQoNCiNtZXJnZSB0aGUgZGF0YQ0KI2xpc3NfYWx0ZXIgPC0gbGlzc19maWxlcyAlPiUNCiMgIHJlZHVjZShmdWxsX2pvaW4sIGJ5ID0gJ25vbWVtX2VuY3InKSAlPiUNCiMgIGFycmFuZ2Uobm9tZW1fZW5jcikNCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gTElTUyBiYWNrZ3JvdW5kLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMNCiNpbXBvcnQgdGhlIGJhY2tncm91bmQgdmFyaWFibGUgZGF0YS4gDQojaW1wb3J0IGRhdGEgZmlsZXMuDQpmaWxlX25hbWVzPWFzLmxpc3QoZGlyKHBhdGg9IkM6L1VzZXJzL3UzOTkxNzEvc3VyZmRyaXZlL1Jlc2VhcmNoL1BoRCBwcm9qZWN0L2RhdGEvTElTUyBkYXRhL29yaWdpbmFsX2RhdGEvYXZhcnMvIiwgcGF0dGVybiA9ICcqLnNhdicpKQ0KbGlzc19maWxlcyA8LSBsaXN0KCkNCg0KI2ltcG9ydCB0aGUgZmlsZXMgaW4gYSBmb3IgbG9vcC4NCmZvciAoaSBpbiAxOmxlbmd0aChmaWxlX25hbWVzKSkgew0KICBsaXNzX2ZpbGVzW1tpXV0gPC0gcmVhZF9zYXYocGFzdGUoIkM6L1VzZXJzL3UzOTkxNzEvc3VyZmRyaXZlL1Jlc2VhcmNoL1BoRCBwcm9qZWN0L2RhdGEvTElTUyBkYXRhL29yaWdpbmFsX2RhdGEvYXZhcnMvIixmaWxlX25hbWVzW1tpXV0sIHNlcD0iIikpDQp9IA0KDQojanVzdCB0byBiZSBzdXJlLCBvcmRlciB0aGUgZmlsZXMgb24gbm9tZW1fZW5jciBhbmQgYWRkIHN1ZmZpeGVzIHRvIHRoZSBkYXRhIA0KIyBKVCBQbGVhc2UgZXhwbGFpbiB0aGUgc3VmZml4ZXMgaGVyZSBhbmQgaW4gdGV4dA0KbGlzc19maWxlcyA8LSBsYXBwbHkoMToxMiwgZnVuY3Rpb24oaSkgew0KICBkYXRhIDwtIGxpc3NfZmlsZXNbW2ldXVtiYXNlOjpvcmRlcihsaXNzX2ZpbGVzW1tpXV0kbm9tZW1fZW5jciksXQ0KICBuYW1lcyhkYXRhKVstMV0gPC0gcGFzdGUwKG5hbWVzKGRhdGEpWy0xXSwgc2VwID0gIi4iLCBjKDE6MTIpW2ldKQ0KICByZXR1cm4oZGF0YSkNCn0pDQoNCiNtZXJnZSB0aGUgZGF0YS4gDQpsaXNzX2JhY2tncm91bmQgPC0gbGlzc19maWxlcyAlPiUNCiAgcmVkdWNlKGZ1bGxfam9pbiwgYnkgPSAnbm9tZW1fZW5jcicpICU+JQ0KICBhcnJhbmdlKG5vbWVtX2VuY3IpDQoNCiN3ZSBub3cgaGF2ZSBhIERGIHdpdGggMjUyODEgb2JzZXJ2YXRpb25zIG9mIDM0MSB2YXJpYWJsZXMuIA0KDQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLU1lcmdpbmcgYWxsIHRoZSBmaWxlcyBpbnRvIG9uZSB3aWRlIGZpbGUgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMNCg0KI21lcmdlIGFsbCB0aGUgZGF0YSB3aXRoIGFuIGZ1bGwgb3V0ZXIgam9pbiBpbnRvIG9uZSBmaWxlLiANCiNva2F5LCBsZXQncyBtZXJnZSB0aGUgbGlzc19tZXJnZWQsIGxpc3NfYWx0ZXIgYW5kIHRoZSBwb2xpdGljcyBhbmQgdmFsdWVzIHdhdmVzLg0KbGlzcyA8LSBsaXNzX3BvbCAlPiUNCiAjIGZ1bGxfam9pbihsaXNzX2FsdGVyLCBieSA9ICJub21lbV9lbmNyIikgJT4lDQogIyBmdWxsX2pvaW4obGlzc19wb2wsIGJ5ID0gIm5vbWVtX2VuY3IiKSAlPiUNCiAgZnVsbF9qb2luKGxpc3NfYmFja2dyb3VuZCwgYnkgPSAibm9tZW1fZW5jciIpICU+JQ0KICBhcnJhbmdlKG5vbWVtX2VuY3IpDQoNCiNUaGUgZmluYWwgREYgY29uc2lzdHMgb2YgMjUzMDYgb2JzZXJ2YXRpb25zIHdpdGggNzI3MSB2YXJpYWJsZXMuIA0KDQojSlQgSSB0aGluayBteSBzdHJhdGVneSB3b3VsZCBiZSB0byB1c2UgZnVsbCBqb2lucyBhbmQgdGhlbiBhZnRlcndhcmRzIHVzZSBmaWx0ZXJzIHRvIHNlbGVjdCByZXNwb25kZW50cy4gVGhhdCB3YXkgd2Uga25vdyBob3cgbWFueSByZXNwb25kZW50cyB3ZSBsb29zZS4gV2Ugd291bGQgbGlrZSB0byByZXBvcnQgdGhpcyBpbiBvdXIgbWFudXNjcmlwdCByaWdodD8gDQoNCiNUSjogYWdyZWUsIEkgbW93IGVkaXRlZCB0aGUgcHJvY2VkdXJlIHRvIHVzZSB0aWR5IGFzIG11Y2ggYXMgcG9zc2libGUsIHNvbWUgY3VzdG9tIGZ1bmN0aW9ucyBJIHByZWZlciB0byB1c2UgYSBsb29wIGZvci4gRm9yIGFub3RoZXIgdmVyc2lvbiBJIHdpbGwgdHJ5IHRvIGNoYW5nZSB0aGlzIHRvIHRpZHkgbm90YXRpb24sIGJ1dCBmb3Igbm93IHRoYXQgd2lsbCB0YWtlIHVwIHRvbyBtdWNoIHRpbWUuIA0KDQojY2xlYW4gdGhlIGdsb2JhbCBlbnZpcm9ubWVudC4NCiNybShmaWxlX25hbWVzLCBsaXNzX2ZpbGVzLCAjbGlzc19tZXJnZWQsIGxpc3NfbWVyZ2VkX2FsdGVyLCBsaXNzX25hbWVzX2FsdGVycywgDQojIGRlc2lyZWRfbGVuZ3RoLCBpLCBsaXNzX3BvbCwgbGlzc19iYWNrZ3JvdW5kKQ0Kcm0obGlzdD1scygpWyEgbHMoKSAlaW4lIGMoImxpc3MiKV0pDQoNCiN3ZSBub3cgaGF2ZSAyNTMwNiBjYXNlcyBvZiA3MjcxIHZhcmlhYmxlcy4NCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBGaWx0ZXIgb3V0IGNhc2VzIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMNCiN3ZSBjYW4gdXNlIHRoZSBtb250aCBvZiBkYXRhY29sbGVjdGlvbiB0byBzZWUgd2hldGhlciBzb21lb25lIGhhcyBwYXJ0aWNpcGF0ZWQgaW4gYSBzcGVjaWZpYyB5ZWFyL21vZHVsZSBjb21iaW5hdGlvbg0KIyBpZiBzb21lb25lIGhhcyBhbiBhbiBOQSB0aGV5IGRpZCBub3QgcGFydGljaXBhdGUgaW4gaXQuDQojIHNvIHdlIHdhbnQgcGVvcGxlIHdobyBwYXJ0aWNpcGF0ZWQgaW4gdGhlIENETiBtb2R1bGUgYW5kIGFsc28gaW4gdGhlIHBvbGl0aWNzIGFuZCB2YWx1ZXMgd2F2ZXMuIA0KIyBMZXQncyBjcmVhdGUgYSBmaWx0ZXIgb2YgcGVvcGxlIHdobyBwYXJ0aWNpcGF0ZWQgaW4gYXQgbGVhc3Qgb25lIG9mIHRoc2UuIA0KI2V4YW1wbGUgb2Ygd2F2ZSAxIHZhci4gDQojdGFibGUobGlzcyRjczA4YV9tLCB1c2VOQSA9ICdhbHdheXMnKQ0KDQojZmlyc3QgY3JlYXRlIGEgbGVpc3VyZSBhbmQgaW50ZWdyYXRpb24gTkEgdmFyaWFibGUuDQojZmlyc3QgY3JlYXRlIGEgc3Vic2V0IG9mIHRoZSBkYXRhLCBzbyB3ZSBjYW4gdXNlIHJvd3dpc2UgdG8gY3JlYXRlIGEgc2VsZWN0aW9uIGlkLiANCiNzdWJzZXQxIDwtIGxpc3MgJT4lDQojICByb3d3aXNlKCkgJT4lDQogICNjcmVhdGUgZmlsdGVyIHZhcmlhYmxlDQojICBtdXRhdGUobmFfbGVpX2ludCA9IHN1bShpcy5uYShjKGNzMDhhX20sIGNzMDliX20sIGNzMTBjX20sIGNzMTFkX20sIGNzMTJlX20sIGNzMTNmX20sIGNzMTRnX20sIGNzMTVoX20sIGNzMTZpX20sIGNzMTdqX20sIGNzMThrX20pKSkpICU+JQ0KICAjdXNlIG9ubHkgdGhlIG9ic2VydmF0aW9ucyB0aGF0IGhhdmUgcGFydGljaXBhdGVkIGluIGF0IGxlYXN0IG9uZSB3YXZlIG9mIHRoZSBsZWlzdXJlIGFuZCBpbnRlZ3JhdGlvbiBkYXRhLiBXZSBjYW4gb2YgY291cnNlIGNoYW5nZSB0aGlzIGxhdGVyIG9uLiANCiMgIGZpbHRlcihuYV9sZWlfaW50IDwgMTEpICU+JQ0KIyAgdW5ncm91cCgpDQoNCiN3ZSBnbyBmcm9tIDI1MzA2IGNhc2VzIHRvIDE0NDczIGNhc2VzLiANCg0KDQojc2Vjb25kIGNyZWF0ZSBhIHBvbCB2YWwgTkEgdmFyaWFibGUuDQojZmlsdGVyIG91dCByZXNwb25kZW50cyB3aG8gZGlkIG5vdCBwYXJ0aWNpcGF0ZSBpbiBhbnkgb2YgdGhlIDExIHdhdmVzLiANCmxpc3Nfc3Vic2V0IDwtIGxpc3MgJT4lDQogIHJvd3dpc2UoKSAlPiUNCiAgbXV0YXRlKG5hX3BvbF92YWwgPSBzdW0oaXMubmEoYyhjdjA4YV9tLCBjdjA5Yl9tLCBjdjEwY19tLCBjdjExZF9tLCBjdjEyZV9tLCBjdjEzZl9tLCBjdjE0Z19tLA0KICAgICAgICAgY3YxN2lfbSwgY3YxOGpfbTEsIGN2MThqX20yLCBjdjE4al9tMywgY3YxOWtfbTEsIGN2MTlrX20yLCBjdjE5a19tMyxjdjIwbF9tMSwgY3YyMGxfbTIsIGN2MjBsX20zKSkpKSAlPiUNCiAgZmlsdGVyKG5hX3BvbF92YWwgPCAxNykgJT4lICNub3cgaXQgaXMgMTQsIGR1ZSB0aGUgd2VpcmQgY29kaW5nIGluIDE4LzE5LiANCiAgdW5ncm91cCgpDQogIA0KI3dlIGdvIGZyb20gMTQ0NzMgY2FzZXMgdG8gMTMyNzMgY2FzZXMuIFdlIHdpbGwgd29yayB3aXRoIHRoaXMgbGlzc19zdWJzZXQgZGF0YWZyYW1lLiANCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBWYXJpYWJsZSBzZWxlY3Rpb24gZnJvbSB0aGUgY29tcGxldGUgbGlzcyBmaWxlIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIw0KIyBKVDogY291bGQgeW91IHBsZWFzZSBtYWtlIGEgZm9sZGVyIHdpdGggYWxsIGNvZGVib29rcyBzbyBJL3Jldmlld2VycyBjYW4gbG9vayB1cCB0aGUgdmFyaWFibGUgbmFtZXMuIA0KIyBDaGVjaw0KDQojY3JlYXRlIHN1YnNldCBvZiBhbGwgdGhlIGRhdGEgdGhhdCBJIHdhbnQgZm9yIGV2ZXJ5IHdhdmUuIFRoZW4gd2UgY2FuIG1ha2UgYSBuZXcgZmlsZSB3aGVyZSB3ZSBvbmx5IGhhdmUgdGhlIHNlbGVjdGVkIGRhdGEgdGhhdCB3ZSB3YW50Lg0KI2xpc3MgcG9saXRpY3MgdmFyaWFibGVzIHRoYXQgSSBuZWVkDQpsaXNzX3BvbCA8LSBsaXNzX3N1YnNldCAlPiUNCiAgc2VsZWN0KG5vbWVtX2VuY3IsIGN2MDhhMDEyLGN2MDhhMDQ3LCBjdjA4YTA0OCwgY3YwOGEwNDksIGN2MDhhMDUwLCBjdjA4YTA1MSwgY3YwOGEwNTIsIGN2MDhhMDU4LCBjdjA4YTEwMSwgY3YwOGExMDIsIGN2MDhhMTAzLCBjdjA4YTEwNCwgY3YwOGExMDUsIGN2MDhhMDAxLCBjdjA4YTA0NCwgY3YwOGEwMTQsIGN2MDhhMTA2LCBjdjA4YTEwNywgY3YwOGExMDgsIGN2MDhhMTA5LGN2MDhhMTEwLGN2MDhhMTExLGN2MDhhMTEyLGN2MDhhMTEzLGN2MDhhMTE0LGN2MDhhMTE1LCBjdjA4YTExNixjdjA4YTExNyxjdjA4YTExOCxjdjA4YTExOSxjdjA4YTEyMCxjdjA4YTEyMSxjdjA4YTEyMixjdjA4YTEyMywNCiAgICAgICAgIGN2MDliMDEyLGN2MDliMDQ3LCBjdjA5YjA0OCwgY3YwOWIwNDksIGN2MDliMDUwLCBjdjA5YjA1MSwgY3YwOWIwNTIsIGN2MDliMDU4LCBjdjA5YjEwMSwgY3YwOWIxMDIsIGN2MDliMTAzLCBjdjA5YjEwNCwgY3YwOWIxMDUsIGN2MDliMDAxLCBjdjA5YjA0NCwgY3YwOWIwMTQsY3YwOWIxMDYsIGN2MDliMTA3LCBjdjA5YjEwOCwgY3YwOWIxMDksY3YwOWIxMTAsY3YwOWIxMTEsY3YwOWIxMTIsY3YwOWIxMTMsY3YwOWIxMTQsY3YwOWIxMTUsY3YwOWIxMTYsY3YwOWIxMTcsY3YwOWIxMTgsY3YwOWIxMTksY3YwOWIxMjAsY3YwOWIxMjEsY3YwOWIxMjIsY3YwOWIxMjMsDQogICAgICAgICBjdjEwYzAxMixjdjEwYzA0NywgY3YxMGMwNDgsIGN2MTBjMDQ5LCBjdjEwYzA1MCwgY3YxMGMwNTEsIGN2MTBjMDUyLCBjdjEwYzA1OCwgY3YxMGMxMDEsIGN2MTBjMTAyLCBjdjEwYzEwMywgY3YxMGMxMDQsIGN2MTBjMTA1LCBjdjEwYzAwMSwgY3YxMGMwNDQsIGN2MTBjMDE0LGN2MTBjMTA2LCBjdjEwYzEwNywgY3YxMGMxMDgsIGN2MTBjMTA5LGN2MTBjMTEwLGN2MTBjMTExLGN2MTBjMTEyLGN2MTBjMTEzLGN2MTBjMTE0LGN2MTBjMTE1LGN2MTBjMTE2LGN2MTBjMTE3LGN2MTBjMTE4LGN2MTBjMTE5LGN2MTBjMTIwLGN2MTBjMTIxLGN2MTBjMTIyLGN2MTBjMTIzLA0KICAgICAgICAgY3YxMWQwMTIsY3YxMWQwNDcsIGN2MTFkMDQ4LCBjdjExZDA0OSwgY3YxMWQwNTAsIGN2MTFkMDUxLCBjdjExZDA1MiwgY3YxMWQxNzEsIGN2MTFkMTAxLCBjdjExZDEwMiwgY3YxMWQxMDMsIGN2MTFkMTA0LCBjdjExZDEwNSwgY3YxMWQwMDEsIGN2MTFkMDQ0LCBjdjExZDAxNCxjdjExZDEwNiwgY3YxMWQxMDcsIGN2MTFkMTA4LCBjdjExZDEwOSxjdjExZDExMCxjdjExZDExMSxjdjExZDExMixjdjExZDExMyxjdjExZDExNCxjdjExZDExNSwgY3YxMWQxMTYsY3YxMWQxMTcsY3YxMWQxMTgsY3YxMWQxMTksY3YxMWQxMjAsY3YxMWQxMjEsY3YxMWQxMjIsY3YxMWQxMjMsDQogICAgICAgICBjdjEyZTAxMixjdjEyZTA0NywgY3YxMmUwNDgsIGN2MTJlMDQ5LCBjdjEyZTA1MCwgY3YxMmUwNTEsIGN2MTJlMDUyLCBjdjEyZTE3MSwgY3YxMmUxMDEsIGN2MTJlMTAyLCBjdjEyZTEwMywgY3YxMmUxMDQsIGN2MTJlMTA1LCBjdjEyZTAwMSwgY3YxMmUwNDQsIGN2MTJlMDE0LGN2MTJlMTA2LCBjdjEyZTEwNywgY3YxMmUxMDgsIGN2MTJlMTA5LGN2MTJlMTEwLGN2MTJlMTExLGN2MTJlMTEyLGN2MTJlMTEzLGN2MTJlMTE0LGN2MTJlMTE1LCBjdjEyZTExNixjdjEyZTExNyxjdjEyZTExOCxjdjEyZTExOSxjdjEyZTEyMCxjdjEyZTEyMSxjdjEyZTEyMixjdjEyZTEyMywNCiAgICAgICAgIGN2MTNmMDEyLGN2MTNmMDQ3LCBjdjEzZjA0OCwgY3YxM2YwNDksIGN2MTNmMDUwLCBjdjEzZjA1MSwgY3YxM2YwNTIsIGN2MTNmMjA5LCBjdjEzZjEwMSwgY3YxM2YxMDIsIGN2MTNmMTAzLCBjdjEzZjEwNCwgY3YxM2YxMDUsIGN2MTNmMDAxLCBjdjEzZjA0NCwgY3YxM2YwMTQsY3YxM2YxMDYsIGN2MTNmMTA3LCBjdjEzZjEwOCwgY3YxM2YxMDksY3YxM2YxMTAsY3YxM2YxMTEsY3YxM2YxMTIsY3YxM2YxMTMsY3YxM2YxMTQsY3YxM2YxMTUsIGN2MTNmMTE2LGN2MTNmMTE3LGN2MTNmMTE4LGN2MTNmMTE5LGN2MTNmMTIwLGN2MTNmMTIxLGN2MTNmMTIyLGN2MTNmMTIzLA0KICAgICAgICAgY3YxNGcwMTIsY3YxNGcwNDcsIGN2MTRnMDQ4LCBjdjE0ZzA0OSwgY3YxNGcwNTAsIGN2MTRnMDUxLCBjdjE0ZzA1MiwgY3YxNGcyMDksIGN2MTRnMTAxLCBjdjE0ZzEwMiwgY3YxNGcxMDMsIGN2MTRnMTA0LCBjdjE0ZzEwNSwgY3YxNGcwMDEsIGN2MTRnMDQ0LCBjdjE0ZzAxNCxjdjE0ZzEwNiwgY3YxNGcxMDcsIGN2MTRnMTA4LCBjdjE0ZzEwOSxjdjE0ZzExMCxjdjE0ZzExMSxjdjE0ZzExMixjdjE0ZzExMyxjdjE0ZzExNCxjdjE0ZzExNSwgY3YxNGcxMTYsY3YxNGcxMTcsY3YxNGcxMTgsY3YxNGcxMTksY3YxNGcxMjAsY3YxNGcxMjEsY3YxNGcxMjIsY3YxNGcxMjMsDQogICAgICAgICBjdjE2aDAxMixjdjE2aDA0NywgY3YxNmgwNDgsIGN2MTZoMDQ5LCBjdjE2aDA1MCwgY3YxNmgwNTEsIGN2MTZoMDUyLCBjdjE2aDIwOSwgY3YxNmgxMDEsIGN2MTZoMTAyLCBjdjE2aDEwMywgY3YxNmgxMDQsIGN2MTZoMTA1LCBjdjE2aDAwMSwgY3YxNmgwNDQsIGN2MTZoMDE0LGN2MTZoMTA2LCBjdjE2aDEwNywgY3YxNmgxMDgsIGN2MTZoMTA5LGN2MTZoMTEwLGN2MTZoMTExLGN2MTZoMTEyLGN2MTZoMTEzLGN2MTZoMTE0LGN2MTZoMTE1LCBjdjE2aDExNixjdjE2aDExNyxjdjE2aDExOCxjdjE2aDExOSxjdjE2aDEyMCxjdjE2aDEyMSxjdjE2aDEyMixjdjE2aDEyMywNCiAgICAgICAgIGN2MTdpMDEyLGN2MTdpMDQ3LCBjdjE3aTA0OCwgY3YxN2kwNDksIGN2MTdpMDUwLCBjdjE3aTA1MSwgY3YxN2kwNTIsIGN2MTdpMjQ0LCBjdjE3aTEwMSwgY3YxN2kxMDIsIGN2MTdpMTAzLCBjdjE3aTEwNCwgY3YxN2kxMDUsIGN2MTdpMDAxLCBjdjE3aTA0NCwgY3YxN2kwMTQsY3YxN2kxMDYsIGN2MTdpMTA3LCBjdjE3aTEwOCwgY3YxN2kxMDksY3YxN2kxMTAsY3YxN2kxMTEsY3YxN2kxMTIsY3YxN2kxMTMsY3YxN2kxMTQsY3YxN2kxMTUsIGN2MTdpMTE2LGN2MTdpMTE3LGN2MTdpMTE4LGN2MTdpMTE5LGN2MTdpMTIwLGN2MTdpMTIxLGN2MTdpMTIyLGN2MTdpMTIzLA0KICAgICAgICAgY3YxOGowMTIsY3YxOGowNDcsIGN2MThqMDQ4LCBjdjE4ajA0OSwgY3YxOGowNTAsIGN2MThqMDUxLCBjdjE4ajA1MiwgY3YxOGoyNDMsIGN2MThqMTAxLCBjdjE4ajEwMiwgY3YxOGoxMDMsIGN2MThqMTA0LCBjdjE4ajEwNSwgY3YxOGowMDEsIGN2MThqMDQ0LCBjdjE4ajAxNCxjdjE4ajEwNiwgY3YxOGoxMDcsIGN2MThqMTA4LCBjdjE4ajEwOSxjdjE4ajExMCxjdjE4ajExMSxjdjE4ajExMixjdjE4ajExMyxjdjE4ajExNCxjdjE4ajExNSwgY3YxOGoxMTYsY3YxOGoxMTcsY3YxOGoxMTgsY3YxOGoxMTksY3YxOGoxMjAsY3YxOGoxMjEsY3YxOGoxMjIsY3YxOGoxMjMsDQogICAgICAgICBjdjE5azAxMixjdjE5azA0NywgY3YxOWswNDgsIGN2MTlrMDQ5LCBjdjE5azA1MCwgY3YxOWswNTEsIGN2MTlrMDUyLCBjdjE5azI0MywgY3YxOWsxMDEsIGN2MTlrMTAyLCBjdjE5azEwMywgY3YxOWsxMDQsIGN2MTlrMTA1LCBjdjE5azAwMSwgY3YxOWswNDQsIGN2MTlrMDE0LGN2MTlrMTA2LCBjdjE5azEwNywgY3YxOWsxMDgsIGN2MTlrMTA5LGN2MTlrMTEwLGN2MTlrMTExLGN2MTlrMTEyLGN2MTlrMTEzLGN2MTlrMTE0LGN2MTlrMTE1LCBjdjE5azExNixjdjE5azExNyxjdjE5azExOCxjdjE5azExOSxjdjE5azEyMCxjdjE5azEyMSxjdjE5azEyMixjdjE5azEyMywNCiAgICAgICAgIGN2MjBsMDEyLGN2MjBsMDQ3LCBjdjIwbDA0OCwgY3YyMGwwNDksIGN2MjBsMDUwLCBjdjIwbDA1MSwgY3YyMGwwNTIsIGN2MjBsMjQzLCBjdjIwbDEwMSwgY3YyMGwxMDIsIGN2MjBsMTAzLCBjdjIwbDEwNCwgY3YyMGwxMDUsIGN2MjBsMDAxLCBjdjIwbDA0NCwgY3YyMGwwMTQsY3YyMGwxMDYsIGN2MjBsMTA3LCBjdjIwbDEwOCwgY3YyMGwxMDksY3YyMGwxMTAsY3YyMGwxMTEsY3YyMGwxMTIsY3YyMGwxMTMsY3YyMGwxMTQsY3YyMGwxMTUsIGN2MjBsMTE2LGN2MjBsMTE3LGN2MjBsMTE4LGN2MjBsMTE5LGN2MjBsMTIwLGN2MjBsMTIxLGN2MjBsMTIyLGN2MjBsMTIzKQ0KDQoNCiNjaGFuZ2UgbmFtZXMuDQpuYW1lcyhsaXNzX3BvbCk8LSBjKCJub21lbV9lbmNyIiwgInBvbF9pbnQuMSIJLAkicGFybF9kb25vdF9jYXJlLjEiCSwJInBvbF9wYXJ0X2ludC4xIgksCSJub19pbmZsdWVjZS4xIgksCSJjYXBfYWN0X3BvbC4xIgksCSJjbGVhcl9waWN0dXJlLjEiCSwJInBvbF9jb21wbC4xIgksCSJ2b3RlX2ludC4xIgksCSJscl9zY2FsZS4xIgksCSJldXRoYW5hc2lhLjEiCSwJImluY29tZV9kaWZmLjEiCSwJImltbWlncmFudHMuMSIsCSJldV9pbnRlZ3JhdGlvbi4xIgksImdvdl9zYXQuMSIsICJzYXRkZW0uMSIsICJwb2x0cnVzdC4xIiwgInBvc3RtYXRmaXJzdC4xIiwgInBvc3RtYXRzZWNvbmQuMSIsICJwb3N0bWF0dGhpcmQuMSIsICJ3b3JraW5nbW90aGVyLjEiLCAiY2hpbGRqb2Jtb3RoZXIuMSIsICJmdWxsdGltZW1vdGhlci4xIiwgImVxdWFsY29udHJpYnV0aW9uLjEiLCAiZmF0aGVyd29ya3MuMSIsICJmYXRoZXJob3VzZWhvbGQuMSIsICJmYXRoZXJzY2hpbGRjYXJlLjEiLCAiZGlmZmVyZW50Y3VsdHVyZS4xIiwgImZvcmVpZ25lcmN1bHR1cmUuMSIsICJhc3lsdW0uMSIsICJmb3JlaWduc29jc2VjLjEiLCAidG9vbWFueWZvcmVpZ25lcnMuMSIsICJmb3JlaWdubm90YWNjZXB0ZWQuMSIsICJmb3JlaWduZWNvbm9teS4xIiwgIm5laWdoYm9yaG9vZC4xIiwgDQogICAgICAgICAgICAgICAgICAgICJwb2xfaW50LjIiCSwJInBhcmxfZG9ub3RfY2FyZS4yIgksCSJwb2xfcGFydF9pbnQuMiIJLAkibm9faW5mbHVlY2UuMiIJLAkiY2FwX2FjdF9wb2wuMiIJLAkiY2xlYXJfcGljdHVyZS4yIgksCSJwb2xfY29tcGwuMiIJLAkidm90ZV9pbnQuMiIJLAkibHJfc2NhbGUuMiIJLAkiZXV0aGFuYXNpYS4yIgksCSJpbmNvbWVfZGlmZi4yIgksCSJpbW1pZ3JhbnRzLjIiCSwJImV1X2ludGVncmF0aW9uLjIiCSwiZ292X3NhdC4yIiwgInNhdGRlbS4yIiwgInBvbHRydXN0LjIiLCJwb3N0bWF0Zmlyc3QuMiIsICJwb3N0bWF0c2Vjb25kLjIiLCAicG9zdG1hdHRoaXJkLjIiLCAid29ya2luZ21vdGhlci4yIiwgImNoaWxkam9ibW90aGVyLjIiLCAiZnVsbHRpbWVtb3RoZXIuMiIsICJlcXVhbGNvbnRyaWJ1dGlvbi4yIiwgImZhdGhlcndvcmtzLjIiLCAiZmF0aGVyaG91c2Vob2xkLjIiLCAiZmF0aGVyc2NoaWxkY2FyZS4yIiwgImRpZmZlcmVudGN1bHR1cmUuMiIsICJmb3JlaWduZXJjdWx0dXJlLjIiLCAiYXN5bHVtLjIiLCAiZm9yZWlnbnNvY3NlYy4yIiwgInRvb21hbnlmb3JlaWduZXJzLjIiLCAiZm9yZWlnbm5vdGFjY2VwdGVkLjIiLCAiZm9yZWlnbmVjb25vbXkuMiIsICJuZWlnaGJvcmhvb2QuMiIsDQogICAgICAgICAgICAgICAgICAgICJwb2xfaW50LjMiCSwJInBhcmxfZG9ub3RfY2FyZS4zIgksCSJwb2xfcGFydF9pbnQuMyIJLAkibm9faW5mbHVlY2UuMyIJLAkiY2FwX2FjdF9wb2wuMyIJLAkiY2xlYXJfcGljdHVyZS4zIgksCSJwb2xfY29tcGwuMyIJLAkidm90ZV9pbnQuMyIJLAkibHJfc2NhbGUuMyIJLAkiZXV0aGFuYXNpYS4zIgksCSJpbmNvbWVfZGlmZi4zIgksCSJpbW1pZ3JhbnRzLjMiCSwJImV1X2ludGVncmF0aW9uLjMiCSwiZ292X3NhdC4zIiwgInNhdGRlbS4zIiwgInBvbHRydXN0LjMiLCJwb3N0bWF0Zmlyc3QuMyIsICJwb3N0bWF0c2Vjb25kLjMiLCAicG9zdG1hdHRoaXJkLjMiLCAid29ya2luZ21vdGhlci4zIiwgImNoaWxkam9ibW90aGVyLjMiLCAiZnVsbHRpbWVtb3RoZXIuMyIsICJlcXVhbGNvbnRyaWJ1dGlvbi4zIiwgImZhdGhlcndvcmtzLjMiLCAiZmF0aGVyaG91c2Vob2xkLjMiLCAiZmF0aGVyc2NoaWxkY2FyZS4zIiwgImRpZmZlcmVudGN1bHR1cmUuMyIsICJmb3JlaWduZXJjdWx0dXJlLjMiLCAiYXN5bHVtLjMiLCAiZm9yZWlnbnNvY3NlYy4zIiwgInRvb21hbnlmb3JlaWduZXJzLjMiLCAiZm9yZWlnbm5vdGFjY2VwdGVkLjMiLCAiZm9yZWlnbmVjb25vbXkuMyIsICJuZWlnaGJvcmhvb2QuMyIsDQogICAgICAgICAgICAgICAgICAgICJwb2xfaW50LjQiCSwJInBhcmxfZG9ub3RfY2FyZS40IgksCSJwb2xfcGFydF9pbnQuNCIJLAkibm9faW5mbHVlY2UuNCIJLAkiY2FwX2FjdF9wb2wuNCIJLAkiY2xlYXJfcGljdHVyZS40IgksCSJwb2xfY29tcGwuNCIJLAkidm90ZV9pbnQuNCIJLAkibHJfc2NhbGUuNCIJLAkiZXV0aGFuYXNpYS40IgksCSJpbmNvbWVfZGlmZi40IgksCSJpbW1pZ3JhbnRzLjQiCSwJImV1X2ludGVncmF0aW9uLjQiCSwiZ292X3NhdC40IiwgInNhdGRlbS40IiwgInBvbHRydXN0LjQiLCJwb3N0bWF0Zmlyc3QuNCIsICJwb3N0bWF0c2Vjb25kLjQiLCAicG9zdG1hdHRoaXJkLjQiLCAid29ya2luZ21vdGhlci40IiwgImNoaWxkam9ibW90aGVyLjQiLCAiZnVsbHRpbWVtb3RoZXIuNCIsICJlcXVhbGNvbnRyaWJ1dGlvbi40IiwgImZhdGhlcndvcmtzLjQiLCAiZmF0aGVyaG91c2Vob2xkLjQiLCAiZmF0aGVyc2NoaWxkY2FyZS40IiwiZGlmZmVyZW50Y3VsdHVyZS40IiwgImZvcmVpZ25lcmN1bHR1cmUuNCIsICJhc3lsdW0uNCIsICJmb3JlaWduc29jc2VjLjQiLCAidG9vbWFueWZvcmVpZ25lcnMuNCIsICJmb3JlaWdubm90YWNjZXB0ZWQuNCIsICJmb3JlaWduZWNvbm9teS40IiwgIm5laWdoYm9yaG9vZC40IiwNCiAgICAgICAgICAgICAgICAgICAgInBvbF9pbnQuNSIJLAkicGFybF9kb25vdF9jYXJlLjUiCSwJInBvbF9wYXJ0X2ludC41IgksCSJub19pbmZsdWVjZS41IgksCSJjYXBfYWN0X3BvbC41IgksCSJjbGVhcl9waWN0dXJlLjUiCSwJInBvbF9jb21wbC41IgksCSJ2b3RlX2ludC41IgksCSJscl9zY2FsZS41IgksCSJldXRoYW5hc2lhLjUiCSwJImluY29tZV9kaWZmLjUiCSwJImltbWlncmFudHMuNSIJLAkiZXVfaW50ZWdyYXRpb24uNSIJLCJnb3Zfc2F0LjUiLCAic2F0ZGVtLjUiLCAicG9sdHJ1c3QuNSIsInBvc3RtYXRmaXJzdC41IiwgInBvc3RtYXRzZWNvbmQuNSIsICJwb3N0bWF0dGhpcmQuNSIsICJ3b3JraW5nbW90aGVyLjUiLCAiY2hpbGRqb2Jtb3RoZXIuNSIsICJmdWxsdGltZW1vdGhlci41IiwgImVxdWFsY29udHJpYnV0aW9uLjUiLCAiZmF0aGVyd29ya3MuNSIsICJmYXRoZXJob3VzZWhvbGQuNSIsICJmYXRoZXJzY2hpbGRjYXJlLjUiLCJkaWZmZXJlbnRjdWx0dXJlLjUiLCAiZm9yZWlnbmVyY3VsdHVyZS41IiwgImFzeWx1bS41IiwgImZvcmVpZ25zb2NzZWMuNSIsICJ0b29tYW55Zm9yZWlnbmVycy41IiwgImZvcmVpZ25ub3RhY2NlcHRlZC41IiwgImZvcmVpZ25lY29ub215LjUiLCAibmVpZ2hib3Job29kLjUiLA0KICAgICAgICAgICAgICAgICAgICAicG9sX2ludC42IgksCSJwYXJsX2Rvbm90X2NhcmUuNiIJLAkicG9sX3BhcnRfaW50LjYiCSwJIm5vX2luZmx1ZWNlLjYiCSwJImNhcF9hY3RfcG9sLjYiCSwJImNsZWFyX3BpY3R1cmUuNiIJLAkicG9sX2NvbXBsLjYiCSwJInZvdGVfaW50LjYiCSwJImxyX3NjYWxlLjYiCSwJImV1dGhhbmFzaWEuNiIJLAkiaW5jb21lX2RpZmYuNiIJLAkiaW1taWdyYW50cy42IgksCSJldV9pbnRlZ3JhdGlvbi42IgksImdvdl9zYXQuNiIsICJzYXRkZW0uNiIsICJwb2x0cnVzdC42IiwicG9zdG1hdGZpcnN0LjYiLCAicG9zdG1hdHNlY29uZC42IiwgInBvc3RtYXR0aGlyZC42IiwgIndvcmtpbmdtb3RoZXIuNiIsICJjaGlsZGpvYm1vdGhlci42IiwgImZ1bGx0aW1lbW90aGVyLjYiLCAiZXF1YWxjb250cmlidXRpb24uNiIsICJmYXRoZXJ3b3Jrcy42IiwgImZhdGhlcmhvdXNlaG9sZC42IiwgImZhdGhlcnNjaGlsZGNhcmUuNiIsImRpZmZlcmVudGN1bHR1cmUuNiIsICJmb3JlaWduZXJjdWx0dXJlLjYiLCAiYXN5bHVtLjYiLCAiZm9yZWlnbnNvY3NlYy42IiwgInRvb21hbnlmb3JlaWduZXJzLjYiLCAiZm9yZWlnbm5vdGFjY2VwdGVkLjYiLCAiZm9yZWlnbmVjb25vbXkuNiIsICJuZWlnaGJvcmhvb2QuNiIsDQogICAgICAgICAgICAgICAgICAgICJwb2xfaW50LjciCSwJInBhcmxfZG9ub3RfY2FyZS43IgksCSJwb2xfcGFydF9pbnQuNyIJLAkibm9faW5mbHVlY2UuNyIJLAkiY2FwX2FjdF9wb2wuNyIJLAkiY2xlYXJfcGljdHVyZS43IgksCSJwb2xfY29tcGwuNyIJLAkidm90ZV9pbnQuNyIJLAkibHJfc2NhbGUuNyIJLAkiZXV0aGFuYXNpYS43IgksCSJpbmNvbWVfZGlmZi43IgksCSJpbW1pZ3JhbnRzLjciCSwJImV1X2ludGVncmF0aW9uLjciCSwiZ292X3NhdC43IiwgInNhdGRlbS43IiwgInBvbHRydXN0LjciLCJwb3N0bWF0Zmlyc3QuNyIsICJwb3N0bWF0c2Vjb25kLjciLCAicG9zdG1hdHRoaXJkLjciLCAid29ya2luZ21vdGhlci43IiwgImNoaWxkam9ibW90aGVyLjciLCAiZnVsbHRpbWVtb3RoZXIuNyIsICJlcXVhbGNvbnRyaWJ1dGlvbi43IiwgImZhdGhlcndvcmtzLjciLCAiZmF0aGVyaG91c2Vob2xkLjciLCAiZmF0aGVyc2NoaWxkY2FyZS43IiwiZGlmZmVyZW50Y3VsdHVyZS43IiwgImZvcmVpZ25lcmN1bHR1cmUuNyIsICJhc3lsdW0uNyIsICJmb3JlaWduc29jc2VjLjciLCAidG9vbWFueWZvcmVpZ25lcnMuNyIsICJmb3JlaWdubm90YWNjZXB0ZWQuNyIsICJmb3JlaWduZWNvbm9teS43IiwgIm5laWdoYm9yaG9vZC43IiwNCiAgICAgICAgICAgICAgICAgICAgInBvbF9pbnQuOCIJLAkicGFybF9kb25vdF9jYXJlLjgiCSwJInBvbF9wYXJ0X2ludC44IgksCSJub19pbmZsdWVjZS44IgksCSJjYXBfYWN0X3BvbC44IgksCSJjbGVhcl9waWN0dXJlLjgiCSwJInBvbF9jb21wbC44IgksCSJ2b3RlX2ludC44IgksCSJscl9zY2FsZS44IgksCSJldXRoYW5hc2lhLjgiCSwJImluY29tZV9kaWZmLjgiCSwJImltbWlncmFudHMuOCIJLAkiZXVfaW50ZWdyYXRpb24uOCIJLCJnb3Zfc2F0LjgiLCAic2F0ZGVtLjgiLCAicG9sdHJ1c3QuOCIsInBvc3RtYXRmaXJzdC44IiwgInBvc3RtYXRzZWNvbmQuOCIsICJwb3N0bWF0dGhpcmQuOCIsICJ3b3JraW5nbW90aGVyLjgiLCAiY2hpbGRqb2Jtb3RoZXIuOCIsICJmdWxsdGltZW1vdGhlci44IiwgImVxdWFsY29udHJpYnV0aW9uLjgiLCAiZmF0aGVyd29ya3MuOCIsICJmYXRoZXJob3VzZWhvbGQuOCIsICJmYXRoZXJzY2hpbGRjYXJlLjgiLCJkaWZmZXJlbnRjdWx0dXJlLjgiLCAiZm9yZWlnbmVyY3VsdHVyZS44IiwgImFzeWx1bS44IiwgImZvcmVpZ25zb2NzZWMuOCIsICJ0b29tYW55Zm9yZWlnbmVycy44IiwgImZvcmVpZ25ub3RhY2NlcHRlZC44IiwgImZvcmVpZ25lY29ub215LjgiLCAibmVpZ2hib3Job29kLjgiLA0KICAgICAgICAgICAgICAgICAgICAicG9sX2ludC45IgksCSJwYXJsX2Rvbm90X2NhcmUuOSIJLAkicG9sX3BhcnRfaW50LjkiCSwJIm5vX2luZmx1ZWNlLjkiCSwJImNhcF9hY3RfcG9sLjkiCSwJImNsZWFyX3BpY3R1cmUuOSIJLAkicG9sX2NvbXBsLjkiCSwJInZvdGVfaW50LjkiCSwJImxyX3NjYWxlLjkiCSwJImV1dGhhbmFzaWEuOSIJLAkiaW5jb21lX2RpZmYuOSIJLAkiaW1taWdyYW50cy45IgksCSJldV9pbnRlZ3JhdGlvbi45IiwiZ292X3NhdC45IiwgInNhdGRlbS45IiwgInBvbHRydXN0LjkiLCJwb3N0bWF0Zmlyc3QuOSIsICJwb3N0bWF0c2Vjb25kLjkiLCAicG9zdG1hdHRoaXJkLjkiLCAid29ya2luZ21vdGhlci45IiwgImNoaWxkam9ibW90aGVyLjkiLCAiZnVsbHRpbWVtb3RoZXIuOSIsICJlcXVhbGNvbnRyaWJ1dGlvbi45IiwgImZhdGhlcndvcmtzLjkiLCAiZmF0aGVyaG91c2Vob2xkLjkiLCAiZmF0aGVyc2NoaWxkY2FyZS45IiwiZGlmZmVyZW50Y3VsdHVyZS45IiwgImZvcmVpZ25lcmN1bHR1cmUuOSIsICJhc3lsdW0uOSIsICJmb3JlaWduc29jc2VjLjkiLCAidG9vbWFueWZvcmVpZ25lcnMuOSIsICJmb3JlaWdubm90YWNjZXB0ZWQuOSIsICJmb3JlaWduZWNvbm9teS45IiwgIm5laWdoYm9yaG9vZC45IiwNCiAgICAgICAgICAgICAgICAgICAgInBvbF9pbnQuMTAiCSwJInBhcmxfZG9ub3RfY2FyZS4xMCIJLAkicG9sX3BhcnRfaW50LjEwIgksCSJub19pbmZsdWVjZS4xMCIJLAkiY2FwX2FjdF9wb2wuMTAiCSwJImNsZWFyX3BpY3R1cmUuMTAiCSwJInBvbF9jb21wbC4xMCIJLAkidm90ZV9pbnQuMTAiCSwJImxyX3NjYWxlLjEwIgksCSJldXRoYW5hc2lhLjEwIgksCSJpbmNvbWVfZGlmZi4xMCIJLAkiaW1taWdyYW50cy4xMCIJLAkiZXVfaW50ZWdyYXRpb24uMTAiLCJnb3Zfc2F0LjEwIiwgInNhdGRlbS4xMCIsICJwb2x0cnVzdC4xMCIsICJwb3N0bWF0Zmlyc3QuMTAiLCAicG9zdG1hdHNlY29uZC4xMCIsICJwb3N0bWF0dGhpcmQuMTAiLCAid29ya2luZ21vdGhlci4xMCIsICJjaGlsZGpvYm1vdGhlci4xMCIsICJmdWxsdGltZW1vdGhlci4xMCIsICJlcXVhbGNvbnRyaWJ1dGlvbi4xMCIsICJmYXRoZXJ3b3Jrcy4xMCIsICJmYXRoZXJob3VzZWhvbGQuMTAiLCAiZmF0aGVyc2NoaWxkY2FyZS4xMCIsImRpZmZlcmVudGN1bHR1cmUuMTAiLCAiZm9yZWlnbmVyY3VsdHVyZS4xMCIsICJhc3lsdW0uMTAiLCAiZm9yZWlnbnNvY3NlYy4xMCIsICJ0b29tYW55Zm9yZWlnbmVycy4xMCIsICJmb3JlaWdubm90YWNjZXB0ZWQuMTAiLCAiZm9yZWlnbmVjb25vbXkuMTAiLCAibmVpZ2hib3Job29kLjEwIiwNCiAgICAgICAgICAgICAgICAgICAgInBvbF9pbnQuMTEiCSwJInBhcmxfZG9ub3RfY2FyZS4xMSIJLAkicG9sX3BhcnRfaW50LjExIgksCSJub19pbmZsdWVjZS4xMSIJLAkiY2FwX2FjdF9wb2wuMTEiCSwJImNsZWFyX3BpY3R1cmUuMTEiCSwJInBvbF9jb21wbC4xMSIJLAkidm90ZV9pbnQuMTEiCSwJImxyX3NjYWxlLjExIgksCSJldXRoYW5hc2lhLjExIgksCSJpbmNvbWVfZGlmZi4xMSIJLAkiaW1taWdyYW50cy4xMSIJLAkiZXVfaW50ZWdyYXRpb24uMTEiLCJnb3Zfc2F0LjExIiwgInNhdGRlbS4xMSIsICJwb2x0cnVzdC4xMSIsICJwb3N0bWF0Zmlyc3QuMTEiLCAicG9zdG1hdHNlY29uZC4xMSIsICJwb3N0bWF0dGhpcmQuMTEiLCAid29ya2luZ21vdGhlci4xMSIsICJjaGlsZGpvYm1vdGhlci4xMSIsICJmdWxsdGltZW1vdGhlci4xMSIsICJlcXVhbGNvbnRyaWJ1dGlvbi4xMSIsICJmYXRoZXJ3b3Jrcy4xMSIsICJmYXRoZXJob3VzZWhvbGQuMTEiLCAiZmF0aGVyc2NoaWxkY2FyZS4xMSIsImRpZmZlcmVudGN1bHR1cmUuMTEiLCAiZm9yZWlnbmVyY3VsdHVyZS4xMSIsICJhc3lsdW0uMTEiLCAiZm9yZWlnbnNvY3NlYy4xMSIsICJ0b29tYW55Zm9yZWlnbmVycy4xMSIsICJmb3JlaWdubm90YWNjZXB0ZWQuMTEiLCAiZm9yZWlnbmVjb25vbXkuMTEiLCAibmVpZ2hib3Job29kLjExIiwgDQogICAgICAgICAgICAgICAgICAgICJwb2xfaW50LjEyIgksCSJwYXJsX2Rvbm90X2NhcmUuMTIiCSwJInBvbF9wYXJ0X2ludC4xMiIJLAkibm9faW5mbHVlY2UuMTIiCSwJImNhcF9hY3RfcG9sLjEyIgksCSJjbGVhcl9waWN0dXJlLjEyIgksCSJwb2xfY29tcGwuMTIiCSwJInZvdGVfaW50LjEyIgksCSJscl9zY2FsZS4xMiIJLAkiZXV0aGFuYXNpYS4xMiIJLAkiaW5jb21lX2RpZmYuMTIiCSwJImltbWlncmFudHMuMTIiCSwJImV1X2ludGVncmF0aW9uLjEyIiwiZ292X3NhdC4xMiIsICJzYXRkZW0uMTIiLCAicG9sdHJ1c3QuMTIiLCAicG9zdG1hdGZpcnN0LjEyIiwgInBvc3RtYXRzZWNvbmQuMTIiLCAicG9zdG1hdHRoaXJkLjEyIiwgIndvcmtpbmdtb3RoZXIuMTIiLCAiY2hpbGRqb2Jtb3RoZXIuMTIiLCAiZnVsbHRpbWVtb3RoZXIuMTIiLCAiZXF1YWxjb250cmlidXRpb24uMTIiLCAiZmF0aGVyd29ya3MuMTIiLCAiZmF0aGVyaG91c2Vob2xkLjEyIiwgImZhdGhlcnNjaGlsZGNhcmUuMTIiLCJkaWZmZXJlbnRjdWx0dXJlLjEyIiwgImZvcmVpZ25lcmN1bHR1cmUuMTIiLCAiYXN5bHVtLjEyIiwgImZvcmVpZ25zb2NzZWMuMTIiLCAidG9vbWFueWZvcmVpZ25lcnMuMTIiLCAiZm9yZWlnbm5vdGFjY2VwdGVkLjEyIiwgImZvcmVpZ25lY29ub215LjEyIiwgIm5laWdoYm9yaG9vZC4xMiIpCQ0KDQoNCiNnZXQgdGhlIGJhY2tncm91bmQgZGF0YSBhbmQgcmVuYW1lIHRoZSBjb2x1bW5zLiANCmxpc3NfYXZhcnMgPC0gbGlzc19zdWJzZXQgJT4lDQogIHNlbGVjdChnZXNsYWNodC4xLHBvc2l0aWUuMSxnZWJqYWFyLjEsbGVlZnRpamQuMSxsZnRkY2F0LjEsYWFudGFsaGguMSxhYW50YWxraS4xLHBhcnRuZXIuMSxidXJnc3RhdC4xLHdvb252b3JtLjEsd29uaW5nLjEsc3RlZC4xLGJlbGJlemlnLjEsYnJ1dG9pbmsuMSxuZXR0b2luay4xLGJydXRvY2F0LjEsbmV0dG9jYXQuMSxvcGx6b24uMSxvcGxtZXQuMSxvcGxjYXQuMSwgbm9ob3VzZV9lbmNyLjEsDQogICAgICAgICBnZXNsYWNodC4yLHBvc2l0aWUuMixnZWJqYWFyLjIsbGVlZnRpamQuMixsZnRkY2F0LjIsYWFudGFsaGguMixhYW50YWxraS4yLHBhcnRuZXIuMixidXJnc3RhdC4yLHdvb252b3JtLjIsd29uaW5nLjIsc3RlZC4yLGJlbGJlemlnLjIsYnJ1dG9pbmsuMixuZXR0b2luay4yLGJydXRvY2F0LjIsbmV0dG9jYXQuMixvcGx6b24uMixvcGxtZXQuMixvcGxjYXQuMiwgbm9ob3VzZV9lbmNyLjIsDQogICAgICAgICBnZXNsYWNodC4zLHBvc2l0aWUuMyxnZWJqYWFyLjMsbGVlZnRpamQuMyxsZnRkY2F0LjMsYWFudGFsaGguMyxhYW50YWxraS4zLHBhcnRuZXIuMyxidXJnc3RhdC4zLHdvb252b3JtLjMsd29uaW5nLjMsc3RlZC4zLGJlbGJlemlnLjMsYnJ1dG9pbmsuMyxuZXR0b2luay4zLGJydXRvY2F0LjMsbmV0dG9jYXQuMyxvcGx6b24uMyxvcGxtZXQuMyxvcGxjYXQuMywgbm9ob3VzZV9lbmNyLjMsDQogICAgICAgICBnZXNsYWNodC40LHBvc2l0aWUuNCxnZWJqYWFyLjQsbGVlZnRpamQuNCxsZnRkY2F0LjQsYWFudGFsaGguNCxhYW50YWxraS40LHBhcnRuZXIuNCxidXJnc3RhdC40LHdvb252b3JtLjQsd29uaW5nLjQsc3RlZC40LGJlbGJlemlnLjQsYnJ1dG9pbmsuNCxuZXR0b2luay40LGJydXRvY2F0LjQsbmV0dG9jYXQuNCxvcGx6b24uNCxvcGxtZXQuNCxvcGxjYXQuNCwgbm9ob3VzZV9lbmNyLjQsDQogICAgICAgICBnZXNsYWNodC41LHBvc2l0aWUuNSxnZWJqYWFyLjUsbGVlZnRpamQuNSxsZnRkY2F0LjUsYWFudGFsaGguNSxhYW50YWxraS41LHBhcnRuZXIuNSxidXJnc3RhdC41LHdvb252b3JtLjUsd29uaW5nLjUsc3RlZC41LGJlbGJlemlnLjUsYnJ1dG9pbmsuNSxuZXR0b2luay41LGJydXRvY2F0LjUsbmV0dG9jYXQuNSxvcGx6b24uNSxvcGxtZXQuNSxvcGxjYXQuNSwgbm9ob3VzZV9lbmNyLjUsDQogICAgICAgICBnZXNsYWNodC42LHBvc2l0aWUuNixnZWJqYWFyLjYsbGVlZnRpamQuNixsZnRkY2F0LjYsYWFudGFsaGguNixhYW50YWxraS42LHBhcnRuZXIuNixidXJnc3RhdC42LHdvb252b3JtLjYsd29uaW5nLjYsc3RlZC42LGJlbGJlemlnLjYsYnJ1dG9pbmsuNixuZXR0b2luay42LGJydXRvY2F0LjYsbmV0dG9jYXQuNixvcGx6b24uNixvcGxtZXQuNixvcGxjYXQuNiwgbm9ob3VzZV9lbmNyLjYsDQogICAgICAgICBnZXNsYWNodC43LHBvc2l0aWUuNyxnZWJqYWFyLjcsbGVlZnRpamQuNyxsZnRkY2F0LjcsYWFudGFsaGguNyxhYW50YWxraS43LHBhcnRuZXIuNyxidXJnc3RhdC43LHdvb252b3JtLjcsd29uaW5nLjcsc3RlZC43LGJlbGJlemlnLjcsYnJ1dG9pbmsuNyxuZXR0b2luay43LGJydXRvY2F0LjcsbmV0dG9jYXQuNyxvcGx6b24uNyxvcGxtZXQuNyxvcGxjYXQuNywgbm9ob3VzZV9lbmNyLjcsDQogICAgICAgICBnZXNsYWNodC44LHBvc2l0aWUuOCxnZWJqYWFyLjgsbGVlZnRpamQuOCxsZnRkY2F0LjgsYWFudGFsaGguOCxhYW50YWxraS44LHBhcnRuZXIuOCxidXJnc3RhdC44LHdvb252b3JtLjgsd29uaW5nLjgsc3RlZC44LGJlbGJlemlnLjgsYnJ1dG9pbmsuOCxuZXR0b2luay44LGJydXRvY2F0LjgsbmV0dG9jYXQuOCxvcGx6b24uOCxvcGxtZXQuOCxvcGxjYXQuOCwgbm9ob3VzZV9lbmNyLjgsDQogICAgICAgICBnZXNsYWNodC45LHBvc2l0aWUuOSxnZWJqYWFyLjksbGVlZnRpamQuOSxsZnRkY2F0LjksYWFudGFsaGguOSxhYW50YWxraS45LHBhcnRuZXIuOSxidXJnc3RhdC45LHdvb252b3JtLjksd29uaW5nLjksc3RlZC45LGJlbGJlemlnLjksYnJ1dG9pbmsuOSxuZXR0b2luay45LGJydXRvY2F0LjksbmV0dG9jYXQuOSxvcGx6b24uOSxvcGxtZXQuOSxvcGxjYXQuOSwgbm9ob3VzZV9lbmNyLjksDQogICAgICAgICBnZXNsYWNodC4xMCxwb3NpdGllLjEwLGdlYmphYXIuMTAsbGVlZnRpamQuMTAsbGZ0ZGNhdC4xMCxhYW50YWxoaC4xMCxhYW50YWxraS4xMCxwYXJ0bmVyLjEwLGJ1cmdzdGF0LjEwLHdvb252b3JtLjEwLHdvbmluZy4xMCxzdGVkLjEwLGJlbGJlemlnLjEwLGJydXRvaW5rLjEwLG5ldHRvaW5rLjEwLGJydXRvY2F0LjEwLG5ldHRvY2F0LjEwLG9wbHpvbi4xMCxvcGxtZXQuMTAsb3BsY2F0LjEwLCBub2hvdXNlX2VuY3IuMTAsDQogICAgICAgICBnZXNsYWNodC4xMSxwb3NpdGllLjExLGdlYmphYXIuMTEsbGVlZnRpamQuMTEsbGZ0ZGNhdC4xMSxhYW50YWxoaC4xMSxhYW50YWxraS4xMSxwYXJ0bmVyLjExLGJ1cmdzdGF0LjExLHdvb252b3JtLjExLHdvbmluZy4xMSxzdGVkLjExLGJlbGJlemlnLjExLGJydXRvaW5rLjExLG5ldHRvaW5rLjExLGJydXRvY2F0LjExLG5ldHRvY2F0LjExLG9wbHpvbi4xMSxvcGxtZXQuMTEsb3BsY2F0LjExLCBub2hvdXNlX2VuY3IuMTEsDQogICAgICAgICBnZXNsYWNodC4xMixwb3NpdGllLjEyLGdlYmphYXIuMTIsbGVlZnRpamQuMTIsbGZ0ZGNhdC4xMixhYW50YWxoaC4xMixhYW50YWxraS4xMixwYXJ0bmVyLjEyLGJ1cmdzdGF0LjEyLHdvb252b3JtLjEyLHdvbmluZy4xMixzdGVkLjEyLGJlbGJlemlnLjEyLGJydXRvaW5rLjEyLG5ldHRvaW5rLjEyLGJydXRvY2F0LjEyLG5ldHRvY2F0LjEyLG9wbHpvbi4xMixvcGxtZXQuMTIsb3BsY2F0LjEyLCBub2hvdXNlX2VuY3IuMTIpDQoNCiNnZXQgdGhlIGJhY2tncm91bmQgZGF0YSBhbmQgcmVuYW1lIHRoZSBjb2x1bW5zLg0KI0ZvciB0aGUgZmlyc3QgdGhyZWUgd2F2ZXMgdGhlcmUgYXJlIGlzIG5vIGRhdGEgb24gdGhpcyB2YXJpYWJsZQ0KbGlzc19vcmlnaW4gPC0gbGlzc19zdWJzZXQgJT4lDQogIHNlbGVjdChoZXJrb21zdGdyb2VwLjQsIGhlcmtvbXN0Z3JvZXAuNSwgaGVya29tc3Rncm9lcC42LCBoZXJrb21zdGdyb2VwLjcsIGhlcmtvbXN0Z3JvZXAuOCwgaGVya29tc3Rncm9lcC45LCBoZXJrb21zdGdyb2VwLjEwLCBoZXJrb21zdGdyb2VwLjExLCBoZXJrb21zdGdyb2VwLjEyKQ0KbmFtZXMobGlzc19vcmlnaW4pIDwtIGMoIm9yaWdpbi40IiwgIm9yaWdpbi41IiwgIm9yaWdpbi42IiwgIm9yaWdpbi43IiwgIm9yaWdpbi44IiwgIm9yaWdpbi45IiwgIm9yaWdpbi4xMCIsIm9yaWdpbi4xMSIsICJvcmlnaW4uMTIiKQ0KDQojY3JlYXRlIGVnbyBvcmlnaW4gMS0zIHdpdGggTkEncyBzbyB3ZSBjYW4gbGF0ZXIgbWVyZ2UgdGhlbSBpbnRvIGEgbG9uZyBmaWxlLiANCmxpc3Nfb3JpZ2luJG9yaWdpbi4xIDwtIE5BDQpsaXNzX29yaWdpbiRvcmlnaW4uMiA8LSBOQQ0KbGlzc19vcmlnaW4kb3JpZ2luLjMgPC0gTkENCg0KI0ZvciBzb21lIHJlYXNvbiB0aGUgcmVzaGFwZSBjb21tYW5kIGJ1Z3Mgd2hlbiB0aGUgb3JkZXJpbmcgaXMgbm90IGNvcnJlY3QuIA0KbGlzc19vcmlnaW4gPC0gbGlzc19vcmlnaW5bLGMoOToxMSwxOjgpXQ0KDQojY29tYmluZSB0aGUgZGlmZmVyZW50IGRhdGEgc291cmNlcyBpbnRvIG9uZSB3aWRlIGRhdGEgZmlsZS4gDQpsaXNzX3dpZGUgPC0gY2JpbmQobGlzc19wb2wsIGxpc3NfYXZhcnMsIGxpc3Nfb3JpZ2luKQ0KDQoNCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIFZhcmlhYmxlIHJlY29kZSAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMNCiNyZXZlcnNlIGNvZGUgcG9saXRpY2FsIGRpc2N1c3Npb24gZnJlcXVlbmN5IGFuZCBldV9pbnRlZ3JhdGlvbi4NCg0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBSZXNoYXBlIHRvIGxvbmcgZmlsZS4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMNCiNUSjogSW4gdGhlIGZ1dHVyZSBJIHdhbnQgdG8gY2hhbmdlIHRoaXMgdG8gYSB0aWR5IGZ1bmN0aW9uIHN1Y2ggYXMgcGl2b3RfbG9uZ2VyLiBGb3Igbm93IEkgaGF2ZSBub3QgZmlndXJlZCBpdCBvdXQgeWV0LiAoYXBwbGljYXRpb24gb2YgcGl2b3Rfd2lkZSgpIHdhcyBzdWNjZXNmdWwpLg0KDQojQEpULCB3aGF0IGRvIHlvdSB1c2UgZm9yIHJlc2hhcGluZyB3aWRlIHRvIGxvbmcgYW5kIHZpY2UgdmVyc2E/DQpsaXNzX3Nydl9zdWJzZXQgPC0gbGlzc193aWRlICAlPiUNCiAgc2VsZWN0KG5vbWVtX2VuY3IsIG9wbG1ldC4xLCBvcGxtZXQuMiwgb3BsbWV0LjMsIG9wbG1ldC40LCBvcGxtZXQuNSwgb3BsbWV0LjYsIG9wbG1ldC43LCBvcGxtZXQuOCwgb3BsbWV0LjksIG9wbG1ldC4xMCwgb3BsbWV0LjExLCBvcGxtZXQuMTIsDQogICAgICAgICBldV9pbnRlZ3JhdGlvbi4xLCBldV9pbnRlZ3JhdGlvbi4yLCBldV9pbnRlZ3JhdGlvbi4zLCBldV9pbnRlZ3JhdGlvbi40LCBldV9pbnRlZ3JhdGlvbi41LCBldV9pbnRlZ3JhdGlvbi42LCBldV9pbnRlZ3JhdGlvbi43LCBldV9pbnRlZ3JhdGlvbi44LCBldV9pbnRlZ3JhdGlvbi45LCBldV9pbnRlZ3JhdGlvbi4xMCwgZXVfaW50ZWdyYXRpb24uMTEsIGV1X2ludGVncmF0aW9uLjEyLA0KICAgICAgICAgaW1taWdyYW50cy4xLCBpbW1pZ3JhbnRzLjIsIGltbWlncmFudHMuMywgaW1taWdyYW50cy40LCBpbW1pZ3JhbnRzLjUsIGltbWlncmFudHMuNiwgaW1taWdyYW50cy43LCBpbW1pZ3JhbnRzLjgsIGltbWlncmFudHMuOSwgaW1taWdyYW50cy4xMCwgaW1taWdyYW50cy4xMSwgaW1taWdyYW50cy4xMiwNCiAgICAgICAgIHN0ZWQuMSwgc3RlZC4yLCBzdGVkLjMsIHN0ZWQuNCwgc3RlZC41LCBzdGVkLjYsIHN0ZWQuNywgc3RlZC44LCBzdGVkLjksIHN0ZWQuMTAsIHN0ZWQuMTEsIHN0ZWQuMTIsDQogICAgICAgICBsZWVmdGlqZC4xLCBsZWVmdGlqZC4yLCBsZWVmdGlqZC4zLCBsZWVmdGlqZC40LCBsZWVmdGlqZC41LCBsZWVmdGlqZC42LCBsZWVmdGlqZC43LCBsZWVmdGlqZC44LCBsZWVmdGlqZC45LCBsZWVmdGlqZC4xMCwgbGVlZnRpamQuMTEsIGxlZWZ0aWpkLjEyKQ0KICAgICAgICAgDQoNCiNjcmVhdGUgYSBsb25nIGZpbGUuDQpsaXNzX3Nydl9zdWJzZXQgPC0gcmVzaGFwZShsaXNzX3Nydl9zdWJzZXQsIGRpcmVjdGlvbiA9ICJsb25nIiwNCiAgICAgICAgICAgICAgICAgICAgIHZhcnlpbmcgPSBuYW1lcyhsaXNzX3Nydl9zdWJzZXRbLDI6NjFdKSwNCiAgICAgICAgICAgICAgICAgICAgIGlkdmFyID0gIm5vbWVtX2VuY3IiLA0KICAgICAgICAgICAgICAgICAgICAgdGltZXZhciA9ICJzdXJ2ZXlfd2F2ZSIsDQogICAgICAgICAgICAgICAgICAgICB0aW1lcyA9IGMoMToxMikpDQoNCnRhYmxlKGxpc3Nfc3J2X3N1YnNldCRldV9pbnRlZ3JhdGlvbikNCg0KI2NsZWFuIHRoZSBlbnZpcm9ubWVudC4gDQpybShsaXN0PWxzKClbISBscygpICVpbiUgYygibGlzc19zcnZfc3Vic2V0IiwgImxpc3Nfd2lkZSIpXSkNCg0KDQojRXhwb3J0IHRoZSBkYXRhICMNCiNzYXZlIFJEYXRhLg0Kc2F2ZS5pbWFnZSgiQzovVXNlcnMvdTM5OTE3MS9zdXJmZHJpdmUvUmVzZWFyY2gvUGhEIHByb2plY3QvZGF0YS9MSVNTIGRhdGEvY3JlYXRlZF9kYXRhL0xJU1Nfc3J2X2Jsb2dfcG9sYXIuUmRhdGEiKQ0KDQpgYGANCg0K</div>
+<style>
+.center {
+  text-align: center;
+  color: red;
+}
+</style>
+
+<hr>
+<br>
+<p class="center">Copyright &copy; 2021 Jochem Tolsma</p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("LISS_coremodule_srv.Rmd");
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -76,43 +76,51 @@ library(ggplot2)
 library(plotly)
 
 ```
+<!---
+#als we bij ggplotly ook een subtitle willen. hier dan ook de caption in stoppen. 
+ggplotly(p) %>%
+  layout(title = list(text = paste0('US State Population and Life Expectancy',
+                                    '<br>',
+                                    '<sup>',
+                                    'Life expectancy 1969-1971; Population estimate as of July 1, 1975',
+                                    '</sup>')))
+--->
+----
+
+## Toenemende polarisatie? Niet in de houdingen van het volk.
+
+De verkiezingsuitslag zou [volgens de Volkskrant](https://www.volkskrant.nl/nieuws-achtergrond/de-uitslagenkaart-toont-een-groeiende-polarisatie-tussen-nationalisten-en-kosmopolieten~b5b56972/) een groeiende polarisatie tonen tussen nationalisten en kosmopolieten. Het is zeker waar dat zowel de ‘kosmopolitische partij’ D66 en de ‘nationalistische partij’ FvD verkiezingswinst hebben geboekt. Maar dat het een gevolg is van toenemende polarisatie onder de bevolking, dat lijkt ons onwaarschijnlijk. Er is namelijk geen sprake van brede groeiende polarisatie op dit vlak.
+Polarisatie?
+Wij zochten met behulp van de [LISS-data](https://www.lissdata.nl/about-panel) (we gebruikten data verzameld in de jaren 2008 t/m 2014 en 2016 t/m 2020) uit of de samenleving steeds verder polariseert over politieke thema’s die de kern raken van de tegenstelling nationalisme versus kosmopolitisme: de EU en migratie/integratie. Aan deelnemers aan het LISS-panel worden herhaaldelijk de volgende twee stellingen voorgelegd. Zie Box 1. 
+
+
+
+---  
+
+**Box 1. Meting van houdingen over de EU en migratie/integratie in LISS**  
+
+**EU-integratie**  
+*Sommige mensen en partijen vinden dat de Europese eenwording nog verder zou moeten gaan. Anderen vinden dat de Europese eenwording al te ver is gegaan. Waar zou u uzelf plaatsen op een schaal van 1 t/m 5 […]?*
+
+1. De Europese eenwording zou nog verder moeten gaan  
+2.  
+3.  
+4.  
+5. De Europese eenwording is al te ver gegaan  
+
+**Migratie/integratie**  
+*In Nederland vinden sommigen dat mensen met een migratie-achtergrond hier moeten kunnen leven met behoud van de eigen cultuur. Anderen vinden dat zij zich geheel moeten aanpassen aan de Nederlandse cultuur. Waar zou u uzelf plaatsen op een schaal van 1 t/m 5 […]?*  
+
+1. behoud van eigen cultuur voor mensen met een migratie-achtergrond  
+2.  
+3.  
+4.  
+5. mensen met een migratie achtergrond moeten zich geheel aanpassen  
 
 ----
 
-De verkiezingsuitslag zou [volgens de Volkskrant](https://www.volkskrant.nl/nieuws-achtergrond/de-uitslagenkaart-toont-een-groeiende-polarisatie-tussen-nationalisten-en-kosmopolieten~b5b56972/) een groeiende polarisatie tonen tussen nationalisten en kosmopolieten. 
-Het is zeker waar dat zowel de 'kosmpolitische partij' D66 en de 'nationalistische partij' FvD verkiezingswinst hebben geboekt. Maar dat dat het gevolg is van toenemende polarisatie lijkt ons onwaarschijnlijk. Onze stelling (of noem het hypothese) is namelijk dat er geen sprake is van groeiende polarisatie.
-
-Wij zochten met behulp van de [LISS data](https://www.lissdata.nl/about-panel) uit of de samenleving wel of niet steeds verder polariseert over politieke thema's die de kern raken van de tegenstelling nationalisme versus kosmopolitisme: houdingen ten aanzien van migratie/integratie en houdingen ten aanzien van de EU.  
-Aan deelnemers aan het LISS panel worden herhaaldelijk de volgende twee stellingen voorgelegd:  
-
-**EU integratie** 
-
-> De Europese integratie is te ver gegaan.  
->  
->  1 Helemaal oneens  
->  2 Oneens   
->  3 Niet eens, niet oneens  
->  4 Eens  
->  5 Helemaal eens  
-
-**Migratie/integratie**
-
-> In Nederland vinden sommigen dat mensen met een migratie achtergrond hier moeten kunnen leven met behoud van de eigen cultuur. Anderen vinden dat zij zich geheel moeten aanpassen aan de Nederlandse cultuur. Waar zou u uzelf plaatsen op een schaal van 1 t/m 5, waarbij 1 behoud van eigen cultuur voor mensen met een migratie achtergrond betekent en 5 dat zij zich geheel moeten aanpassen?  
->  
-> 1	behoud van eigen cultuur voor mensen met een migratie achtergrond  
-> 2  
-> 3	  
-> 4	  
-> 5	mensen met een migratie achtergrond moeten zich geheel aanpassen  
 
 
-----
-
-Indien er sprake zou van toenemende polarisatie zou je verwachten dat een steeds groter deel van de bevolking een (relatief) extreem antwoord zou geven op deze twee stellingen. Dat lijkt echter niet het geval. Zie Figuur 1 en 2. Het percentage van de bevolking dat een zeer uitgesproken mening heeft dat de EU integratie niet ver genoeg is gegaan schommelt zo tussen de 4 en 6%. Er zijn aanzienlijk veel meer Nederlanders die duidelijk van mening zijn dat de EU integratie te ver is gegaan. We zien hier ook flinke schommelingen. Maar van een duidelijke trend is geen sprake en in de laatste jaren lijkt er eerder weer een trend naar minder 'extreme' meningen te zijn.  
-
-Iets vergelijkbaars zien we bij de stelling over de integratie van mensen met een migratie achtergrond. Slechts een klein percentage van de bevolking scoort hier extreem aan de behoud-van-eigen-cultuur-kant. Het gaat om ongeveer 2%. Aan de andere kant van de schaal bevindt zich een aanzienlijk groter deel van de bevolking, hoewel we ook daar niet kunnen spreken over een toenemende polarisatie. De laatste meetjaren zien we eerder dat minder mensen vinden dat migranten zich volledig dienen aan te passen. 
-
-  
 ```{r}
 #clean the environment. 
 rm(list=ls())
@@ -121,6 +129,7 @@ rm(list=ls())
 load('data-processed/LISS_srv_blog_polar.Rdata')
 ```
   
+Als er sprake zou van toenemende polarisatie moet een steeds groter deel van de bevolking een (relatief) extreem antwoord geven op deze twee stellingen. Figuren 1 en 2 tonen dat dit niet het geval is. Het aantal mensen dat zeer sterk vindt dat de EU-integratie niet ver genoeg is gegaan schommelt constant tussen de 4 en 6%. Er zijn veel meer Nederlanders die vinden dat de EU-integratie veel te ver is gegaan: tussen de 17 en 33%. We zien daarbij flinke schommelingen, maar van een duidelijke stijgende trend is geen sprake. Sterker nog: in de laatste jaren lijkt de Nederlandse bevolking minder ‘extreem’ te worden op dit vlak.
   
 
 ```{r}
@@ -180,6 +189,7 @@ htmlwidgets::saveWidget(figuur1, file.path("plots", 'figuur1.html'))
 
 
 ```
+Iets vergelijkbaars zien we rond de integratie van mensen met een migratie-achtergrond. Een laag stabiel aantal mensen (2%) is het sterk eens met de ‘behoud van eigen cultuur’-extreem. Aan de andere kant van de schaal bevindt zich een aanzienlijk groter deel van de bevolking, maar het aantal neemt niet toe. In tegendeel: de laatste meetjaren zien we juist dat minder mensen vinden dat migranten zich volledig dienen aan te passen.  
 
 
 ```{r}
@@ -228,46 +238,18 @@ figuur2 <- ggplotly(ggp, tooltip = c("y", "x"))
 htmlwidgets::saveWidget(figuur2, file.path("plots", 'figuur2.html'))
 
 ```
-## Sociale scheidslijnen
+## Sociale scheidslijnen?
 
-Nu kan het natuurlijk zo zijn dat er weliswaar in de bevolking als geheel geen sprake is van toenemende polarisatie, maar dat verschillende groepen in de samenleving wel duidelijk anders zijn gaan denken over deze onderwerpen. Ik zou in dit laatste verband overigens liever willen spreken over toenemende sociale scheidslijnen dan over toenemende polarisatie, maar dat is academische muggenzifterij. In het reeds aangehaalde volkskrant artikel zouden er twee sociale dimensies van belang zijn:  
+Ook al is er geen sprake is van toenemende polarisatie onder de bevolking, kan het nog wel zo zijn dat verschillende groepen in de samenleving uit elkaar groeien. We spreken dan eigenlijk over toenemende sociale scheidslijnen, niet over toenemende polarisatie (maar dat is wellicht academische muggenzifterij). Volgens het Volkskrant artikel zouden twee sociale kenmerken cruciaal zijn:  
 
-- opleiding  
-- stedelijkheid
+•	opleiding  
+•	stedelijkheid  
 
-Ook deze informatie vinden we in de LISS. 
+Laten we eens kijken, want ook deze informatie vinden we in de LISS-data. Voor opleiding nemen we enkel mensen van 25 jaar en ouder mee, omdat ze zeer waarschijnlijk klaar zijn met hun onderwijscarrière. We maakten drie categorieën: Laag: basisonderwijs en vmbo; Midden: havo/vwo en mbo; Hoog: hbo en wo. Stedelijkheid is bepaald op basis van de woonplaats: Zeer sterk stedelijk; Sterk stedelijk; Matig stedelijk; Weinig stedelijk en Niet stedelijk. We tonen in het onderstaande steeds per groep de (geschatte) trendlijn in gemiddelde houding (de standaarddeviatie van deze schatting geven we aan met een schaduw om de lijn).   
+Kijken we naar de EU-integratie (Figuur 3) dan lijkt de sociale scheidslijn inderdaad een klein beetje toe te nemen: de verschillen tussen de opleidingsgroepen worden wat groter. Echter, de verschillen zijn altijd al groot geweest.  
 
-**opleiding**  
+Voor stedelijkheid en EU-integratie zien we meer spaghetti (Figuur 4). Stedelingen staan minder negatief ten aanzien van verdere EU-integratie dan mensen in minder stedelijke gebieden. Echter, van een duidelijke toenemende sociale scheidslijn is geen sprake.
 
-> Hoogste opleiding met diploma  
-> 1 basisonderwijs  
-> 2 vmbo  
-> 3 havo/vwo  
-> 4 mbo  
-> 5 hbo  
-> 6 wo  
-> 7 anders  
-> 8 (Nog) geen onderwijs afgerond  
-> 9 Volgt nog geen onderwijs  
-> Hierbij hebben wij opleiding gecategoriseerd in drie groepen:  
-> 1. Laag: basisonderwijs en vmbo  
-> 2. Midden: havo/vwo en mbo  
-> 3. Hoog: hbo en wo  
-> Als we uitsplitsen naar opleidingsgroepen nemen we enkel mensen van 25 jaar en ouder mee. Van hen verwachten we dat ze klaar zijn met hun onderwijscarriere. 
-
-**stedelijkheid**  
-
-> Stedelijkheid woonplaats  
-> 1 Zeer sterk stedelijk  
-> 2 Sterk stedelijk  
-> 3 Matig stedelijk  
-> 4 Weinig stedelijk  
-> 5 Niet stedelijk  
-
-
-In figuren geven we de trend in de gemiddelde houding per opleidingsgroep weer. De grijze schaduw achter de lijn geeft de variantie in de houding weer.  
-
-Als we allereerst kijken naar de meningen over EU integratie en de sociale dimensie opleiding (Figuur 3) dan lijken we inderdaad te kunnen spreken over een kleine toenemende sociale scheidslijn: de verschillen tussen de opleidingsgroepen nemen iets toe. Echter, de verschillen zijn altijd al groot geweest.  
 
 ```{r}
 
@@ -329,8 +311,6 @@ htmlwidgets::saveWidget(figuur3, file.path("plots", 'figuur3.html'))
 
 ```
 
-Indien we de meningen over EU integratie uitsplitsen naar mensen uit verschillende stedelijke gebieden, wordt het enigszins spaghetti (zie Figuur 4). Inderdaad lijken stedelingen minder negatief te staan ten aanzien van verdere EU integratie dan mensen in minder stedelijke gebieken. Maar er is geen sprake van een duidelijke toenemende sociale scheidslijn. 
-
 ```{r stedelijkheid}
 
 dataplot <- liss_srv_subset
@@ -381,7 +361,8 @@ htmlwidgets::saveWidget(figuur4, file.path("plots", 'figuur4.html'))
 ```
 
 
-We zien min of meer hetzelfde beeld als we kijken naar verschillen in meningen over migratie/integratie. Ja, er bestaan zeker verschillen tussen groepen. De hogeropgeleiden en mensen in stedelijke gebieden zijn (iets) minder vaak van mening dat migranten zich volledig dienen aan te passen. Maar van toenemende sociale scheidslijnen is ook hier geen sprake. 
+We zien min of meer hetzelfde beeld als we kijken naar integratiehouding (Figuur 5 en 6): Ja, er bestaan verschillen en de hogeropgeleiden en mensen in stedelijke gebieden zijn (iets) minder vaak van mening dat migranten zich volledig dienen aan te passen, maar van duidelijk toenemende sociale scheidslijnen is geen sprake.
+
 
 ```{r}
 dataplot <- liss_srv_subset
@@ -419,7 +400,7 @@ ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= opleiding)) +         
   geom_smooth() + 
   scale_x_continuous(name="jaar", breaks=c(2008:2020), limits=c(2008,2020)) +
   scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
-  labs(title="Figuur 5. Migratie/integratie", subtitle = "Opleidingsscheidslijn", caption="DATA van LISS", x="jaar", y=" ") + 
+  labs(title="Figuur 5. Migratie/integratie", subtitle = "Opleidingsscheidslijn", caption="DATA: LISS", x="jaar", y=" ") + 
     theme(plot.caption = element_text(hjust = 0))
 
 ggp
@@ -456,7 +437,13 @@ figuur6 <- ggplotly(ggp)
 htmlwidgets::saveWidget(figuur6, file.path("plots", 'figuur6.html'))
 ```
 
-## Wat is er dan wel aan de hand?  
+## Polarisatie is geen easy-fix stopwoord
 
-Natuurlijk zijn er de nodige kanttekeningen bij onze analysen te plaatsen. Doen extreme mensen wel mee aan het LISS panel bijvoorbeeld? Dat is een goed punt, maar ook in het LISS panel bevinden zich FvD stemmers en D66 stemmers. Nielsje jij bent! :-)
+Ja, in de verkiezing hebben kosmopolitische en nationalistische partijen (D66, VOLT, FvD en JA21) gewonnen. Echter GroenLinks en PVV verloren. Netto is er – in zetels uitgedrukt – slechts sprake van +1 op kosmopolitisme en +6 op nationalisme.  Ofwel: meer nationalisme. En zelfs die verschuiving, kunnen we niet koppelen aan een langere trend van veranderende houdingen onder de bevolking.  
+
+Kan het dan aan de data liggen? Extreem denkende mensen doen minder mee met vragenlijstonderzoek, maar we hebben geen reden om aan te nemen dat dit het afgelopen decennium is veranderd Wel weten we dat mensen met extreme meningen vaker op sociale media zitten en tv-programma’s en kranten daarvan smullen. Dit maakt het heel intuïtief dat polarisatie toeneemt, maar niet per se correct. Het populaire stopwoord ‘polarisatie’ volgt vaak te snel en te simpel.  
+
+Wat verklaart dan wel die nationalistische verschuiving in de kamer? Per verkiezing verschilt het welke houdingen (of thema’s) de stemkeus van mensen bepalen. Als migratie en integratie worden uitgelicht, lijken juist D66 en nationalisten daarvan te profiteren. Bovendien lijkt het meer geaccepteerd dat mensen op extreemrechtse partijen als FvD stemmen. Tenslotte, zou de zetelwinst voor ‘nationalisme’ wel eens vooral winst kunnen zijn voor ‘corona-vrijheid’, hetgeen waarop Forum zich profileerde. Of dit de verklaringen zijn, moet verder onderzoek uitwijzen. Voor nu kan kosmopolitisme-nationalisme polarisatie weer even in de ijskast.
+
+
 
