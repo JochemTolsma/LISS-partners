@@ -76,6 +76,7 @@ library(dplyr)
 library(haven)
 library(purrr)
 library(tidyr)
+library(data.table)
 ```
 
 
@@ -83,15 +84,6 @@ library(tidyr)
 
 ## Constructing the merged LISS data
 
-Hai Jochem, 
-
-Ik heb het script aangepast. Ik heb geprobeerd om jou structuur aan te houden. Daarnaast heb ik nu zoveel mogelijk tidyverse gebruikt. Hier en daar wel gewoon base r, omdat het me nu niet even lukt om het aan te passen. Maar dat wil ik op termijn wel aanpassen. Ik zal hier nog een lijst maken met de files die ik heb gebruikt en ik zal de codeboeken er bij zetten. Daarnaast zal ik ook nog de procedure van het alter identificeren uitleggen. Maar dit komt later, nu kan je in ieder geval in de vakantie spelen. 
-
-Laat maar weten als je iets tegenkomt. Hier en daar staan nog wat vragen onder #TJ. 
-
-Okee thijmen. 
-hierbij wat reacties:
-- TJ I added DOCS/ as the data-raw exists in the docs dir.: colorize("Nee niet doen!", "red"). de 'docs' folder is voor de website en staat ook in de gitignore. niet via deze dir werken dus.  
 
 ```{r, eval=FALSE}
 ##---------------------------- LISS Merging ----------------------------##
@@ -108,14 +100,14 @@ options(scipen = 999) #JT op het eind van dit script weer aan zetten?
 #---------------------------------- LISS leisure and integration file ----------------------------------#
 
 #import the different liss files from their directory. 
-file_names=as.list(dir(path="docs/data-raw/leisure_integ_data/", pattern = '*.sav')) #TJ I added DOCS/ as the data-raw exists in the docs dir. 
+file_names=as.list(dir(path="data-raw/leisure_integ_data/", pattern = '*.sav')) #TJ I added DOCS/ as the data-raw exists in the docs dir. 
 #create an empty list so that we can load all the files in this list. 
 desired_length <- 11 #
 liss_files <- vector(mode = "list", length = desired_length)
 
 #import all the files in the list.
 for (i in 1:length(file_names)) {
-  liss_files[[i]] <- read_sav(paste("docs/data-raw/leisure_integ_data/",file_names[[i]], sep=""))
+  liss_files[[i]] <- read_sav(paste("data-raw/leisure_integ_data/",file_names[[i]], sep=""))
 }
 
 #For a full outer join.
@@ -132,13 +124,13 @@ liss_merged <- liss_files %>%
 #get the politics and values data.
 #I do this seperately as I wanted to create wave id's, and this was easier to do on one file.
 #import the data files.
-file_names=as.list(dir(path="docs/data-raw/pol_data/", pattern = '*.sav'))
+file_names=as.list(dir(path="data-raw/pol_data/", pattern = '*.sav'))
 liss_files <- vector(mode = "list", length = 11)
 
 #loop to load all the data in one list.
 #name them. 
 for (i in 1:length(file_names)) {
-  liss_files[[i]] <- read_sav(paste("docs/data-raw/pol_data/",file_names[[i]], sep=""))
+  liss_files[[i]] <- read_sav(paste("data-raw/pol_data/",file_names[[i]], sep=""))
 } 
 
 #merge the data into one file.
@@ -160,13 +152,13 @@ liss_merged[,c("nohouse_encr", "nohouse_encr.x", "nohouse_encr.y", "nohouse_encr
 # JT perhaps add some explanation how we retrieved this data. preferably in README.md. #Answer Thijmen: Will do. 
 
 #import the data files.
-file_names=as.list(dir(path="docs/data-raw/alter_data/", pattern = '*.sav'))
+file_names=as.list(dir(path="data-raw/alter_data/", pattern = '*.sav'))
 liss_names_alters <- vector(mode = "list", length = 11)
 
 #loop to load all the data in one list.
 #name them. 
 for (i in 1:length(file_names)) {
-  liss_names_alters[[i]] <- read_sav(paste("docs/data-raw/alter_data/",file_names[[i]], sep=""))
+  liss_names_alters[[i]] <- read_sav(paste("data-raw/alter_data/",file_names[[i]], sep=""))
 } 
 
 #just to be sure, order the files on nomem_encr and add suffixes to the data.
@@ -186,12 +178,12 @@ liss_alter <- liss_files %>%
 #---------------------------------- LISS background----------------------------------#
 #import the background variable data. 
 #import data files.
-file_names=as.list(dir(path="docs/data-raw/avars/", pattern = '*.sav'))
+file_names=as.list(dir(path="data-raw/avars/", pattern = '*.sav'))
 liss_files <- vector(mode = "list", length = 11)
 
 #import the files in a for loop.
 for (i in 1:length(file_names)) {
-  liss_files[[i]] <- read_sav(paste("docs/data-raw/avars/",file_names[[i]], sep=""))
+  liss_files[[i]] <- read_sav(paste("data-raw/avars/",file_names[[i]], sep=""))
 } 
 
 #just to be sure, order the files on nomem_encr and add suffixes to the data 
@@ -262,9 +254,6 @@ liss_subset <- subset1 %>%
   ungroup()
   
 #we go from 14473 cases to 13273 cases. We will work with this liss_subset dataframe. 
-
-
-
 
 #--------------------------------------------- Variable selection from the complete liss file --------------------------------------------#
 # JT: could you please make a folder with all codebooks so I/reviewers can look up the variable names. 
@@ -592,7 +581,7 @@ In this section the procedure of creating the parner dyads is explained on the o
 Okay, once we agree on the procedure, we can delete this section. TJ: Agree, so this section can be deleted. 
 ```{r procedure explanation}
 #import data
-MyData <- read_sav('docs/data-raw/avars_201912_EN_1.0p.sav')
+MyData <- read_sav('data-raw/avars/avars_201812_EN_1.0p.sav')
 
 #take a look at the contents of the data.
 ls(MyData)
@@ -671,7 +660,9 @@ liss_subset <- liss_wide %>%
          geslacht.5, geslacht.6, geslacht.7, geslacht.8, geslacht.9, geslacht.10, geslacht.11, oplmet.1, oplmet.2, oplmet.3, oplmet.4,
          oplmet.5, oplmet.6, oplmet.7, oplmet.8, oplmet.9, oplmet.10, oplmet.11, immigrants.1, immigrants.2, immigrants.3, immigrants.4, immigrants.5, immigrants.6,
          immigrants.7, immigrants.8, immigrants.9, immigrants.10, immigrants.11, positie.1, positie.2, positie.3, positie.4, positie.5, positie.6, positie.7, positie.8, positie.9,
-         positie.10, positie.11)
+         positie.10, positie.11, euthanasia.1, euthanasia.2, euthanasia.3, euthanasia.4, euthanasia.5, euthanasia.6, euthanasia.7, euthanasia.8, euthanasia.9,
+         euthanasia.10, euthanasia.11, income_diff.1, income_diff.2, income_diff.3, income_diff.4, income_diff.5, income_diff.6, income_diff.7, income_diff.8, income_diff.9,
+         income_diff.10, income_diff.11, )
 ```
 
 First we need to recode some of the variables. 
@@ -714,7 +705,7 @@ We can start with the data preperation.
 #reshape into a wide file.
 liss_subset_long <- reshape(as.data.frame(liss_subset),
                             direction = 'long',
-                            varying = names(liss_subset[,2:67]),
+                            varying = names(liss_subset[,2:89]),
                             idvar = 'nomem_encr',
                             times = 1:11)
 
@@ -723,7 +714,7 @@ liss_subset_long <- reshape(as.data.frame(liss_subset),
 #this custom function follows the logic of the test procedure. 
 #I will create a list of all the waves, then use lapply to apply the function to all the dfs
 #Then I will 
-partner_function <- function (x) {
+partner_function <- function (x) { #x <- partner_list[[1]]
   
   #filter out non partners
   a <- x %>%
@@ -746,14 +737,14 @@ partner_function <- function (x) {
   arrange(nohouse_encr, geslacht) %>% #opnieuw ordenen
   filter(hetero==TRUE) # en de homostellen verwijderen. 
   
-  #length of df, which we need for rep function.
+  #create a second gesclacht variable.
   f <- 
   e %>% mutate(geslacht2=ifelse(geslacht==1,"m", "f" ))
   
   #reshape into wide file.
   g <- reshape(as.data.frame(f),
           direction = 'wide',
-          v.names = names(f[,c(3,5:9,11)]),
+          v.names = names(f[,c(3,5:11,13)]),
           idvar = 'nohouse_encr',
           timevar = 'geslacht2')
   
@@ -767,7 +758,8 @@ partner_list <- liss_subset_long %>%
 #apply the function to the data. 
 partner_list <- lapply(partner_list, partner_function)
 #use do.call to reduce the lists to one df.
-partner_df_long <- do.call(rbind, partner_list)
+partner_df_long <- partner_list %>%
+  rbindlist()
 
 ```
 
@@ -776,7 +768,7 @@ Now we only have a long file, so before we finish we need to reshape into a wide
 ```{r, wide file}
 partner_df_wide <- reshape(partner_df_long,
                            direction = 'wide',
-                           v.names = names(partner_df_long[,2,4:15]),
+                           v.names = names(partner_df_long[2,4:22]),
                            idvar = 'nohouse_encr',
                            timevar = 'time')
 
@@ -794,7 +786,7 @@ save.image('data-processed/partner_dataprepped.Rdata')
 
 ### Description of the data
 
-The *partner_dataprepped_v1_210209.Rdata* consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables. The suffices .r and .p denote respondent and partner, .1 etc denotes the wave in the wide format. 
+The *partner_dataprepped.Rdata* consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables. The suffices .r and .p denote respondent and partner, .1 etc denotes the wave in the wide format. 
 
 Variables of interest and value labels:
 
@@ -804,6 +796,8 @@ Variables of interest and value labels:
 - geslacht = dummy with 0 = male / 1 = female
 - eu_integratrion = 0 = eu integration has gone too far / 4 = eu integration should go further
 - immigrants = 0 = immigrants should adjust / 4 immigrants can retain their own culture.
+- euthanasia = 1 = euthanasia should be forbidden / 5 euthanasia should be permitted
+- income_diff = 1 differences in income should increase / differences in income should decrease
 
 
 
