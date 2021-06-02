@@ -4,13 +4,13 @@ exclude: "data-raw"
 navbar:
   title: "Replication package"
   left:
-    - text: "Tables Manuscript"
+    - text: "DvdS 2021"
       href: index.html
   # - text: "Supplementary Material"
   #    href: SM.html
-    - text: "Data preperation"
+    - text: "Data preparation"
       href: dataprep.html
-    - text: "Trends SRV"
+    - text: "Blog SRV"
       href: trends.html
   right:
     - icon: fab fa-github
