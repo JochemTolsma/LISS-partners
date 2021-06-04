@@ -7,7 +7,7 @@ output:
   html_document:
     toc:  true
     toc_float: true
-    number_sections: false
+    number_sections: true
     code_folding: show
     code_download: yes
 ---
@@ -81,7 +81,7 @@ library(lavaan)
 ------------------------------------------------------------------------
 
 
-This website is a replication package for the paper "LISS-partners" by @Tolsma2021.
+This [website](https://jochemtolsma.github.io/LISS-partners/) is a replication package for the paper "LISS-partners" by @Tolsma2021.
 
 It contains R code to replicate all Tables/Results in the manuscript.
 
@@ -101,6 +101,8 @@ Questions can be addressed to [Jochem Tolsma](mailto:jochem.tolsma@ru.nl).
 
 ## Introduction {.tabset .tabset-fade}
 
+**PARTNERS AND POLITICS - When do we listen to our partner**'s political opinion? 
+
 <html>
 <body>
 </iframe>
@@ -110,50 +112,316 @@ Questions can be addressed to [Jochem Tolsma](mailto:jochem.tolsma@ru.nl).
 
 ---   
 
-Starting point: opinion homophily within couples. 
+**Starting points:**
 
-Homophily may be the result of: 
+1. Opinion homophily within couples. 
+2. Political polarization within society. 
+
+Homophily within couples may be the result of: 
+
+- **selection**  
+- **common context** 
+- **dyadic influence**  
+
+Political polarization between couples may be the result of: 
 
 - **selection**  
 - **common context** 
 - **influence**  
--
+
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(hrbrthemes)
+#hrbrthemes::import_roboto_condensed() 
+library(patchwork)
+library(truncnorm)
+library(mvtnorm)
+
+set.seed(98712)
+data2 <- rmvnorm(n = 1000, mean=c(2,3), sigma=matrix(c(4,2,2,3),ncol=2))
+var1 <- c(data2[,1],data2[,2])
+data <- data.frame(var1)
+data2 <-  data.frame(data2)
+data2$mean <- rowMeans(data2)
+
+
+# Chart
+#individuals
+p1 <- ggplot(data, aes(x=x) ) +
+  # Top
+  geom_density( aes(x = var1, y = ..density..), fill="#69b3a2" , alpha=.4) +
+  geom_label( aes(x=1, y=-0.05, label="individuals"), color="#69b3a2") +
+  theme_ipsum() +
+  xlab("some political opinion") + 
+  xlim(-6,8) + 
+  ylim(-0.05,.3)
+#p1
+
+
+#selective marriage: couples
+p2 <- ggplot(data2, aes(x=x) ) +
+  # Top
+  geom_density( aes(x = mean, y = ..density..), fill="#404080" , alpha=.4) +
+  geom_label( aes(x=2, y=-0.05, label="couples"), color="#404080") +
+  theme_ipsum() +
+  xlab("some political opinion") + 
+  xlim(-6,8) + 
+  ylim(-0.05,.3)
+# p1 + p2 
+  
+#common influence
+data2$mean2 <- ifelse(data2$mean > mean(data2$mean), data2$mean + abs(rnorm(1,0,.2)), data2$mean - abs(rnorm(1,0,.2)))
+
+#data2$mean2 <- (data2$mean2 / sd(data2$mean2)) * sd(data2$mean)
+
+p3 <- ggplot(data2, aes(x=x) ) +
+  # Top
+  geom_density( aes(x = mean2, y = ..density..), fill="#404080" , alpha=.4) +
+  geom_label( aes(x=2, y=-0.05, label="couples"), color="#404080") +
+  theme_ipsum() +
+  xlab("some political opinion") + 
+  xlim(-6,8)  + 
+  ylim(-0.05,.3)
+# p2 + p3
+
+#within couple influence
+data2$X1b <- data2$X1 + (data2$mean2 - data2$mean)
+data2$X2b <- data2$X2 + (data2$mean2 - data2$mean)
+
+var1 <- c(data2$X1b,data2$X2b)
+data <- data.frame(var1)
+
+p4 <- ggplot(data, aes(x=x) ) +
+  # Top
+  geom_density( aes(x = var1, y = ..density..), fill="#69b3a2" , alpha=.4) +
+  geom_label( aes(x=1, y=-0.05, label="individuals"), color="#69b3a2") +
+  theme_ipsum() +
+  xlab("some political opinion") + 
+  xlim(-6,8) + 
+  ylim(-0.05,.3)
+# p3 + p4
+
+var1 <- c(data2$mean2,data2$mean2)
+data <- data.frame(var1)
+
+p5 <- ggplot(data, aes(x=x) ) +
+  # Top
+  geom_density( aes(x = var1, y = ..density..), fill="#69b3a2" , alpha=.4) +
+  geom_label( aes(x=1, y=-0.05, label="individuals"), color="#69b3a2") +
+  theme_ipsum() +
+  xlab("some political opinion") + 
+  xlim(-6,8) + 
+  ylim(-0.05,.3)
+ #p4 + p5
+ 
+
+
+```
+
 
 ---  
 
 ### Selection  
 
+
+```{r, fig.cap="Distribution of opinions within population"}
+p1
+```
+
 Marriage Market: Constrained Decisions with whom to marry (or cohabit). 
+
+What does the political opinion distribution look like for the mean political opinion of the couples. 
+
+```{r, fig.cap="Distribution of mean opinions within couples"}
+p1 + p2
+```
 
 ---  
 
 ### Common context  
 
-- Shared live events:  
+- Shared life experiences:  
   - having kids  
   - poverty  
 - Shared environment:
-  - polution
+  - pollution
   - housing
   - poverty 
+
+Suppose these life events are more likely for some couples than others. More specifically it is associated with the mean political opinion of the couple. The life event consequently influences the mean political opinion of the couple. 
+
+```{r, fig.cap="Distribution of mean opinions within couples, after shared life experiences"}
+p2 + p3
+```
+
+We observe polarization between couples. 
+But not polarization between individuals. 
+
+```{r, fig.cap="Distribution of opinions within couples"}
+p1 + p4
+```
 
 
 ---  
 
 ### Influence  
 
-- Pictures of convergence / divergence 
 - Dyadic (positive) influence:  
   - information  
   - persuasion  
   - need for similarity  
-  
+
+
+```{r}
+p4 + p5
+```
+
+But what happens at the couple level? 
+
+```{r, echo=FALSE, fig.cap="No change"}
+library(ggplot2)
+time <- rep(c(1:10),2)
+time
+couple <- rep(c("man", "woman"), each=10)
+couple
+opinion1 <- rep(4, 10) 
+opinion2 <- rep(14, 10) 
+opinion <- c(opinion1, opinion2)
+opinion
+df <- data.frame(time,opinion, couple)
+
+ggplot(df, aes(x = time, y = opinion, colour = couple)) +
+  geom_line(size=1.5) + 
+  geom_point(size=4) + 
+  ylim(0,30)
+
+
+```
+
+
+
+
+```{r, echo=FALSE, fig.cap="Common trend"}
+library(ggplot2)
+time <- rep(c(1:10),2)
+couple <- rep(c("man", "woman"), each=10)
+opinion1 <- 4 + .5*c(1:10)
+opinion2 <- 14 + .5*c(1:10)
+opinion <- c(opinion1, opinion2)
+df <- data.frame(time,opinion, couple)
+
+ggplot(df, aes(x = time, y = opinion, colour = couple)) +
+  geom_line(size=1.5) + 
+  geom_point(size=4) + 
+  ylim(0,30)
+
+
+```
+
+```{r, echo=FALSE, fig.cap="Convergence"}
+library(ggplot2)
+time <- rep(c(1:10),2)
+
+couple <- rep(c("man", "woman"), each=10)
+
+opinion1 <- 4 + .3*c(1:10)
+opinion2 <- 14 + -.3*c(1:10)
+opinion <- c(opinion1, opinion2)
+
+df <- data.frame(time,opinion, couple)
+
+ggplot(df, aes(x = time, y = opinion, colour = couple)) +
+  geom_line(size=1.5) + 
+  geom_point(size=4) + 
+  ylim(0,30)
+
+
+```
+
+```{r, echo=FALSE, fig.cap="Shocks"}
+library(ggplot2)
+time <- rep(c(1:10),2)
+
+couple <- rep(c("man", "woman"), each=10)
+
+opinion1 <- rep(4,10)
+opinion2 <- rep(14,10)
+opinion1b <- 2*c(0,0,1,1,1,1,1,2,1,1)
+opinion2b <- 2*c(0,0,0,1,1,1,2,2,2,1)
+opinion1 <- opinion1 + opinion1b
+opinion2 <- opinion2 + opinion2b
+
+opinion <- c(opinion1, opinion2)
+
+df <- data.frame(time,opinion, couple)
+
+ggplot(df, aes(x = time, y = opinion, colour = couple)) +
+  geom_line(size=1.5) + 
+  geom_point(size=4) + 
+  ylim(0,30)
+
+
+```
+
+```{r, echo=FALSE, fig.cap="Common Trend and Shocks"}
+library(ggplot2)
+time <- rep(c(1:10),2)
+couple <- rep(c("man", "woman"), each=10)
+opinion1 <- 4 + .5*c(1:10)
+opinion2 <- 14 + .5*c(1:10)
+opinion1b <- 2*c(0,0,1,1,1,1,1,2,1,1)
+opinion2b <- 2*c(0,0,0,1,1,1,2,2,2,1)
+opinion1 <- opinion1 + opinion1b
+opinion2 <- opinion2 + opinion2b
+
+opinion <- c(opinion1, opinion2)
+df <- data.frame(time,opinion, couple)
+
+ggplot(df, aes(x = time, y = opinion, colour = couple)) +
+  geom_line(size=1.5) + 
+  geom_point(size=4) + 
+  ylim(0,30)
+
+
+```
+
+
+
+```{r, echo=FALSE, fig.cap="Convergence and shocks"}
+library(ggplot2)
+time <- rep(c(1:10),2)
+
+couple <- rep(c("man", "woman"), each=10)
+
+opinion1 <- 4 + .3*c(1:10)
+opinion2 <- 14 + -.3*c(1:10)
+opinion1b <- 2*c(0,0,1,1,1,1,1,2,1,1)
+opinion2b <- 2*c(0,0,0,1,1,1,2,2,2,1)
+opinion1 <- opinion1 + opinion1b
+opinion2 <- opinion2 + opinion2b
+
+opinion <- c(opinion1, opinion2)
+
+df <- data.frame(time,opinion, couple)
+
+ggplot(df, aes(x = time, y = opinion, colour = couple)) +
+  geom_line(size=1.5) + 
+  geom_point(size=4) + 
+  ylim(0,30)
+
+
+```
+
+
+
 ---  
 
 ## Expectations {.tabset .tabset-fade} 
 
 
-"People influence one another, and as the importance and immediacy of a group or individual increases, this influence becomes stronger (Latané, 1981). Forces of influence are especially strong within romantic relationships because these relationships are important, are predicated on mutual acceptance, and involve frequent exposure to the habits of one's partner." @bartel2017romantic
+"People influence one another, and as the importance and immediacy of a group or individual increases, this influence becomes stronger (Latané, 1981). Forces of influence are especially strong within romantic relationships because these relationships are important, are predicated on mutual acceptance, and involve frequent exposure to the habits of one's partner." @bartel2017romantic  
+
 ---  
 
 ### Hypothesis 1 
@@ -201,6 +469,7 @@ Hypo1 LT-RI-CLPM: Even if we take into account that...:
 --- 
 
 ### Variables  
+
 
 Variables of interest and value labels:
 
@@ -508,7 +777,8 @@ Our hypotheses refers to how the attitude of partner/alter at time T is related 
 
 
 
-### CLPM
+### CLPM  
+
 <!---
 `r colorize("DONT FORGET TO SOLVE THE FITTING PROBLEMS", "red")`\
 Changing optimizer seems to help a bit. Need to check what happens if we use all 11 waves.
@@ -1116,12 +1386,12 @@ m4deps <- rbind(m4h1y1, m4h1y2, m4h1y3, m4h1y4)
 m1deps
 #put methods next to each other
 h1 <- cbind(m1deps, m2deps, m3deps, m4deps)
-h1
+
 row.names(h1) <- NULL
 
 paths <- rep(c("stability", "partner-effect"),2)
 h1 <- cbind(paths,h1)
-h1
+
 
 hypo1 <- kbl(h1, booktabs=TRUE, digits=2, caption="Results Hypo1", align = "lcccccccccccc") %>%
   add_header_above(c(" ", "CLPM" = 3, "RI-CLPM" = 3, "SC-RI-CLPM" = 3, "LT-RI-CLPM" = 3)) %>%
@@ -1131,7 +1401,7 @@ hypo1 <- kbl(h1, booktabs=TRUE, digits=2, caption="Results Hypo1", align = "lccc
 
 hypo1
 
-save_kable(hypo1, file="hypo1.html")
+#save_kable(hypo1, file="hypo1.html")
 ```
 
 ------------------------------------------------------------------------
@@ -1781,7 +2051,7 @@ row.names(h2) <- NULL
 
 paths <- rep(c("Men:stability", "Women:stability", "Men:partner-effect", "Women:partner-effect"),2)
 h2 <- cbind(paths,h2)
-h2
+
 
 hypo2 <- kbl(h2, booktabs=TRUE, digits=2, caption="Results Hypo2", align = "lcccccccccccc") %>%
   add_header_above(c(" ", "CLPM" = 3, "RI-CLPM" = 3, "SC-RI-CLPM" = 3, "LT-RI-CLPM" = 3)) %>%
@@ -1792,7 +2062,7 @@ hypo2 <- kbl(h2, booktabs=TRUE, digits=2, caption="Results Hypo2", align = "lccc
 
 hypo2
 
-save_kable(hypo2, file="hypo2.html")
+#save_kable(hypo2, file="hypo2.html")
 ```
 
 ------------------------------------------------------------------------
