@@ -14,7 +14,7 @@ output:
 
 ```{r globalsettings, echo=FALSE, warning=FALSE}
 library(knitr)
-opts_chunk$set(tidy.opts=list(width.cutoff=100),tidy=TRUE, warning = FALSE, message = FALSE,comment = "#>", cache=TRUE, class.source=c("test"), class.output=c("test2"))
+opts_chunk$set(tidy.opts=list(width.cutoff=100),tidy=TRUE, warning = FALSE, message = FALSE,comment = "#>", cache=TRUE, echo=FALSE, class.source=c("test"), class.output=c("test2"))
 options(width = 100)
 rgl::setupKnitr()
 ```
@@ -68,6 +68,11 @@ if (!require("dplyr", character.only = TRUE)) {install.packages("dplyr", depende
 if (!require("haven", character.only = TRUE)) {install.packages("haven", dependencies=TRUE)}
 #if (!require("purr", character.only = TRUE)) {install.packages("purr", dependencies=TRUE)}
 if (!require("lavaan", character.only = TRUE)) {install.packages("lavaan", dependencies=TRUE)}
+if (!require("ggplot2", character.only = TRUE)) {install.packages("ggplot2", dependencies=TRUE)}
+if (!require("hrbrthemes", character.only = TRUE)) {install.packages("hrbrthemes", dependencies=TRUE)}
+if (!require("patchwork", character.only = TRUE)) {install.packages("patchwork", dependencies=TRUE)}
+if (!require("mvtnorm", character.only = TRUE)) {install.packages("mvtnorm", dependencies=TRUE)}
+if (!require("plotly", character.only = TRUE)) {install.packages("plotyly", dependencies=TRUE)}
 
 #load packages.
 library(dplyr)
@@ -75,10 +80,22 @@ library(haven)
 library(purrr)
 library(tidyr)
 library(lavaan)
+library(ggplot2)
+library(plotly)
+library(ggplot2)
+library(hrbrthemes)
+hrbrthemes::import_roboto_condensed() 
+library(patchwork)
+library(mvtnorm)
+
+
 
 ```
 
 ------------------------------------------------------------------------
+
+
+#  
 
 
 This [website](https://jochemtolsma.github.io/LISS-partners/) is a replication package for the paper "LISS-partners" by @Tolsma2021.
@@ -98,7 +115,6 @@ Questions can be addressed to [Jochem Tolsma](mailto:jochem.tolsma@ru.nl).
 ---  
 
 
-
 ## Introduction {.tabset .tabset-fade}
 
 **PARTNERS AND POLITICS - When do we listen to our partner**'s political opinion? 
@@ -114,8 +130,15 @@ Questions can be addressed to [Jochem Tolsma](mailto:jochem.tolsma@ru.nl).
 
 **Starting points:**
 
-1. Opinion homophily within couples. 
-2. Political polarization within society. 
+1. Political polarization within society. 
+2. Opinion homophily within couples. 
+
+Political polarization between groups (e.g. couples) may be the result of: 
+
+- **selection**  
+- **common context** 
+- **influence**  
+
 
 Homophily within couples may be the result of: 
 
@@ -123,28 +146,18 @@ Homophily within couples may be the result of:
 - **common context** 
 - **dyadic influence**  
 
-Political polarization between couples may be the result of: 
 
-- **selection**  
-- **common context** 
-- **influence**  
 
 
 ```{r, echo=FALSE}
-library(ggplot2)
-library(hrbrthemes)
-#hrbrthemes::import_roboto_condensed() 
-library(patchwork)
-library(truncnorm)
-library(mvtnorm)
+
 
 set.seed(98712)
-data2 <- rmvnorm(n = 1000, mean=c(2,3), sigma=matrix(c(4,2,2,3),ncol=2))
+data2 <- rmvnorm(n = 1000, mean=c(2,3), sigma=matrix(c(4,3,3,3.5),ncol=2))
 var1 <- c(data2[,1],data2[,2])
 data <- data.frame(var1)
 data2 <-  data.frame(data2)
 data2$mean <- rowMeans(data2)
-
 
 # Chart
 #individuals
@@ -157,7 +170,7 @@ p1 <- ggplot(data, aes(x=x) ) +
   xlim(-6,8) + 
   ylim(-0.05,.3)
 #p1
-
+p1 <- p1 + labs(title=bquote(bold("Figure 1.")~"Distribution of opinions within population"))
 
 #selective marriage: couples
 p2 <- ggplot(data2, aes(x=x) ) +
@@ -169,7 +182,9 @@ p2 <- ggplot(data2, aes(x=x) ) +
   xlim(-6,8) + 
   ylim(-0.05,.3)
 # p1 + p2 
-  
+
+p2 <- p2 + labs(title=bquote(bold("Figure 2.")~"Distribution of opinions within couples"), subtitle = "After selective marriage")  
+
 #common influence
 data2$mean2 <- ifelse(data2$mean > mean(data2$mean), data2$mean + abs(rnorm(1,0,.2)), data2$mean - abs(rnorm(1,0,.2)))
 
@@ -184,6 +199,10 @@ p3 <- ggplot(data2, aes(x=x) ) +
   xlim(-6,8)  + 
   ylim(-0.05,.3)
 # p2 + p3
+
+
+p3 <- p3 + labs(title=bquote(bold("Figure 3.")~"Distribution of opinions within couples"), subtitle = "After selective marriage and shared life events")  
+
 
 #within couple influence
 data2$X1b <- data2$X1 + (data2$mean2 - data2$mean)
@@ -202,6 +221,9 @@ p4 <- ggplot(data, aes(x=x) ) +
   ylim(-0.05,.3)
 # p3 + p4
 
+p4 <- p4 + labs(title=bquote(bold("Figure 4.")~"Distribution of opinions within population"), subtitle = "After selective marriage and shared life events")  
+
+
 var1 <- c(data2$mean2,data2$mean2)
 data <- data.frame(var1)
 
@@ -215,6 +237,7 @@ p5 <- ggplot(data, aes(x=x) ) +
   ylim(-0.05,.3)
  #p4 + p5
  
+p5 <- p5 + labs(title=bquote(bold("Figure 5.")~"Distribution of opinions within population"), subtitle = "After selective marriage, shared life events and dyadic influence")  
 
 
 ```
@@ -225,7 +248,7 @@ p5 <- ggplot(data, aes(x=x) ) +
 ### Selection  
 
 
-```{r, fig.cap="Distribution of opinions within population"}
+```{r}
 p1
 ```
 
@@ -233,9 +256,10 @@ Marriage Market: Constrained Decisions with whom to marry (or cohabit).
 
 What does the political opinion distribution look like for the mean political opinion of the couples. 
 
-```{r, fig.cap="Distribution of mean opinions within couples"}
-p1 + p2
+```{r }
+p2
 ```
+
 
 ---  
 
@@ -251,15 +275,15 @@ p1 + p2
 
 Suppose these life events are more likely for some couples than others. More specifically it is associated with the mean political opinion of the couple. The life event consequently influences the mean political opinion of the couple. 
 
-```{r, fig.cap="Distribution of mean opinions within couples, after shared life experiences"}
-p2 + p3
+```{r }
+p3
 ```
 
 We observe polarization between couples. 
 But not polarization between individuals. 
 
-```{r, fig.cap="Distribution of opinions within couples"}
-p1 + p4
+```{r}
+p4
 ```
 
 
@@ -273,36 +297,42 @@ p1 + p4
   - need for similarity  
 
 
-```{r}
-p4 + p5
+```{r }
+p5
 ```
 
-But what happens at the couple level? 
+### Mechanisms
 
-```{r, echo=FALSE, fig.cap="No change"}
+What happens within the couple? 
+Or phrased otherwise, what could dyadic influence look like? 
+
+- No change (no influence)  
+- Common trend (commen context and/or dyadic influence)  
+- Convergence (assimilation)   
+- Mimic change after 'shocks' 
+
+```{r, echo=FALSE }
 library(ggplot2)
 time <- rep(c(1:10),2)
-time
+
 couple <- rep(c("man", "woman"), each=10)
-couple
+
 opinion1 <- rep(4, 10) 
 opinion2 <- rep(14, 10) 
 opinion <- c(opinion1, opinion2)
-opinion
+
 df <- data.frame(time,opinion, couple)
 
 ggplot(df, aes(x = time, y = opinion, colour = couple)) +
   geom_line(size=1.5) + 
   geom_point(size=4) + 
-  ylim(0,30)
+  ylim(0,30) + 
+  labs(title=bquote(bold("Figure 6.")~"Opinion development over time: no change."))  
 
 
 ```
 
-
-
-
-```{r, echo=FALSE, fig.cap="Common trend"}
+```{r, echo=FALSE}
 library(ggplot2)
 time <- rep(c(1:10),2)
 couple <- rep(c("man", "woman"), each=10)
@@ -314,12 +344,13 @@ df <- data.frame(time,opinion, couple)
 ggplot(df, aes(x = time, y = opinion, colour = couple)) +
   geom_line(size=1.5) + 
   geom_point(size=4) + 
-  ylim(0,30)
+  ylim(0,30) + 
+  labs(title=bquote(bold("Figure 7.")~"Opinion development over time: parallel trend."))  
 
 
 ```
 
-```{r, echo=FALSE, fig.cap="Convergence"}
+```{r, echo=FALSE}
 library(ggplot2)
 time <- rep(c(1:10),2)
 
@@ -334,12 +365,13 @@ df <- data.frame(time,opinion, couple)
 ggplot(df, aes(x = time, y = opinion, colour = couple)) +
   geom_line(size=1.5) + 
   geom_point(size=4) + 
-  ylim(0,30)
+  ylim(0,30) + 
+  labs(title=bquote(bold("Figure 8.")~"Opinion development over time: convergence."))  
 
 
 ```
 
-```{r, echo=FALSE, fig.cap="Shocks"}
+```{r, echo=FALSE}
 library(ggplot2)
 time <- rep(c(1:10),2)
 
@@ -359,12 +391,16 @@ df <- data.frame(time,opinion, couple)
 ggplot(df, aes(x = time, y = opinion, colour = couple)) +
   geom_line(size=1.5) + 
   geom_point(size=4) + 
-  ylim(0,30)
+  ylim(0,30) + 
+  geom_segment(x = 2.5, y = 7, xend = 3.5, yend = 13, colour="black", arrow = arrow(length = unit(0.03, "npc"))) + 
+  geom_segment(x = 6.5, y = 15, xend = 7.5, yend = 9, colour="black", arrow = arrow(length = unit(0.03, "npc"))) +
+  geom_segment(x = 8.5, y = 9, xend = 9.5, yend = 15, colour="black", arrow = arrow(length = unit(0.03, "npc"))) + 
+  labs(title=bquote(bold("Figure 9.")~"Opinion development over time: shocks."))  
 
 
 ```
 
-```{r, echo=FALSE, fig.cap="Common Trend and Shocks"}
+```{r, echo=FALSE}
 library(ggplot2)
 time <- rep(c(1:10),2)
 couple <- rep(c("man", "woman"), each=10)
@@ -381,14 +417,13 @@ df <- data.frame(time,opinion, couple)
 ggplot(df, aes(x = time, y = opinion, colour = couple)) +
   geom_line(size=1.5) + 
   geom_point(size=4) + 
-  ylim(0,30)
+  ylim(0,30) + 
+  labs(title=bquote(bold("Figure 10.")~"Opinion development over time: parallel trend with shocks."))  
 
 
 ```
 
-
-
-```{r, echo=FALSE, fig.cap="Convergence and shocks"}
+```{r, echo=FALSE}
 library(ggplot2)
 time <- rep(c(1:10),2)
 
@@ -408,7 +443,8 @@ df <- data.frame(time,opinion, couple)
 ggplot(df, aes(x = time, y = opinion, colour = couple)) +
   geom_line(size=1.5) + 
   geom_point(size=4) + 
-  ylim(0,30)
+  ylim(0,30) + 
+  labs(title=bquote(bold("Figure 11.")~"Opinion development over time: convergence with shocks."))  
 
 
 ```
@@ -422,45 +458,62 @@ ggplot(df, aes(x = time, y = opinion, colour = couple)) +
 
 "People influence one another, and as the importance and immediacy of a group or individual increases, this influence becomes stronger (Latané, 1981). Forces of influence are especially strong within romantic relationships because these relationships are important, are predicated on mutual acceptance, and involve frequent exposure to the habits of one's partner." @bartel2017romantic  
 
+Naive conceptualisation of **influence**. It is assumed that partners will match their opinions/behaviors. Thus influence here is convergence and reaction to shocks. 
+
 ---  
 
 ### Hypothesis 1 
 
-
-
-Naive conceptualisation of **influence**. It is assumed that partners will match their opinions/behaviors. Thus influence here is convergence. 
-
-**Hypo1: Partner influence hypothesis** 
-
-Hypo1 CLPM: When men have a relatively high opinion (compared to the grand mean opinion of men over time) at time T, men's spouses will have a relatively high opinion (compared to the grand mean opinion of women over time) at time T+1, and vice versa. 
+**Hypothesis 1: Partner influence hypothesis** 
 
 **Hypo1 RI-CLPM: When your partner's opinion is relatively high (compared to your partners average opinion over time) at time T, your own opinion will be relatively high (compared to your own average opinion over time) at time T+1.** 
 
+<br/><br/><br/><br/>
+
+<!---
 Hypo1 SC-RI-CLPM: Even if we control for structural time trends in political opinions, when your partner's opinion is relatively high (compared to your partners average opinion over time) at time T, your own opinion will be relatively high (compared to your own average opinion over time) at time T+1. 
 
 Hypo1 LT-RI-CLPM: Even if we take into account that...: 
   - the general time trend of men and women will be (positively) associated (i.e. positive covariance of the random slopes);  
   - the mean opinion of your spouse will influence your general time trend (i.e. negative covariance of random intercept of men with random slop of women (and vice versa));
   ...when your partner's opinion is relatively high (compared to your partners average opinion over time) at time T, your own opinion will be relatively high (compared to your own average opinion over time) at time T+1. 
-
+--->
 
 
 ---  
 
-### Hypo2
+### Hypothesis 2
+
+**Hypothesis 2: Male dominance hypothesis** 
+
+**Hypo2 RI-CLPM: Women are more influenced by their (male) spouse than men are influenced by their (female) spouse.** 
+
+<br/><br/><br/><br/>
 
 ---  
 
-### Hypo3
+### Hypothesis 3
+
+**Hypothesis 3: Educational dominance hypothesis** 
+
+**Hypo3 RI-CLPM: The spouse with the lowest education is more influenced by their partner than the spouse with the highest education.** 
+
+<br/><br/><br/><br/>
 
 ---  
 
 
 ## Data {.tabset .tabset-fade}
 
-- LISS  
-- 11 waves  
+
+<a href="https://www.lissdata.nl/">
+  <img src="lisslogo_0.png">
+  </a>
+
+
+- 11 waves (2008-2014, 2016-2020)  
 - More than 3000 heterosexual couples (cohabiting and married)
+- Older than 25
 
 ---  
 
@@ -473,14 +526,51 @@ Hypo1 LT-RI-CLPM: Even if we take into account that...:
 
 Variables of interest and value labels:
 
--   nohouse_encr = hh id
--   nomem_encr = respondent/partner id
--   oplmet = higheste completed education in years
--   geslacht = dummy with 0 = male / 1 = female
--   eu_integratrion = 0 = eu integration has gone too far / 4 = eu integration should go further
--   immigrants = 0 = immigrants should adjust / 4 immigrants can retain their own culture.
--   euthanasia = 1 = euthanasia should be forbidden / 5 euthanasia should be permitted
--   income_diff = 1 differences in income should increase / differences in income should decrease
+-   Education: = highest completed education in years (4-16.5)
+-   sex: = 0 = male / 1 = female
+-   eu_integration: 0 = eu integration has gone too far / 4 = eu integration should go further
+-   immigrants: 0 = immigrants should adjust / 4 immigrants can retain their own culture.
+-   euthanasia: 1 = euthanasia should be forbidden / 5 euthanasia should be permitted
+-   income: 1 differences in income should increase / 5 differences in income should decrease
+
+**opleiding**  
+
+> Hoogste opleiding met diploma  
+> 1 basisonderwijs  
+> 2 vmbo  
+> 3 havo/vwo  
+> 4 mbo  
+> 5 hbo  
+> 6 wo  
+> 7 anders  
+> 8 (Nog) geen onderwijs afgerond  
+> 9 Volgt nog geen onderwijs  
+> Hierbij hebben wij opleiding gecategoriseerd in drie groepen:  
+> 1. Laag: basisonderwijs en vmbo  
+> 2. Midden: havo/vwo en mbo  
+> 3. Hoog: hbo en wo  
+> We nemen enkel mensen van 25 jaar en ouder mee. Van hen verwachten we dat ze klaar zijn met hun onderwijscarriere. 
+
+
+**EU integratie** 
+
+> De Europese integratie is te ver gegaan.  
+>  
+>  1 Helemaal oneens  
+>  2 Oneens   
+>  3 Niet eens, niet oneens  
+>  4 Eens  
+>  5 Helemaal eens  
+
+**Migratie/integratie**
+
+> In Nederland vinden sommigen dat mensen met een migratie achtergrond hier moeten kunnen leven met behoud van de eigen cultuur. Anderen vinden dat zij zich geheel moeten aanpassen aan de Nederlandse cultuur. Waar zou u uzelf plaatsen op een schaal van 1 t/m 5, waarbij 1 behoud van eigen cultuur voor mensen met een migratie achtergrond betekent en 5 dat zij zich geheel moeten aanpassen?  
+>  
+> 1	behoud van eigen cultuur voor mensen met een migratie achtergrond  
+> 2  
+> 3	  
+> 4	  
+> 5	mensen met een migratie achtergrond moeten zich geheel aanpassen  
 
 ---  
 
@@ -502,15 +592,6 @@ partner_df_wide <- reshape(partner_df_long,
 
 
 ```
-
-### Description of the data
-
-The *partner_dataprepped_v1_210209.Rdata* consists of the prepped data for the partner paper, in long and wide format. For now, I have only included a selection of variables.
-
--   The suffices **.m** and **.f** denote the gender of the partner within the heterosexual couples (male, female)\
--   .x, where x is a number, denotes the wave in the wide format.
-
-
 
 
 ```{r, echo=FALSE, results='hide'}
@@ -744,8 +825,20 @@ table(partner_df_wide$na_check)
 
 ## Modelling strategy {.tabset .tabset-fade}
 
-Actor effects: stability effects
-Partner effects: influence effects 
+- Actor effects: stability effects  
+- Partner effects: influence effects  
+
+
+Controlling for education.  
+
+
+```{r, out.width="100%"}
+knitr::include_graphics("hsem_a_1784738_f0001_oc.jpg")
+```
+  
+**Figure 12.** RI-CLPM  
+Source: [@mulder2020three](https://www.tandfonline.com/doi/full/10.1080/10705511.2020.1784738)
+
 
 -   We will compare the results across four different modeling strategies:
     -   Cross-lagged Panel Model (CLPM) (11 waves)\
@@ -754,22 +847,24 @@ Partner effects: influence effects
     -   RI/RS-CLPM (11 waves)
 
 
--   We will test our hypotheses for three different dependent variables:
+
+### Robustness
+
+-   We will test our hypotheses for four different dependent variables:
 
     -   eu-integration\
     -   immigration\
     -   euthanasia\
+    -   income differences\
 
 -   We will test our hypotheses among different (sub)samples of the LISS:
 
     -   **total**\
     -   couples among which initial opinion differs substantially\
+    -   married vs. cohabiting\ 
 
 
 
-
-In **bold face** above refers to the 'base line' which we will describe in detail in the paper.\
-Our hypotheses refers to how the attitude of partner/alter at time T is related to the attitude of the other partern/ego at time T+1.
 
 ------------------------------------------------------------------------
 
@@ -779,16 +874,7 @@ Our hypotheses refers to how the attitude of partner/alter at time T is related 
 
 ### CLPM  
 
-<!---
-`r colorize("DONT FORGET TO SOLVE THE FITTING PROBLEMS", "red")`\
-Changing optimizer seems to help a bit. Need to check what happens if we use all 11 waves.
-
--   We assume similar effect for men and women.\
--   We assume time-constant effects.\
--   We assume no structural changes (time trends).
---->
-
-```{r}
+```{r, echo=TRUE}
 results <- list()
 
 myModel <- "
@@ -883,23 +969,26 @@ myModel <- "
   
 "
 
-# L-BFGS-B / ,optim.method="BFGS" 
+#Estimate models a bit faster:
 
-fitm1h1y1 <- lavaan(myModel, data = datalist_ori[[1]], missing = "fiml.x", meanstructure = T )
-summary(fitm1h1y1, standardized = T)
-fitm1h1y2 <- lavaan(myModel, data = datalist_ori[[2]], missing = "fiml.x", meanstructure = T)
-summary(fitm1h1y2, standardized = T)
-fitm1h1y3 <- lavaan(myModel, data = datalist_ori[[3]], missing = "fiml.x", meanstructure = T )
-summary(fitm1h1y1, standardized = T)
-fitm1h1y4 <- lavaan(myModel, data = datalist_ori[[4]], missing = "fiml.x", meanstructure = T)
-summary(fitm1h1y2, standardized = T)
+estimate <- function(x) lavaan(myModel, data=x, missing = "fiml.x", meanstructure = T )
+library(future.apply)
+plan(multisession)
 
-results[[1]] <- fitm1h1y1
-results[[2]] <- fitm1h1y2
-results[[3]] <- fitm1h1y3
-results[[4]] <- fitm1h1y4
+results_temp <- future_lapply(datalist_ori, estimate)
 
-names(results) <- c("fitm1h1y1", "fitm1h1y2","fitm1h1y3","fitm1h1y4")
+results[[1]] <- results_temp[[1]]
+results[[2]] <- results_temp[[2]]
+results[[3]] <- results_temp[[3]]
+results[[4]] <- results_temp[[4]]
+
+names(results)[1:4] <-  c("fitm1h1y1", "fitm1h1y2","fitm1h1y3","fitm1h1y4")
+
+
+summary(results[[1]])
+summary(results[[2]])
+summary(results[[3]])
+summary(results[[4]])
 
 ```
 
@@ -907,15 +996,7 @@ names(results) <- c("fitm1h1y1", "fitm1h1y2","fitm1h1y3","fitm1h1y4")
 
 ### RI-CLPM
 
-`r colorize("DONT FORGET TO SOLVE THE FITTING PROBLEMS", "red")`\
-Changing optimizer seems to help a bit. Need to check what happens if we use all 11 waves. Update `r format(Sys.time(), '%B, %Y')`: `r colorize("We dont have any fitting problems anymore. I discovered typo in syntax", "green")`
-
--   We assume similar effect for men and women.\
--   We assume time-constant effects.\
--   We assume no structural changes (time trends).\
--   We include education as predictor for the RI/latent variable
-
-```{r}
+```{r, echo=TRUE}
 RICLPM <- '
   # Create between components (random intercepts)
   RIx =~ 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5 + 1*x6 + 1*x7 + 1*x8 + 1*x9 + 1*x10 + 1*x11
@@ -1015,31 +1096,34 @@ RICLPM <- '
   wy11 ~~ wy11
 '
 
+#Estimate models a bit faster:
 
-fitm2h1y1 <- lavaan(RICLPM, data = datalist_ori[[1]], missing = "fiml.x", meanstructure = T , int.ov.free = T)
-summary(fitm2h1y1, standardized = T)
-fitm2h1y2 <- lavaan(RICLPM, data = datalist_ori[[2]], missing = "fiml.x", meanstructure = T, int.ov.free = T)
-summary(fitm2h1y2, standardized = T)
-fitm2h1y3 <- lavaan(RICLPM, data = datalist_ori[[3]], missing = "fiml.x", meanstructure = T , int.ov.free = T)
-summary(fitm2h1y1, standardized = T)
-fitm2h1y4 <- lavaan(RICLPM, data = datalist_ori[[4]], missing = "fiml.x", meanstructure = T, int.ov.free = T)
-summary(fitm2h1y2, standardized = T)
+estimate <- function(x) lavaan(RICLPM, data=x, missing = "fiml.x", meanstructure = T )
+library(future.apply)
+plan(multisession)
 
-results[[5]] <- fitm2h1y1
-results[[6]] <- fitm2h1y2
-results[[7]] <- fitm2h1y3
-results[[8]] <- fitm2h1y4
+results_temp <- future_lapply(datalist_ori, estimate)
 
-names(results) <- c("fitm1h1y1", "fitm1h1y2","fitm1h1y3","fitm1h1y4","fitm2h1y1", "fitm2h1y2","fitm2h1y3","fitm2h1y4")
+results[[5]] <- results_temp[[1]]
+results[[6]] <- results_temp[[2]]
+results[[7]] <- results_temp[[3]]
+results[[8]] <- results_temp[[4]]
+
+names(results)[5:8] <- c("fitm2h1y1", "fitm2h1y2","fitm2h1y3","fitm2h1y4")
+
+summary(results[[5]])
+summary(results[[6]])
+summary(results[[7]])
+summary(results[[8]])
+
+
 ```
-
-**Conclusions:**
 
 ------------------------------------------------------------------------
 
 ### SC-RI-CLPM
 
-```{r}
+```{r, echo=TRUE}
 SCCLPM <- '
   # Create between components 
   RIx =~ 1*x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11
@@ -1139,30 +1223,34 @@ SCCLPM <- '
   wy11 ~~ wy11
 '
 
+#Estimate models a bit faster:
 
-fitm3h1y1 <- lavaan(SCCLPM, data = datalist_ori[[1]], missing = "fiml.x", meanstructure = T , int.ov.free = T)
-summary(fitm3h1y1, standardized = T)
-fitm3h1y2 <- lavaan(SCCLPM, data = datalist_ori[[2]], missing = "fiml.x", meanstructure = T, int.ov.free = T)
-summary(fitm3h1y2, standardized = T)
-fitm3h1y3 <- lavaan(SCCLPM, data = datalist_ori[[3]], missing = "fiml.x", meanstructure = T , int.ov.free = T)
-summary(fitm3h1y1, standardized = T)
-fitm3h1y4 <- lavaan(SCCLPM, data = datalist_ori[[4]], missing = "fiml.x", meanstructure = T, int.ov.free = T)
-summary(fitm3h1y2, standardized = T)
+estimate <- function(x) lavaan(SCCLPM, data=x, missing = "fiml.x", meanstructure = T )
+library(future.apply)
+plan(multisession)
 
-results[[9]] <- fitm3h1y1
-results[[10]] <- fitm3h1y2
-results[[11]] <- fitm3h1y3
-results[[12]] <- fitm3h1y4
+results_temp <- future_lapply(datalist_ori, estimate)
+
+results[[9]] <- results_temp[[1]]
+results[[10]] <- results_temp[[2]]
+results[[11]] <- results_temp[[3]]
+results[[12]] <- results_temp[[4]]
+
 names(results)[9:12] <- c("fitm3h1y1", "fitm3h1y2","fitm3h1y3","fitm3h1y4")
-```
 
-**Conclusions:**
+summary(results[[9]])
+summary(results[[10]])
+summary(results[[11]])
+summary(results[[12]])
+
+
+```
 
 ------------------------------------------------------------------------
 
 ### LT-RI-CLPM
 
-```{r}
+```{r, echo=TRUE}
 
 LTRICLPM <- '
   # Create between components (random intercepts)
@@ -1276,21 +1364,29 @@ LTRICLPM <- '
   wx11 ~~ wx11
   wy11 ~~ wy11
 '
-fitm4h1y1 <- lavaan(LTRICLPM , data = datalist_ori[[1]], missing = "fiml.x", meanstructure = T , int.ov.free = T)
-summary(fitm4h1y1, standardized = T)
-fitm4h1y2 <- lavaan(LTRICLPM , data = datalist_ori[[2]], missing = "fiml.x", meanstructure = T, int.ov.free = T)
-summary(fitm4h1y2, standardized = T)
-fitm4h1y3 <- lavaan(LTRICLPM , data = datalist_ori[[3]], missing = "fiml.x", meanstructure = T , int.ov.free = T)
-summary(fitm4h1y1, standardized = T)
-fitm4h1y4 <- lavaan(LTRICLPM , data = datalist_ori[[4]], missing = "fiml.x", meanstructure = T, int.ov.free = T)
-summary(fitm4h1y2, standardized = T)
 
-results[[13]] <- fitm4h1y1
-results[[14]] <- fitm4h1y2
-results[[15]] <- fitm4h1y3
-results[[16]] <- fitm4h1y4
 
-names(results)[13:16] <- c("fitm4h1y1", "fitm4h1y2","fitm4h1y3","fitm4h1y4")
+#Estimate models a bit faster:
+
+estimate <- function(x) lavaan(LTRICLPM, data=x, missing = "fiml.x", meanstructure = T )
+library(future.apply)
+plan(multisession)
+
+results_temp <- future_lapply(datalist_ori, estimate)
+
+results[[13]] <- results_temp[[1]]
+results[[14]] <- results_temp[[2]]
+results[[15]] <- results_temp[[3]]
+results[[16]] <- results_temp[[4]]
+
+names(results)[9:12] <- c("fitm4h1y1", "fitm4h1y2","fitm4h1y3","fitm4h1y4")
+
+
+summary(results[[13]])
+summary(results[[14]])
+summary(results[[15]])
+summary(results[[16]])
+
 ```
 
 ------------------------------------------------------------------------
@@ -1298,6 +1394,8 @@ names(results)[13:16] <- c("fitm4h1y1", "fitm4h1y2","fitm4h1y3","fitm4h1y4")
 ### Summary results hypo1
 
 ```{r, results='asis'}
+
+save(results, file="results.RData")
 
 #https://bookdown.org/yihui/rmarkdown-cookbook/kableextra.html
 #https://haozhu233.github.io/kableExtra/awesome_table_in_html.html
@@ -1383,7 +1481,7 @@ m2deps <- rbind(m2h1y1, m2h1y2, m2h1y3, m2h1y4)
 m3deps <- rbind(m3h1y1, m3h1y2, m3h1y3, m3h1y4)
 m4deps <- rbind(m4h1y1, m4h1y2, m4h1y3, m4h1y4)
 
-m1deps
+
 #put methods next to each other
 h1 <- cbind(m1deps, m2deps, m3deps, m4deps)
 
@@ -1397,7 +1495,8 @@ hypo1 <- kbl(h1, booktabs=TRUE, digits=2, caption="Results Hypo1", align = "lccc
   add_header_above(c(" ", "CLPM" = 3, "RI-CLPM" = 3, "SC-RI-CLPM" = 3, "LT-RI-CLPM" = 3)) %>%
   pack_rows(index=c("eu-integration"=2, "immigrants"=2, "euthanasia"=2, "income_diff"=2)) %>%
   kable_classic(full_width = F, html_font = "Cambria") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  column_spec(5:7, color = "white", background = "green")
 
 hypo1
 
@@ -1405,6 +1504,7 @@ hypo1
 ```
 
 ------------------------------------------------------------------------
+
 
 ### Conclusion hypo1
 
@@ -1416,7 +1516,7 @@ Hypo2: Women are more influenced by their (male) spouse than Men are influenced 
 
 ### CLPM
 
-```{r}
+```{r, echo=TRUE}
 myModel <- "
   ### control for education
   x1 + x2 + x3 +x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11 ~ ex*oplx
@@ -1529,13 +1629,18 @@ results[[20]] <- results_temp[[4]]
 
 names(results)[17:20] <- c("fitm1h2y1", "fitm1h2y2","fitm1h2y3","fitm1h2y4")
 
+summary(results[[17]])
+summary(results[[18]])
+summary(results[[19]])
+summary(results[[20]])
+
 ```
 
 ------------------------------------------------------------------------
 
 ### RI-CLPM
 
-```{r}
+```{r, echo=TRUE}
 RICLPM <- '
   # Create between components (random intercepts)
   RIx =~ 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5 + 1*x6 + 1*x7 + 1*x8 + 1*x9 + 1*x10 + 1*x11
@@ -1655,13 +1760,19 @@ results[[23]] <- results_temp[[3]]
 results[[24]] <- results_temp[[4]]
 
 names(results)[21:24] <- c("fitm2h2y1", "fitm2h2y2","fitm2h2y3","fitm2h2y4")
+
+summary(results[[21]])
+summary(results[[22]])
+summary(results[[23]])
+summary(results[[24]])
+
 ```
 
 ------------------------------------------------------------------------
 
 ### SC-RI-CLPM
 
-```{r}
+```{r, echo=TRUE}
 
 SCCLPM <- '
   # Create between components (random intercepts)
@@ -1782,13 +1893,19 @@ results[[27]] <- results_temp[[3]]
 results[[28]] <- results_temp[[4]]
 
 names(results)[25:28] <- c("fitm3h2y1", "fitm3h2y2","fitm3h2y3","fitm3h2y4")
+
+summary(results[[25]])
+summary(results[[26]])
+summary(results[[27]])
+summary(results[[28]])
+
 ```
 
 ------------------------------------------------------------------------
 
 ### LT-RI-CLPM
 
-```{r}
+```{r, echo=TRUE}
 
 LTRICLPM <- '
   # Create between components (random intercepts)
@@ -1922,6 +2039,12 @@ results[[31]] <- results_temp[[3]]
 results[[32]] <- results_temp[[4]]
 
 names(results)[29:32] <- c("fitm4h2y1", "fitm4h2y2","fitm4h2y3","fitm4h2y4")
+
+summary(results[[29]])
+summary(results[[30]])
+summary(results[[31]])
+summary(results[[32]])
+
 ```
 
 ------------------------------------------------------------------------
@@ -2073,6 +2196,7 @@ hypo2
 
 ## Results Hypo3 {.tabset .tabset-fade}
 
+<!---
 Hypo3: The partner with the highest education exerts most influence. 
 
 In lavaan it is not possible to include interaction effects directly with latent variables. Strategy 1 is a two-step approach. Strategy 2 is a multi-group approach.
@@ -2251,10 +2375,13 @@ RICLPM.fit <- lavaan(RICLPM, data = dat, missing = 'ml.x', meanstructure = T, in
 summary(RICLPM.fit, standardized = T)
 ```
 
+--->
+
 ------------------------------------------------------------------------
 
 ## Robustness check {.tabset .tabset-fade}
 
+<!---
 ### Initial disagreement or not  
 
 Select on couples who disagree
@@ -2326,7 +2453,17 @@ RICLPM <- '
 RICLPM.fit <- lavaan(RICLPM, data = dat_sel, missing = 'ml.x', meanstructure = T, int.ov.free = T) 
 summary(RICLPM.fit, standardized = T)
 ```
-
+--->
 ------------------------------------------------------------------------
+
+## Take Home Message  
+
+- Partners influence each others opinions.
+  - React to shocks  
+  - Convergence  
+- Influence just as strong for men/women.  
+
+---  
+
 
 ## References

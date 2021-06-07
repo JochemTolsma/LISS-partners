@@ -1,0 +1,367 @@
+---
+title: "LISS-Partners"
+author: '[Jochem Tolsma](https://www.jochemtolsma.nl) - Radboud University, the Netherlands'
+bibliography: references.bib
+date: "Last compiled on `r format(Sys.time(), '%B, %Y')`"
+output: 
+  html_document:
+    toc:  false
+    code_download: yes
+
+---
+   
+```{r, globalsettings, echo=FALSE, warning=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=100),tidy=TRUE, warning = FALSE, message = FALSE,comment = "#>", cache=TRUE, class.source=c("test"), class.output=c("test2"), echo=FALSE)
+options(width = 100)
+rgl::setupKnitr()
+```
+
+```{r, echo=FALSE}
+colorize <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+            x)
+  } else x
+}
+
+```
+
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy(position = c('top', 'right'))
+#klippy::klippy(color = 'darkred')
+#klippy::klippy(tooltip_message = 'Click to copy', tooltip_success = 'Done')
+```
+
+```{css, echo=FALSE}
+pre.test {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+}
+
+pre.test2 {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 0px;
+  background-color: white;
+  color: rgb(201, 76, 76);
+}
+
+
+h1, .h1, h2, .h2, h3, .h3 {
+  margin-top: 24px;
+}
+
+
+```
+
+
+  
+```{r packages, class.source="watch-out"}
+#install if necessary 
+if (!require("dplyr", character.only = TRUE)) {install.packages("dplyr", dependencies=TRUE)}
+if (!require("haven", character.only = TRUE)) {install.packages("haven", dependencies=TRUE)}
+if (!require("ggplot2", character.only = TRUE)) {install.packages("ggplot", dependencies=TRUE)}
+if (!require("plotly", character.only = TRUE)) {install.packages("plotly", dependencies=TRUE)}
+
+#load packages.
+library(dplyr)
+library(haven)
+library(ggplot2)
+library(plotly)
+
+```
+
+----
+
+De verkiezingsuitslag zou [volgens de Volkskrant](https://www.volkskrant.nl/nieuws-achtergrond/de-uitslagenkaart-toont-een-groeiende-polarisatie-tussen-nationalisten-en-kosmopolieten~b5b56972/) een groeiende polarisatie tonen tussen nationalisten en kosmopolieten. 
+Het is zeker waar dat zowel de 'kosmpolitische partij' D66 en de 'nationalistische partij' FvD verkiezingswinst hebben geboekt. Maar dat dat het gevolg is van toenemende polarisatie lijkt ons onwaarschijnlijk. Onze stelling (of noem het hypothese) is namelijk dat er geen sprake is van groeiende polarisatie.
+
+Wij zochten met behulp van de [LISS data](https://www.lissdata.nl/about-panel) uit of de samenleving wel of niet steeds verder polariseert over politieke thema's die de kern raken van de tegenstelling nationalisme versus kosmopolitisme: houdingen ten aanzien van migratie/integratie en houdingen ten aanzien van de EU.  
+Aan deelnemers aan het LISS panel worden herhaaldelijk de volgende twee stellingen voorgelegd:  
+
+**EU integratie** 
+
+> De Europese integratie is te ver gegaan.  
+>  
+>  1 Helemaal oneens  
+>  2 Oneens   
+>  3 Niet eens, niet oneens  
+>  4 Eens  
+>  5 Helemaal eens  
+
+**Migratie/integratie**
+
+> In Nederland vinden sommigen dat mensen met een migratie achtergrond hier moeten kunnen leven met behoud van de eigen cultuur. Anderen vinden dat zij zich geheel moeten aanpassen aan de Nederlandse cultuur. Waar zou u uzelf plaatsen op een schaal van 1 t/m 5, waarbij 1 behoud van eigen cultuur voor mensen met een migratie achtergrond betekent en 5 dat zij zich geheel moeten aanpassen?  
+>  
+> 1	behoud van eigen cultuur voor mensen met een migratie achtergrond  
+> 2  
+> 3	  
+> 4	  
+> 5	mensen met een migratie achtergrond moeten zich geheel aanpassen  
+
+
+----
+
+Indien er sprake zou van toenemende polarisatie zou je verwachten dat een steeds groter deel van de bevolking een (relatief) extreem antwoord zou geven op deze twee stellingen. Dat lijkt echter niet het geval. Zie Figuur 1 en 2. Het percentage van de bevolking dat een zeer uitgesproken mening heeft dat de EU integratie niet ver genoeg is gegaan schommelt zo tussen de 4 en 6%. Er zijn aanzienlijk veel meer Nederlanders die duidelijk van mening zijn dat de EU integratie te ver is gegaan. We zien hier ook flinke schommelingen. Maar van een duidelijke trend is geen sprake en in de laatste jaren lijkt er eerder weer een trend naar minder 'extreme' meningen te zijn.  
+
+Iets vergelijkbaars zien we bij de stelling over de integratie van mensen met een migratie achtergrond. Slechts een klein percentage van de bevolking scoort hier extreem aan de behoud-van-eigen-cultuur-kant. Het gaat om ongeveer 2%. Aan de andere kant van de schaal bevindt zich een aanzienlijk groter deel van de bevolking, hoewel we ook daar niet kunnen spreken over een toenemende polarisatie. De laatste meetjaren zien we eerder dat minder mensen vinden dat migranten zich volledig dienen aan te passen. 
+
+  
+```{r}
+#clean the environment. 
+rm(list=ls())
+load('data-processed/partner_dataprepped.Rdata')
+load('data-processed/liss_merged_core_file_v1_201124.Rdata')
+
+```
+  
+  
+
+```{r}
+dataplot <- liss_long
+dataplot$jaar <- dataplot$survey_wave + 2007
+dataplot <- dataplot[dataplot$leeftijd>17,]
+
+#prop.table(table(dataplot$eu_integration,dataplot$jaar ))
+#table(dataplot$eu_integration,dataplot$jaar)
+
+## Get counts for each risk class on each date
+frequencies <- with(dataplot, prop.table(table(eu_integration,jaar ), margin=2))
+
+
+frequencies <- as.data.frame(frequencies)
+frequencies <- frequencies[frequencies$eu_integration==0 | frequencies$eu_integration==4, ]
+frequencies$eu_integratie[frequencies$eu_integration==0] <- "EU integratie te ver"
+frequencies$eu_integratie[frequencies$eu_integration==4] <- "EU integratie niet ver genoeg"
+frequencies$eu_integratie <- factor(frequencies$eu_integratie,  levels = c("EU integratie te ver", "EU integratie niet ver genoeg"))
+frequencies$Freq <- round(frequencies$Freq*100, 2)
+
+
+ggp <- ggplot(frequencies, aes(x=jaar, y=Freq, group=eu_integratie, color= eu_integratie)) + 
+        geom_line() + 
+       geom_point(size = 4, shape = 21, fill = "white") + 
+      scale_color_discrete(name = "EU integratie")  + 
+      ylim(0,50) + 
+      labs(title="Figuur 1. Polarisatie over EU-integratie", caption="DATA: LISS", x="jaar", y="% met extreme mening") + 
+    theme(plot.caption = element_text(hjust = 0))
+      
+ggp
+ggplotly(ggp, tooltip = c("y", "x"))  
+
+```
+
+
+```{r}
+dataplot <- liss_long
+dataplot$jaar <- dataplot$survey_wave + 2007
+dataplot <- dataplot[dataplot$leeftijd>17,]
+
+## Get counts for each risk class on each date
+frequencies <- with(dataplot, prop.table(table(immigrants,jaar ), margin=2))
+
+
+frequencies <- as.data.frame(frequencies)
+frequencies <- frequencies[frequencies$immigrants==1 | frequencies$immigrants==5, ]
+frequencies$immigrants2[frequencies$immigrants==1] <- "eigen cultuur behouden"
+frequencies$immigrants2[frequencies$immigrants==5] <- "volledig aan passen"
+frequencies$Freq <- round(frequencies$Freq*100, 2)
+
+ggp <- ggplot(frequencies, aes(x=jaar, y=Freq, group=immigrants2, color= immigrants2)) + 
+        geom_line() + 
+       geom_point(size = 4, shape = 21, fill = "white") + 
+      scale_color_discrete(name = "migratie/integratie")  + 
+      ylim(0,50) +
+      labs(title="Figuur 2. Polarisatie over migratie/integratie", caption="DATA: LISS", x="jaar", y="% met extreme mening") + 
+    theme(plot.caption = element_text(hjust = 0))
+ggp
+ggplotly(ggp, tooltip = c("y", "x"))  
+
+```
+## Sociale scheidslijnen
+
+Nu kan het natuurlijk zo zijn dat er weliswaar in de bevolking als geheel geen sprake is van toenemende polarisatie, maar dat verschillende groepen in de samenleving wel duidelijk anders zijn gaan denken over deze onderwerpen. Ik zou in dit laatste verband overigens liever willen spreken over toenemende sociale scheidslijnen dan over toenemende polarisatie, maar dat is academische muggenzifterij. In het reeds aangehaalde volkskrant artikel zouden er twee sociale dimensies van belang zijn:  
+
+- opleiding  
+- stedelijkheid
+
+Ook deze informatie vinden we in de LISS. 
+
+**opleiding**  
+
+> Hoogste opleiding met diploma  
+> 1 basisonderwijs  
+> 2 vmbo  
+> 3 havo/vwo  
+> 4 mbo  
+> 5 hbo  
+> 6 wo  
+> 7 anders  
+> 8 (Nog) geen onderwijs afgerond  
+> 9 Volgt nog geen onderwijs  
+> Hierbij hebben wij opleiding gecategoriseerd in drie groepen:  
+> 1. Laag: basisonderwijs en vmbo  
+> 2. Midden: havo/vwo en mbo  
+> 3. Hoog: hbo en wo  
+> Als we uitsplitsen naar opleidingsgroepen nemen we enkel mensen van 25 jaar en ouder mee. Van hen verwachten we dat ze klaar zijn met hun onderwijscarriere. 
+
+**stedelijkheid**  
+
+> Stedelijkheid woonplaats  
+> 1 Zeer sterk stedelijk  
+> 2 Sterk stedelijk  
+> 3 Matig stedelijk  
+> 4 Weinig stedelijk  
+> 5 Niet stedelijk  
+
+
+In figuren geven we de trend in de gemiddelde houding per opleidingsgroep weer. De grijze schaduw achter de lijn geeft de variantie in de houding weer.  
+
+Als we allereerst kijken naar de meningen over EU integratie en de sociale dimensie opleiding (Figuur 3) dan lijken we inderdaad te kunnen spreken over een kleine toenemende sociale scheidslijn: de verschillen tussen de opleidingsgroepen nemen iets toe. Echter, de verschillen zijn altijd al groot geweest.  
+
+```{r}
+
+dataplot <- liss_long
+dataplot <- dataplot[dataplot$leeftijd>24,]
+
+dataplot$opleiding[dataplot$oplmet==1] <- "laag"
+dataplot$opleiding[dataplot$oplmet==2] <- "laag"
+dataplot$opleiding[dataplot$oplmet==3] <- "midden"
+dataplot$opleiding[dataplot$oplmet==4] <- "midden"
+dataplot$opleiding[dataplot$oplmet==5] <- "hoog"
+dataplot$opleiding[dataplot$oplmet==6] <- "hoog"
+dataplot$opleiding[dataplot$oplmet==7] <- NA
+dataplot$opleiding[dataplot$oplmet==8] <- "laag"
+dataplot$opleiding[dataplot$oplmet==9] <- "laag"
+
+dataplot$opleiding <- factor(dataplot$opleiding,  levels = c("hoog", "midden", "laag"))
+
+
+dataplot <- dataplot[!is.na(dataplot$opleiding),]
+dataplot$jaar <- dataplot$survey_wave + 2007
+dataplot$eu_integration <- 5 - dataplot$eu_integration
+#table(dataplot$eu_integration)
+
+ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= opleiding)) +           # Create basic ggplot
+  #geom_smooth(method = "lm", formula = y ~ x) + 
+  geom_smooth() + 
+  #xlim(0,13) +
+  #ylim(0,4) + 
+  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_y_continuous(labels=c("Helemaal oneens ", "Oneens", "Niet eens, niet oneens", "Eens","Helemaal eens"), limits = c(1,5)) + 
+  labs(title="Figuur 3. EU integratie te ver gegaan", subtitle= "Opleidingsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
+    theme(plot.caption = element_text(hjust = 0))
+
+ggp
+
+ggplotly(ggp)
+
+
+```
+
+Indien we de meningen over EU integratie uitsplitsen naar mensen uit verschillende stedelijke gebieden, wordt het enigszins spaghetti (zie Figuur 4). Inderdaad lijken stedelingen minder negatief te staan ten aanzien van verdere EU integratie dan mensen in minder stedelijke gebieken. Maar er is geen sprake van een duidelijke toenemende sociale scheidslijn. 
+
+```{r stedelijkheid}
+
+dataplot <- liss_long
+dataplot <- dataplot[dataplot$leeftijd>17,]
+dataplot$eu_integration <- 5 - dataplot$eu_integration
+
+dataplot$stedelijkheid <- as.factor(dataplot$sted)
+
+levels(dataplot$stedelijkheid) <- c("Zeer sterk", "Sterk", "Matig", "Weinig", "Niet")
+
+dataplot$stedelijkheid <- factor(dataplot$stedelijkheid,  levels = c("Zeer sterk", "Sterk", "Matig", "Weinig", "Niet"))
+
+dataplot <- dataplot[!is.na(dataplot$stedelijkheid),]
+dataplot$jaar <- dataplot$survey_wave + 2007
+
+ggp <- ggplot(dataplot, aes(x=jaar, y=eu_integration, colour= stedelijkheid)) +           # Create basic ggplot
+  #geom_smooth(method = "lm", formula = y ~ x) + 
+  geom_smooth() + 
+  #xlim(0,13) +
+  #ylim(0,4) + 
+  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_y_continuous(labels=c("Helemaal oneens ", "Oneens", "Niet eens, niet oneens", "Eens","Helemaal eens"), limits = c(1,5)) + 
+  labs(title="Figuur 4. EU integratie te ver gegaan", subtitle= "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y="") + 
+    theme(plot.caption = element_text(hjust = 0))
+
+ggp
+ggplotly(ggp)
+
+
+```
+
+
+We zien min of meer hetzelfde beeld als we kijken naar verschillen in meningen over migratie/integratie. Ja, er bestaan zeker verschillen tussen groepen. De hogeropgeleiden en mensen in stedelijke gebieden zijn (iets) minder vaak van mening dat migranten zich volledig dienen aan te passen. Maar van toenemende sociale scheidslijnen is ook hier geen sprake. 
+
+```{r}
+
+dataplot <- liss_long
+dataplot <- dataplot[dataplot$leeftijd>24,]
+
+dataplot$opleiding[dataplot$oplmet==1] <- "laag"
+dataplot$opleiding[dataplot$oplmet==2] <- "laag"
+dataplot$opleiding[dataplot$oplmet==3] <- "midden"
+dataplot$opleiding[dataplot$oplmet==4] <- "midden"
+dataplot$opleiding[dataplot$oplmet==5] <- "hoog"
+dataplot$opleiding[dataplot$oplmet==6] <- "hoog"
+dataplot$opleiding[dataplot$oplmet==7] <- NA
+dataplot$opleiding[dataplot$oplmet==8] <- "laag"
+dataplot$opleiding[dataplot$oplmet==9] <- "laag"
+
+dataplot$opleiding <- factor(dataplot$opleiding,  levels = c("hoog", "midden", "laag"))
+
+
+dataplot <- dataplot[!is.na(dataplot$opleiding),]
+dataplot$jaar <- dataplot$survey_wave + 2007
+
+ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= opleiding)) +           # Create basic ggplot
+  geom_smooth() + 
+  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
+  labs(title="Figuur 5. Migratie/integratie", subtitle = "Opleidingsscheidslijn", caption="DATA van LISS", x="jaar", y=" ") + 
+    theme(plot.caption = element_text(hjust = 0))
+
+ggp
+ggplotly(ggp)
+
+
+```
+
+
+```{r}
+
+dataplot <- liss_long
+dataplot <- dataplot[dataplot$leeftijd>17,]
+dataplot$stedelijkheid <- as.factor(dataplot$sted)
+levels(dataplot$stedelijkheid) <- c("Zeer sterk", "Sterk", "Matig", "Weinig", " Niet")
+dataplot$stedelijkheid <- factor(dataplot$stedelijkheid,  levels = c("Zeer sterk", "Sterk", "Matig", "Weinig", " Niet"))
+
+dataplot <- dataplot[!is.na(dataplot$stedelijkheid),]
+dataplot$jaar <- dataplot$survey_wave + 2007
+
+ggp <- ggplot(dataplot, aes(x=jaar, y=immigrants, colour= stedelijkheid)) +           # Create basic ggplot
+  geom_smooth() + 
+  scale_x_continuous(name="jaar", breaks=c(2008:2018), limits=c(2008,2018)) +
+  scale_y_continuous(labels=c("behoud eigen cultuur", "2", "3", "4","volledige assimilatie"), limits = c(1,5)) + 
+  labs(title="Figuur 6. Migratie/integratie", subtitle = "Stedelijkheidsscheidslijn", caption="DATA: LISS", x="jaar", y=" ") + 
+    theme(plot.caption = element_text(hjust = 0))
+
+ggp
+
+ggsave(filename="plots/figuur6.png", plot=ggp)
+
+figuur6 <- ggplotly(ggp)
+htmlwidgets::saveWidget(figuur6, file.path("plots", 'figuur6.html'))
+```
+
+## Wat is er dan wel aan de hand?  
+
+Natuurlijk zijn er de nodige kanttekeningen bij onze analysen te plaatsen. Doen extreme mensen wel mee aan het LISS panel bijvoorbeeld? Dat is een goed punt, maar ook in het LISS panel bevinden zich FvD stemmers en D66 stemmers. Nielsje jij bent! :-)
+
